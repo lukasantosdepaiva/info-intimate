@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AppVeiculosRouteImport } from './routes/_app.veiculos'
 import { Route as AppSaidasRouteImport } from './routes/_app.saidas'
@@ -36,108 +37,113 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/_app/',
-  path: '/',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppVeiculosRoute = AppVeiculosRouteImport.update({
-  id: '/_app/veiculos',
+  id: '/veiculos',
   path: '/veiculos',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppSaidasRoute = AppSaidasRouteImport.update({
-  id: '/_app/saidas',
+  id: '/saidas',
   path: '/saidas',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppRncsRoute = AppRncsRouteImport.update({
-  id: '/_app/rncs',
+  id: '/rncs',
   path: '/rncs',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppRelatoriosRoute = AppRelatoriosRouteImport.update({
-  id: '/_app/relatorios',
+  id: '/relatorios',
   path: '/relatorios',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppRecebimentoRoute = AppRecebimentoRouteImport.update({
-  id: '/_app/recebimento',
+  id: '/recebimento',
   path: '/recebimento',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppPcpRoute = AppPcpRouteImport.update({
-  id: '/_app/pcp',
+  id: '/pcp',
   path: '/pcp',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppOpConsultaRoute = AppOpConsultaRouteImport.update({
-  id: '/_app/op-consulta',
+  id: '/op-consulta',
   path: '/op-consulta',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppMovimentacoesRoute = AppMovimentacoesRouteImport.update({
-  id: '/_app/movimentacoes',
+  id: '/movimentacoes',
   path: '/movimentacoes',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppInspecoesRoute = AppInspecoesRouteImport.update({
-  id: '/_app/inspecoes',
+  id: '/inspecoes',
   path: '/inspecoes',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppHistoricoRoute = AppHistoricoRouteImport.update({
-  id: '/_app/historico',
+  id: '/historico',
   path: '/historico',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppEstoqueRoute = AppEstoqueRouteImport.update({
-  id: '/_app/estoque',
+  id: '/estoque',
   path: '/estoque',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppDebugSupabaseRoute = AppDebugSupabaseRouteImport.update({
-  id: '/_app/debug-supabase',
+  id: '/debug-supabase',
   path: '/debug-supabase',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppDebugEnvRoute = AppDebugEnvRouteImport.update({
-  id: '/_app/debug-env',
+  id: '/debug-env',
   path: '/debug-env',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
-  id: '/_app/configuracoes',
+  id: '/configuracoes',
   path: '/configuracoes',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppAprovacoesRoute = AppAprovacoesRouteImport.update({
-  id: '/_app/aprovacoes',
+  id: '/aprovacoes',
   path: '/aprovacoes',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppPalletsIndexRoute = AppPalletsIndexRouteImport.update({
-  id: '/_app/pallets/',
+  id: '/pallets/',
   path: '/pallets/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppInspecaoIndexRoute = AppInspecaoIndexRouteImport.update({
-  id: '/_app/inspecao/',
+  id: '/inspecao/',
   path: '/inspecao/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppPalletsCodigoRoute = AppPalletsCodigoRouteImport.update({
-  id: '/_app/pallets/$codigo',
+  id: '/pallets/$codigo',
   path: '/pallets/$codigo',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const AppInspecaoRncRoute = AppInspecaoRncRouteImport.update({
-  id: '/_app/inspecao/rnc',
+  id: '/inspecao/rnc',
   path: '/inspecao/rnc',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/aprovacoes': typeof AppAprovacoesRoute
   '/configuracoes': typeof AppConfiguracoesRoute
@@ -154,7 +160,6 @@ export interface FileRoutesByFullPath {
   '/rncs': typeof AppRncsRoute
   '/saidas': typeof AppSaidasRoute
   '/veiculos': typeof AppVeiculosRoute
-  '/': typeof AppIndexRoute
   '/inspecao/rnc': typeof AppInspecaoRncRoute
   '/pallets/$codigo': typeof AppPalletsCodigoRoute
   '/inspecao/': typeof AppInspecaoIndexRoute
@@ -185,6 +190,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/aprovacoes': typeof AppAprovacoesRoute
   '/_app/configuracoes': typeof AppConfiguracoesRoute
@@ -210,6 +216,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/login'
     | '/aprovacoes'
     | '/configuracoes'
@@ -226,7 +233,6 @@ export interface FileRouteTypes {
     | '/rncs'
     | '/saidas'
     | '/veiculos'
-    | '/'
     | '/inspecao/rnc'
     | '/pallets/$codigo'
     | '/inspecao/'
@@ -256,6 +262,7 @@ export interface FileRouteTypes {
     | '/pallets'
   id:
     | '__root__'
+    | '/_app'
     | '/login'
     | '/_app/aprovacoes'
     | '/_app/configuracoes'
@@ -280,7 +287,170 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/': {
+      id: '/_app/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/veiculos': {
+      id: '/_app/veiculos'
+      path: '/veiculos'
+      fullPath: '/veiculos'
+      preLoaderRoute: typeof AppVeiculosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/saidas': {
+      id: '/_app/saidas'
+      path: '/saidas'
+      fullPath: '/saidas'
+      preLoaderRoute: typeof AppSaidasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/rncs': {
+      id: '/_app/rncs'
+      path: '/rncs'
+      fullPath: '/rncs'
+      preLoaderRoute: typeof AppRncsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/relatorios': {
+      id: '/_app/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof AppRelatoriosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/recebimento': {
+      id: '/_app/recebimento'
+      path: '/recebimento'
+      fullPath: '/recebimento'
+      preLoaderRoute: typeof AppRecebimentoRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/pcp': {
+      id: '/_app/pcp'
+      path: '/pcp'
+      fullPath: '/pcp'
+      preLoaderRoute: typeof AppPcpRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/op-consulta': {
+      id: '/_app/op-consulta'
+      path: '/op-consulta'
+      fullPath: '/op-consulta'
+      preLoaderRoute: typeof AppOpConsultaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/movimentacoes': {
+      id: '/_app/movimentacoes'
+      path: '/movimentacoes'
+      fullPath: '/movimentacoes'
+      preLoaderRoute: typeof AppMovimentacoesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/inspecoes': {
+      id: '/_app/inspecoes'
+      path: '/inspecoes'
+      fullPath: '/inspecoes'
+      preLoaderRoute: typeof AppInspecoesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/historico': {
+      id: '/_app/historico'
+      path: '/historico'
+      fullPath: '/historico'
+      preLoaderRoute: typeof AppHistoricoRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/estoque': {
+      id: '/_app/estoque'
+      path: '/estoque'
+      fullPath: '/estoque'
+      preLoaderRoute: typeof AppEstoqueRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/debug-supabase': {
+      id: '/_app/debug-supabase'
+      path: '/debug-supabase'
+      fullPath: '/debug-supabase'
+      preLoaderRoute: typeof AppDebugSupabaseRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/debug-env': {
+      id: '/_app/debug-env'
+      path: '/debug-env'
+      fullPath: '/debug-env'
+      preLoaderRoute: typeof AppDebugEnvRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/configuracoes': {
+      id: '/_app/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof AppConfiguracoesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/aprovacoes': {
+      id: '/_app/aprovacoes'
+      path: '/aprovacoes'
+      fullPath: '/aprovacoes'
+      preLoaderRoute: typeof AppAprovacoesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/pallets/': {
+      id: '/_app/pallets/'
+      path: '/pallets'
+      fullPath: '/pallets/'
+      preLoaderRoute: typeof AppPalletsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/inspecao/': {
+      id: '/_app/inspecao/'
+      path: '/inspecao'
+      fullPath: '/inspecao/'
+      preLoaderRoute: typeof AppInspecaoIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/pallets/$codigo': {
+      id: '/_app/pallets/$codigo'
+      path: '/pallets/$codigo'
+      fullPath: '/pallets/$codigo'
+      preLoaderRoute: typeof AppPalletsCodigoRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/inspecao/rnc': {
+      id: '/_app/inspecao/rnc'
+      path: '/inspecao/rnc'
+      fullPath: '/inspecao/rnc'
+      preLoaderRoute: typeof AppInspecaoRncRouteImport
+      parentRoute: typeof AppRoute
+    }
+  }
+}
+
+interface AppRouteChildren {
   AppAprovacoesRoute: typeof AppAprovacoesRoute
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppDebugEnvRoute: typeof AppDebugEnvRoute
@@ -303,160 +473,7 @@ export interface RootRouteChildren {
   AppPalletsIndexRoute: typeof AppPalletsIndexRoute
 }
 
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/': {
-      id: '/_app/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/veiculos': {
-      id: '/_app/veiculos'
-      path: '/veiculos'
-      fullPath: '/veiculos'
-      preLoaderRoute: typeof AppVeiculosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/saidas': {
-      id: '/_app/saidas'
-      path: '/saidas'
-      fullPath: '/saidas'
-      preLoaderRoute: typeof AppSaidasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/rncs': {
-      id: '/_app/rncs'
-      path: '/rncs'
-      fullPath: '/rncs'
-      preLoaderRoute: typeof AppRncsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/relatorios': {
-      id: '/_app/relatorios'
-      path: '/relatorios'
-      fullPath: '/relatorios'
-      preLoaderRoute: typeof AppRelatoriosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/recebimento': {
-      id: '/_app/recebimento'
-      path: '/recebimento'
-      fullPath: '/recebimento'
-      preLoaderRoute: typeof AppRecebimentoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/pcp': {
-      id: '/_app/pcp'
-      path: '/pcp'
-      fullPath: '/pcp'
-      preLoaderRoute: typeof AppPcpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/op-consulta': {
-      id: '/_app/op-consulta'
-      path: '/op-consulta'
-      fullPath: '/op-consulta'
-      preLoaderRoute: typeof AppOpConsultaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/movimentacoes': {
-      id: '/_app/movimentacoes'
-      path: '/movimentacoes'
-      fullPath: '/movimentacoes'
-      preLoaderRoute: typeof AppMovimentacoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/inspecoes': {
-      id: '/_app/inspecoes'
-      path: '/inspecoes'
-      fullPath: '/inspecoes'
-      preLoaderRoute: typeof AppInspecoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/historico': {
-      id: '/_app/historico'
-      path: '/historico'
-      fullPath: '/historico'
-      preLoaderRoute: typeof AppHistoricoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/estoque': {
-      id: '/_app/estoque'
-      path: '/estoque'
-      fullPath: '/estoque'
-      preLoaderRoute: typeof AppEstoqueRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/debug-supabase': {
-      id: '/_app/debug-supabase'
-      path: '/debug-supabase'
-      fullPath: '/debug-supabase'
-      preLoaderRoute: typeof AppDebugSupabaseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/debug-env': {
-      id: '/_app/debug-env'
-      path: '/debug-env'
-      fullPath: '/debug-env'
-      preLoaderRoute: typeof AppDebugEnvRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/configuracoes': {
-      id: '/_app/configuracoes'
-      path: '/configuracoes'
-      fullPath: '/configuracoes'
-      preLoaderRoute: typeof AppConfiguracoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/aprovacoes': {
-      id: '/_app/aprovacoes'
-      path: '/aprovacoes'
-      fullPath: '/aprovacoes'
-      preLoaderRoute: typeof AppAprovacoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/pallets/': {
-      id: '/_app/pallets/'
-      path: '/pallets'
-      fullPath: '/pallets/'
-      preLoaderRoute: typeof AppPalletsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/inspecao/': {
-      id: '/_app/inspecao/'
-      path: '/inspecao'
-      fullPath: '/inspecao/'
-      preLoaderRoute: typeof AppInspecaoIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/pallets/$codigo': {
-      id: '/_app/pallets/$codigo'
-      path: '/pallets/$codigo'
-      fullPath: '/pallets/$codigo'
-      preLoaderRoute: typeof AppPalletsCodigoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/inspecao/rnc': {
-      id: '/_app/inspecao/rnc'
-      path: '/inspecao/rnc'
-      fullPath: '/inspecao/rnc'
-      preLoaderRoute: typeof AppInspecaoRncRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
-}
-
-const rootRouteChildren: RootRouteChildren = {
-  LoginRoute: LoginRoute,
+const AppRouteChildren: AppRouteChildren = {
   AppAprovacoesRoute: AppAprovacoesRoute,
   AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppDebugEnvRoute: AppDebugEnvRoute,
@@ -477,6 +494,13 @@ const rootRouteChildren: RootRouteChildren = {
   AppPalletsCodigoRoute: AppPalletsCodigoRoute,
   AppInspecaoIndexRoute: AppInspecaoIndexRoute,
   AppPalletsIndexRoute: AppPalletsIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
+const rootRouteChildren: RootRouteChildren = {
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
