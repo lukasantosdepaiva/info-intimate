@@ -1,7 +1,8 @@
-import { useNavigate, useRouterState, Link } from "@tanstack/react-router";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { getSupabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
+
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
@@ -47,7 +48,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (loading) return;
-
     const isPublic = PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
     if (!user && !isPublic) {
       navigate({ to: "/login" });
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (user && isPublic) {
       navigate({ to: "/" });
     }
-  }, [user, loading, pathname, router]);
+  }, [user, loading, pathname, navigate]);
 
   const login = useCallback(async (email: string, password: string) => {
     const supabase = getSupabase();
@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
     setUser(null);
     navigate({ to: "/login" });
-  }, [router]);
+  }, [navigate]);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
