@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 function RncForm() {
-  const searchParams = useSearchParams();
+  const search = Route.useSearch() as Record<string,string>; const searchParams = { get: (k: string) => search[k] ?? null };
   const navigate = useNavigate();
 
   const pallet_id = searchParams.get("pallet_id") ?? "";

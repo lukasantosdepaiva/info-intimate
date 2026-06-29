@@ -32,7 +32,7 @@ interface PalletDetail {
 }
 
 function PalletDetailPage() {
-  const params = useParams();
+  const params = Route.useParams();
   const navigate = useNavigate();
   const codigo = params.codigo as string;
 
@@ -83,7 +83,7 @@ function PalletDetailPage() {
   if (error) {
     return (
       <div className="space-y-6">
-        <Button variant="ghost" size="sm" onClick={() => router.back()}>
+        <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
         </Button>
         <Card className="border-destructive/50 bg-destructive/5">

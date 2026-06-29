@@ -51,7 +51,7 @@ const TIPO_EVENTO_COLORS: Record<string, "default" | "secondary" | "destructive"
 };
 
 function HistoricoContent() {
-  const searchParams = useSearchParams();
+  const search = Route.useSearch() as Record<string,string>; const searchParams = { get: (k: string) => search[k] ?? null };
   const initialPallet = searchParams.get("pallet") ?? "";
 
   const [data, setData] = useState<HistoricoRow[]>([]);
