@@ -30,15 +30,21 @@ interface SaldoRow {
 
 type FilterKey = "armazem_02" | "armazem_05" | "armazem_11" | "armazem_14" | "galpao_1" | "galpao_2" | "pintura" | "serigrafia";
 
+const textoSeguro = (valor: unknown) => String(valor ?? "").toLowerCase();
+const numeroSeguro = (valor: unknown) => {
+  const n = Number(valor ?? 0);
+  return Number.isFinite(n) ? n : 0;
+};
+
 const FILTERS: { key: FilterKey; label: string; match: (r: SaldoRow) => boolean }[] = [
-  { key: "armazem_02", label: "Armazém 02", match: (r) => r.armazem_codigo?.includes("02") || r.codigo_local?.toLowerCase().includes("02") },
-  { key: "armazem_05", label: "Armazém 05", match: (r) => r.armazem_codigo?.includes("05") || r.codigo_local?.toLowerCase().includes("05") },
-  { key: "armazem_11", label: "Armazém 11", match: (r) => r.armazem_codigo?.includes("11") || r.codigo_local?.toLowerCase().includes("11") },
-  { key: "armazem_14", label: "Armazém 14", match: (r) => r.armazem_codigo?.includes("14") || r.codigo_local?.toLowerCase().includes("14") },
-  { key: "galpao_1", label: "Galpão 1", match: (r) => r.galpao?.toLowerCase().includes("1") },
-  { key: "galpao_2", label: "Galpão 2", match: (r) => r.galpao?.toLowerCase().includes("2") },
-  { key: "pintura", label: "Pintura", match: (r) => r.processo?.toLowerCase().includes("pintura") || r.descricao?.toLowerCase().includes("pintura") },
-  { key: "serigrafia", label: "Serigrafia", match: (r) => r.processo?.toLowerCase().includes("serigrafia") || r.descricao?.toLowerCase().includes("serigrafia") },
+  { key: "armazem_02", label: "Armazém 02", match: (r) => textoSeguro(r.armazem_codigo).includes("02") || textoSeguro(r.codigo_local).includes("02") },
+  { key: "armazem_05", label: "Armazém 05", match: (r) => textoSeguro(r.armazem_codigo).includes("05") || textoSeguro(r.codigo_local).includes("05") },
+  { key: "armazem_11", label: "Armazém 11", match: (r) => textoSeguro(r.armazem_codigo).includes("11") || textoSeguro(r.codigo_local).includes("11") },
+  { key: "armazem_14", label: "Armazém 14", match: (r) => textoSeguro(r.armazem_codigo).includes("14") || textoSeguro(r.codigo_local).includes("14") },
+  { key: "galpao_1", label: "Galpão 1", match: (r) => textoSeguro(r.galpao).includes("1") },
+  { key: "galpao_2", label: "Galpão 2", match: (r) => textoSeguro(r.galpao).includes("2") },
+  { key: "pintura", label: "Pintura", match: (r) => textoSeguro(r.processo).includes("pintura") || textoSeguro(r.descricao).includes("pintura") },
+  { key: "serigrafia", label: "Serigrafia", match: (r) => textoSeguro(r.processo).includes("serigrafia") || textoSeguro(r.descricao).includes("serigrafia") },
 ];
 
 function EstoquePage() {
