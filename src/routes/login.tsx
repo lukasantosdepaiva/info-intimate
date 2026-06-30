@@ -9,10 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-const isTestEnv =
-  import.meta.env.VITE_ENABLE_TEST_LOGIN === "true" ||
-  import.meta.env.NEXT_PUBLIC_ENABLE_TEST_LOGIN === "true";
-
 const TEST_EMAIL = "admin@specialdecor.test";
 const TEST_PASSWORD = "Admin@123456";
 
