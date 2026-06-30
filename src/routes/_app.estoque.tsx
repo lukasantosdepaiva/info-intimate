@@ -258,15 +258,15 @@ function EstoquePage() {
                   </td>
                   <td className="p-3 text-xs">{r.descricao ?? "—"}</td>
                   <td className="p-3 text-right tabular-nums font-semibold">
-                    {r.total_pallets?.toLocaleString("pt-BR") ?? "—"}
+                    {numeroSeguro(r.total_pallets).toLocaleString("pt-BR")}
                   </td>
                   <td className="p-3 text-right tabular-nums">
-                    {r.quantidade_total?.toLocaleString("pt-BR") ?? "—"}
+                    {numeroSeguro(r.quantidade_total).toLocaleString("pt-BR")}
                   </td>
                   <td className="p-3 text-right">
-                    {r.quantidade_pendente && r.quantidade_pendente > 0 ? (
+                    {numeroSeguro(r.quantidade_pendente) > 0 ? (
                       <Badge variant="secondary" className="text-[10px]">
-                        {r.quantidade_pendente.toLocaleString("pt-BR")} pend.
+                        {numeroSeguro(r.quantidade_pendente).toLocaleString("pt-BR")} pend.
                       </Badge>
                     ) : (
                       "—"
