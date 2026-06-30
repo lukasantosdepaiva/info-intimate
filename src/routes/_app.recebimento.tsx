@@ -158,20 +158,28 @@ function RecebimentoPage() {
     }
   }, []);
 
-  // ─── Filtrar locais ───────────────────────────────────────
+  // ─── Filtrar locais (null-safe) ───────────────────────────
   const locaisFiltrados = useMemo(() => {
+    const textoSeguro = (valor: unknown) => String(valor ?? "").toLowerCase();
     if (!localBusca.trim()) return locais;
-    const q = localBusca.toLowerCase();
-    return locais.filter(
-      (l) =>
-        l.codigo_local.toLowerCase().includes(q) ||
-        l.armazem_codigo.toLowerCase().includes(q) ||
-        l.armazem_nome.toLowerCase().includes(q) ||
-        l.galpao.toLowerCase().includes(q) ||
-        l.rua.toLowerCase().includes(q) ||
-        (l.processo && l.processo.toLowerCase().includes(q)) ||
-        l.descricao.toLowerCase().includes(q)
-    );
+    const q = textoSeguro(localBusca);
+    return locais.filter((l) => {
+      const row = l as unknown as Record<string, unknown>;
+      const campos: unknown[] = [
+        row.codigo_local,
+        row.armazem_codigo,
+        row.armazem_nome,
+        row.galpao,
+        row.rua,
+        row.processo,
+        row.descricao,
+        row.status,
+        row.codigo_pallet,
+        row.numero_sd,
+        row.codigo_referencia,
+      ];
+      return campos.some((c) => textoSeguro(c).includes(q));
+    });
   }, [locais, localBusca]);
 
   // ─── Validar formulário ───────────────────────────────────
