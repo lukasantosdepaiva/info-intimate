@@ -9,10 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-const isTestEnv =
-  import.meta.env.VITE_ENABLE_TEST_LOGIN === "true" ||
-  import.meta.env.NEXT_PUBLIC_ENABLE_TEST_LOGIN === "true";
-
 const TEST_EMAIL = "admin@specialdecor.test";
 const TEST_PASSWORD = "Admin@123456";
 
@@ -129,24 +125,22 @@ function LoginPage() {
               </div>
             </div>
 
-            {isTestEnv && (
-              <div className="space-y-2 rounded-md border border-dashed border-amber-500/40 bg-amber-500/5 p-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2 text-xs"
-                  onClick={entrarComoAdminTeste}
-                  disabled={loading}
-                >
-                  <UserPlus className="h-3.5 w-3.5" />
-                  Entrar como Admin Teste
-                </Button>
-                <p className="text-center text-[10px] text-muted-foreground">
-                  Ambiente de teste. Não usar dados reais.
-                </p>
-              </div>
-            )}
+            <div className="space-y-2 rounded-md border border-dashed border-amber-500/40 bg-amber-500/5 p-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full gap-2 text-xs"
+                onClick={entrarComoAdminTeste}
+                disabled={loading}
+              >
+                <UserPlus className="h-3.5 w-3.5" />
+                Entrar como Admin Teste
+              </Button>
+              <p className="text-center text-[10px] text-muted-foreground">
+                Ambiente de teste. Não usar dados reais.
+              </p>
+            </div>
           </CardContent>
 
           <CardFooter className="flex flex-col gap-3">
