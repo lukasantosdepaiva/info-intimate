@@ -50,10 +50,24 @@ function LoginPage() {
     }
   };
 
-  const preencherTeste = () => {
-    setEmail("admin@specialdecor.test");
-    setPassword("Admin@123456");
+  const entrarComoAdminTeste = async () => {
+    setEmail(TEST_EMAIL);
+    setPassword(TEST_PASSWORD);
     setError(null);
+    setLoading(true);
+    try {
+      await login(TEST_EMAIL, TEST_PASSWORD);
+      navigate({ to: "/" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erro ao fazer login";
+      setError(
+        message.includes("Invalid login credentials")
+          ? "Usuário de teste não encontrado neste ambiente."
+          : message,
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
