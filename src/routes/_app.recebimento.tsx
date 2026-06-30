@@ -164,18 +164,19 @@ function RecebimentoPage() {
     if (!localBusca.trim()) return locais;
     const q = textoSeguro(localBusca);
     return locais.filter((l) => {
+      const row = l as unknown as Record<string, unknown>;
       const campos: unknown[] = [
-        (l as Record<string, unknown>).codigo_local,
-        (l as Record<string, unknown>).armazem_codigo,
-        (l as Record<string, unknown>).armazem_nome,
-        (l as Record<string, unknown>).galpao,
-        (l as Record<string, unknown>).rua,
-        (l as Record<string, unknown>).processo,
-        (l as Record<string, unknown>).descricao,
-        (l as Record<string, unknown>).status,
-        (l as Record<string, unknown>).codigo_pallet,
-        (l as Record<string, unknown>).numero_sd,
-        (l as Record<string, unknown>).codigo_referencia,
+        row.codigo_local,
+        row.armazem_codigo,
+        row.armazem_nome,
+        row.galpao,
+        row.rua,
+        row.processo,
+        row.descricao,
+        row.status,
+        row.codigo_pallet,
+        row.numero_sd,
+        row.codigo_referencia,
       ];
       return campos.some((c) => textoSeguro(c).includes(q));
     });
