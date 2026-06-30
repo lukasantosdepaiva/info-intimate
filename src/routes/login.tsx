@@ -130,19 +130,20 @@ function LoginPage() {
             </div>
 
             {isTestEnv && (
-              <div className="space-y-2">
+              <div className="space-y-2 rounded-md border border-dashed border-amber-500/40 bg-amber-500/5 p-3">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   className="w-full gap-2 text-xs"
-                  onClick={preencherTeste}
+                  onClick={entrarComoAdminTeste}
+                  disabled={loading}
                 >
                   <UserPlus className="h-3.5 w-3.5" />
-                  Usar usuário de teste
+                  Entrar como Admin Teste
                 </Button>
                 <p className="text-center text-[10px] text-muted-foreground">
-                  Disponível apenas para testes. Remover antes de produção.
+                  Ambiente de teste. Não usar dados reais.
                 </p>
               </div>
             )}
