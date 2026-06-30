@@ -10,7 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 const isTestEnv =
-  process.env.NEXT_PUBLIC_ENABLE_TEST_LOGIN === "true";
+  import.meta.env.VITE_ENABLE_TEST_LOGIN === "true" ||
+  import.meta.env.NEXT_PUBLIC_ENABLE_TEST_LOGIN === "true";
+
+const TEST_EMAIL = "admin@specialdecor.test";
+const TEST_PASSWORD = "Admin@123456";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -46,10 +50,24 @@ function LoginPage() {
     }
   };
 
-  const preencherTeste = () => {
-    setEmail("admin@specialdecor.test");
-    setPassword("Admin@123456");
+  const entrarComoAdminTeste = async () => {
+    setEmail(TEST_EMAIL);
+    setPassword(TEST_PASSWORD);
     setError(null);
+    setLoading(true);
+    try {
+      await login(TEST_EMAIL, TEST_PASSWORD);
+      navigate({ to: "/" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erro ao fazer login";
+      setError(
+        message.includes("Invalid login credentials")
+          ? "Usuário de teste não encontrado neste ambiente."
+          : message,
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -112,19 +130,20 @@ function LoginPage() {
             </div>
 
             {isTestEnv && (
-              <div className="space-y-2">
+              <div className="space-y-2 rounded-md border border-dashed border-amber-500/40 bg-amber-500/5 p-3">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   className="w-full gap-2 text-xs"
-                  onClick={preencherTeste}
+                  onClick={entrarComoAdminTeste}
+                  disabled={loading}
                 >
                   <UserPlus className="h-3.5 w-3.5" />
-                  Usar usuário de teste
+                  Entrar como Admin Teste
                 </Button>
                 <p className="text-center text-[10px] text-muted-foreground">
-                  Disponível apenas para testes. Remover antes de produção.
+                  Ambiente de teste. Não usar dados reais.
                 </p>
               </div>
             )}
