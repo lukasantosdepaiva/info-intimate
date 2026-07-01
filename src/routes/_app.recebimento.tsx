@@ -160,29 +160,8 @@ function RecebimentoPage() {
     }
   }, []);
 
-  // ─── Filtrar locais (null-safe) ───────────────────────────
-  const locaisFiltrados = useMemo(() => {
-    const textoSeguro = (valor: unknown) => String(valor ?? "").toLowerCase();
-    if (!localBusca.trim()) return locais;
-    const q = textoSeguro(localBusca);
-    return locais.filter((l) => {
-      const row = l as unknown as Record<string, unknown>;
-      const campos: unknown[] = [
-        row.codigo_local,
-        row.armazem_codigo,
-        row.armazem_nome,
-        row.galpao,
-        row.rua,
-        row.processo,
-        row.descricao,
-        row.status,
-        row.codigo_pallet,
-        row.numero_sd,
-        row.codigo_referencia,
-      ];
-      return campos.some((c) => textoSeguro(c).includes(q));
-    });
-  }, [locais, localBusca]);
+  // Busca antiga removida — seleção por cascata (Armazém → Galpão → Rua)
+
 
   // ─── Validar formulário ───────────────────────────────────
   const errosValidacao = useMemo(() => {
