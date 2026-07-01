@@ -249,7 +249,15 @@ function SaidaArmazem05Page() {
         local_origem_codigo: primeiroLocal05?.local?.codigo_local ?? null,
         status: row.status ?? null,
         locais_e_saldos: row.locais_e_saldos ?? null,
+        saldos_05: saldos05
+          .filter((s) => s.local?.codigo_local)
+          .map((s) => ({
+            local_estoque_id: s.local_estoque_id,
+            codigo_local: String(s.local?.codigo_local ?? ""),
+            quantidade: s.quantidade,
+          })),
       };
+
 
       setPallet(palletNormalizado);
       setLocalOrigem(palletNormalizado.local_origem_id);
