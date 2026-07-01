@@ -19,7 +19,6 @@ import { Route as AppRelatoriosRouteImport } from './routes/_app.relatorios'
 import { Route as AppRecebimentoRouteImport } from './routes/_app.recebimento'
 import { Route as AppPcpRouteImport } from './routes/_app.pcp'
 import { Route as AppOpConsultaRouteImport } from './routes/_app.op-consulta'
-import { Route as AppMovimentacoesRouteImport } from './routes/_app.movimentacoes'
 import { Route as AppInspecoesRouteImport } from './routes/_app.inspecoes'
 import { Route as AppHistoricoRouteImport } from './routes/_app.historico'
 import { Route as AppEstoqueRouteImport } from './routes/_app.estoque'
@@ -79,11 +78,6 @@ const AppPcpRoute = AppPcpRouteImport.update({
 const AppOpConsultaRoute = AppOpConsultaRouteImport.update({
   id: '/op-consulta',
   path: '/op-consulta',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppMovimentacoesRoute = AppMovimentacoesRouteImport.update({
-  id: '/movimentacoes',
-  path: '/movimentacoes',
   getParentRoute: () => AppRoute,
 } as any)
 const AppInspecoesRoute = AppInspecoesRouteImport.update({
@@ -152,7 +146,6 @@ export interface FileRoutesByFullPath {
   '/estoque': typeof AppEstoqueRoute
   '/historico': typeof AppHistoricoRoute
   '/inspecoes': typeof AppInspecoesRoute
-  '/movimentacoes': typeof AppMovimentacoesRoute
   '/op-consulta': typeof AppOpConsultaRoute
   '/pcp': typeof AppPcpRoute
   '/recebimento': typeof AppRecebimentoRoute
@@ -174,7 +167,6 @@ export interface FileRoutesByTo {
   '/estoque': typeof AppEstoqueRoute
   '/historico': typeof AppHistoricoRoute
   '/inspecoes': typeof AppInspecoesRoute
-  '/movimentacoes': typeof AppMovimentacoesRoute
   '/op-consulta': typeof AppOpConsultaRoute
   '/pcp': typeof AppPcpRoute
   '/recebimento': typeof AppRecebimentoRoute
@@ -199,7 +191,6 @@ export interface FileRoutesById {
   '/_app/estoque': typeof AppEstoqueRoute
   '/_app/historico': typeof AppHistoricoRoute
   '/_app/inspecoes': typeof AppInspecoesRoute
-  '/_app/movimentacoes': typeof AppMovimentacoesRoute
   '/_app/op-consulta': typeof AppOpConsultaRoute
   '/_app/pcp': typeof AppPcpRoute
   '/_app/recebimento': typeof AppRecebimentoRoute
@@ -225,7 +216,6 @@ export interface FileRouteTypes {
     | '/estoque'
     | '/historico'
     | '/inspecoes'
-    | '/movimentacoes'
     | '/op-consulta'
     | '/pcp'
     | '/recebimento'
@@ -247,7 +237,6 @@ export interface FileRouteTypes {
     | '/estoque'
     | '/historico'
     | '/inspecoes'
-    | '/movimentacoes'
     | '/op-consulta'
     | '/pcp'
     | '/recebimento'
@@ -271,7 +260,6 @@ export interface FileRouteTypes {
     | '/_app/estoque'
     | '/_app/historico'
     | '/_app/inspecoes'
-    | '/_app/movimentacoes'
     | '/_app/op-consulta'
     | '/_app/pcp'
     | '/_app/recebimento'
@@ -363,13 +351,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOpConsultaRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/movimentacoes': {
-      id: '/_app/movimentacoes'
-      path: '/movimentacoes'
-      fullPath: '/movimentacoes'
-      preLoaderRoute: typeof AppMovimentacoesRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/inspecoes': {
       id: '/_app/inspecoes'
       path: '/inspecoes'
@@ -458,7 +439,6 @@ interface AppRouteChildren {
   AppEstoqueRoute: typeof AppEstoqueRoute
   AppHistoricoRoute: typeof AppHistoricoRoute
   AppInspecoesRoute: typeof AppInspecoesRoute
-  AppMovimentacoesRoute: typeof AppMovimentacoesRoute
   AppOpConsultaRoute: typeof AppOpConsultaRoute
   AppPcpRoute: typeof AppPcpRoute
   AppRecebimentoRoute: typeof AppRecebimentoRoute
@@ -481,7 +461,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppEstoqueRoute: AppEstoqueRoute,
   AppHistoricoRoute: AppHistoricoRoute,
   AppInspecoesRoute: AppInspecoesRoute,
-  AppMovimentacoesRoute: AppMovimentacoesRoute,
   AppOpConsultaRoute: AppOpConsultaRoute,
   AppPcpRoute: AppPcpRoute,
   AppRecebimentoRoute: AppRecebimentoRoute,

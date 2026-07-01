@@ -1,5 +1,7 @@
 "use client";
 
+import { createFileRoute } from "@tanstack/react-router";
+
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { ArrowRightLeft, AlertCircle, Search, Loader2, CheckCircle2, Package, Send } from "lucide-react";
@@ -135,7 +137,7 @@ const localCombinaComBusca = (local: LocalRow, busca: string) => {
   );
 };
 
-export default function MovimentacoesPage() {
+function MovimentacoesPage() {
   const [palletBusca, setPalletBusca] = useState("");
   const [palletResultados, setPalletResultados] = useState<PalletResumoRow[]>([]);
   const [palletBuscaLoading, setPalletBuscaLoading] = useState(false);
@@ -916,3 +918,7 @@ export default function MovimentacoesPage() {
     </main>
   );
 }
+
+export const Route = createFileRoute("/_app/movimentacoes")({
+  component: MovimentacoesPage,
+});
