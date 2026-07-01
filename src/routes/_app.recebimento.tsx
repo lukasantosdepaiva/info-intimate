@@ -265,7 +265,7 @@ function RecebimentoPage() {
     setRefSelecionada(null);
     setSds([]);
     setSdSelecionada(null);
-    setLocalBusca("");
+    setLocalSelecionado(null);
     setLocalSelecionado(null);
     setResultado(null);
     setError(null);
