@@ -70,8 +70,8 @@ function RecebimentoPage() {
   // Local
   const [locais, setLocais] = useState<LocalRow[]>([]);
   const [locaisLoading, setLocaisLoading] = useState(true);
-  const [localBusca, setLocalBusca] = useState("");
   const [localSelecionado, setLocalSelecionado] = useState<LocalRow | null>(null);
+
 
   // Submission
   const [submitting, setSubmitting] = useState(false);
