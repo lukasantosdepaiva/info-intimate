@@ -19,6 +19,12 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
+interface Saldo05 {
+  local_estoque_id: string;
+  codigo_local: string;
+  quantidade: number;
+}
+
 interface PalletRow {
   id: string;
   codigo_pallet: string;
@@ -31,7 +37,9 @@ interface PalletRow {
   local_origem_codigo: string | null;
   status: string | null;
   locais_e_saldos: string | null;
+  saldos_05: Saldo05[];
 }
+
 
 interface PalletViewRow {
   id?: string;
