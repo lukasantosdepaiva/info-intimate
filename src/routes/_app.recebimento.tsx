@@ -19,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LocalCascadeSelector } from "@/components/local-cascade-selector";
+
 
 interface ReferenciaRow {
   id: string;
@@ -68,8 +70,8 @@ function RecebimentoPage() {
   // Local
   const [locais, setLocais] = useState<LocalRow[]>([]);
   const [locaisLoading, setLocaisLoading] = useState(true);
-  const [localBusca, setLocalBusca] = useState("");
   const [localSelecionado, setLocalSelecionado] = useState<LocalRow | null>(null);
+
 
   // Submission
   const [submitting, setSubmitting] = useState(false);
@@ -158,29 +160,8 @@ function RecebimentoPage() {
     }
   }, []);
 
-  // ─── Filtrar locais (null-safe) ───────────────────────────
-  const locaisFiltrados = useMemo(() => {
-    const textoSeguro = (valor: unknown) => String(valor ?? "").toLowerCase();
-    if (!localBusca.trim()) return locais;
-    const q = textoSeguro(localBusca);
-    return locais.filter((l) => {
-      const row = l as unknown as Record<string, unknown>;
-      const campos: unknown[] = [
-        row.codigo_local,
-        row.armazem_codigo,
-        row.armazem_nome,
-        row.galpao,
-        row.rua,
-        row.processo,
-        row.descricao,
-        row.status,
-        row.codigo_pallet,
-        row.numero_sd,
-        row.codigo_referencia,
-      ];
-      return campos.some((c) => textoSeguro(c).includes(q));
-    });
-  }, [locais, localBusca]);
+  // Busca antiga removida — seleção por cascata (Armazém → Galpão → Rua)
+
 
   // ─── Validar formulário ───────────────────────────────────
   const errosValidacao = useMemo(() => {
@@ -284,8 +265,8 @@ function RecebimentoPage() {
     setRefSelecionada(null);
     setSds([]);
     setSdSelecionada(null);
-    setLocalBusca("");
     setLocalSelecionado(null);
+
     setResultado(null);
     setError(null);
   };
@@ -547,16 +528,6 @@ function RecebimentoPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={localBusca}
-                  onChange={(e) => setLocalBusca(e.target.value)}
-                  placeholder="Filtrar locais por código, armazém, galpão..."
-                  className="pl-10"
-                />
-              </div>
-
               {locaisLoading ? (
                 <div className="space-y-1">
                   {Array.from({ length: 3 }).map((_, i) => (
@@ -564,51 +535,15 @@ function RecebimentoPage() {
                   ))}
                 </div>
               ) : (
-                <div className="max-h-64 overflow-y-auto rounded-md border">
-                  {locaisFiltrados.length === 0 ? (
-                    <p className="px-3 py-4 text-center text-xs text-muted-foreground">
-                      Nenhum local encontrado.
-                    </p>
-                  ) : (
-                    locaisFiltrados.map((l) => {
-                      const selected = localSelecionado?.id === l.id;
-                      return (
-                        <button
-                          key={l.id}
-                          type="button"
-                          onClick={() => setLocalSelecionado(l)}
-                          className={`flex w-full items-center gap-3 px-3 py-2 text-left text-xs transition-colors hover:bg-muted ${
-                            selected
-                              ? "bg-primary/10 border-l-2 border-primary"
-                              : "border-l-2 border-transparent"
-                          }`}
-                        >
-                          <span className="font-mono font-semibold w-24 shrink-0">
-                            {l.codigo_local}
-                          </span>
-                          <span className="flex-1 truncate">
-                            {l.armazem_nome} / {l.galpao} / {l.rua}
-                          </span>
-                          {l.processo && (
-                            <Badge variant="outline" className="text-[10px] shrink-0">
-                              {l.processo}
-                            </Badge>
-                          )}
-                        </button>
-                      );
-                    })
-                  )}
-                </div>
-              )}
-
-              {localSelecionado && (
-                <p className="flex items-center gap-1 text-xs text-green-500">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Local selecionado: {localSelecionado.codigo_local} —{" "}
-                  {localSelecionado.descricao}
-                </p>
+                <LocalCascadeSelector
+                  locais={locais}
+                  value={localSelecionado}
+                  onChange={setLocalSelecionado}
+                  emptyLabel="Nenhum local cadastrado."
+                />
               )}
             </CardContent>
+
           </Card>
 
           {/* Responsável + Observação */}

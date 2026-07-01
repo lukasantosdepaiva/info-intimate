@@ -19,6 +19,12 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
+interface Saldo05 {
+  local_estoque_id: string;
+  codigo_local: string;
+  quantidade: number;
+}
+
 interface PalletRow {
   id: string;
   codigo_pallet: string;
@@ -31,7 +37,9 @@ interface PalletRow {
   local_origem_codigo: string | null;
   status: string | null;
   locais_e_saldos: string | null;
+  saldos_05: Saldo05[];
 }
+
 
 interface PalletViewRow {
   id?: string;
@@ -241,7 +249,15 @@ function SaidaArmazem05Page() {
         local_origem_codigo: primeiroLocal05?.local?.codigo_local ?? null,
         status: row.status ?? null,
         locais_e_saldos: row.locais_e_saldos ?? null,
+        saldos_05: saldos05
+          .filter((s) => s.local?.codigo_local)
+          .map((s) => ({
+            local_estoque_id: s.local_estoque_id,
+            codigo_local: String(s.local?.codigo_local ?? ""),
+            quantidade: s.quantidade,
+          })),
       };
+
 
       setPallet(palletNormalizado);
       setLocalOrigem(palletNormalizado.local_origem_id);
@@ -704,11 +720,38 @@ function SaidaArmazem05Page() {
                   )}
 
                   {temSaldoNoArmazem05 && (
-                    <p className="flex items-center gap-1 text-xs text-green-500">
-                      <CheckCircle2 className="h-3 w-3" />
-                      Possui saldo no armazém 05.
-                    </p>
+                    <div className="space-y-2 rounded-md border border-primary/30 bg-primary/5 p-3">
+                      <p className="text-xs font-semibold text-primary">
+                        Locais com saldo deste pallet (Armazém 05)
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {pallet.saldos_05.map((s) => {
+                          const active = localOrigem === s.local_estoque_id;
+                          return (
+                            <button
+                              key={s.local_estoque_id}
+                              type="button"
+                              onClick={() => setLocalOrigem(s.local_estoque_id)}
+                              className={`inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-mono transition-colors ${
+                                active
+                                  ? "border-primary bg-primary text-primary-foreground"
+                                  : "border-primary/40 bg-background hover:bg-primary/10"
+                              }`}
+                            >
+                              {s.codigo_local}
+                              <Badge
+                                variant={active ? "secondary" : "outline"}
+                                className="text-[10px]"
+                              >
+                                {formatarNumero(s.quantidade)}
+                              </Badge>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   )}
+
                 </div>
               )}
             </CardContent>
