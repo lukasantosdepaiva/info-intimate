@@ -179,7 +179,7 @@ function MovimentacoesPage() {
 
         if (dbError) throw new Error(dbError.message);
 
-        setLocais(((data ?? []) as LocalRow[]) ?? []);
+        setLocais((data ?? []) as LocalRow[]);
       } catch {
         setLocais([]);
       } finally {
