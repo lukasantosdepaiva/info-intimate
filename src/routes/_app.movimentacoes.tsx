@@ -211,7 +211,7 @@ function MovimentacoesPage() {
 
       if (dbError) throw new Error(dbError.message);
 
-      setPalletResultados(((data ?? []) as PalletResumoRow[]) ?? []);
+      setPalletResultados((data ?? []) as PalletResumoRow[]);
     } catch {
       setPalletResultados([]);
     } finally {
