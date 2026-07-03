@@ -970,5 +970,8 @@ function SaidaArmazem05Page() {
 
 
 export const Route = createFileRoute("/_app/saidas")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    pallet: typeof search.pallet === "string" ? search.pallet : undefined,
+  }),
   component: SaidaArmazem05Page,
 });
