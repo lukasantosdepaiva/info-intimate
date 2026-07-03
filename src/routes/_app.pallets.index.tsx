@@ -147,14 +147,22 @@ function PalletsPage() {
             encontrado{filtered.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={fetchPallets}
-          aria-label="Atualizar"
-        >
-          <RefreshCw className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild className="gap-2">
+            <Link to="/scanner">
+              <QrCode className="h-4 w-4" />
+              Escanear pallet
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={fetchPallets}
+            aria-label="Atualizar"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Busca local */}
