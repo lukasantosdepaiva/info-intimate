@@ -276,6 +276,14 @@ function SaidaArmazem05Page() {
     return () => clearTimeout(t);
   }, [palletBusca, buscarPallet]);
 
+  const { pallet: palletFromUrl } = Route.useSearch();
+  useEffect(() => {
+    if (palletFromUrl && !pallet) {
+      setPalletBusca(palletFromUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [palletFromUrl]);
+
   const buscarOp = useCallback(async (numero: string) => {
     const termo = numero.trim();
 
@@ -970,5 +978,8 @@ function SaidaArmazem05Page() {
 
 
 export const Route = createFileRoute("/_app/saidas")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    pallet: typeof search.pallet === "string" ? search.pallet : undefined,
+  }),
   component: SaidaArmazem05Page,
 });

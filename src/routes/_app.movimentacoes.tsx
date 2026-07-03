@@ -224,6 +224,14 @@ function MovimentacoesPage() {
     return () => clearTimeout(timer);
   }, [palletBusca, buscarPallet]);
 
+  const { pallet: palletFromUrl } = Route.useSearch();
+  useEffect(() => {
+    if (palletFromUrl && !palletSelecionado) {
+      setPalletBusca(palletFromUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [palletFromUrl]);
+
   const selecionarPallet = useCallback(async (p: PalletResumoRow) => {
     setPalletSelecionado(p);
     setPalletBusca(textoExibicao(p.codigo_pallet, ""));
@@ -920,5 +928,8 @@ function MovimentacoesPage() {
 }
 
 export const Route = createFileRoute("/_app/movimentacoes")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    pallet: typeof search.pallet === "string" ? search.pallet : undefined,
+  }),
   component: MovimentacoesPage,
 });

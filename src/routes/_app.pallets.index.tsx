@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -147,14 +147,22 @@ function PalletsPage() {
             encontrado{filtered.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={fetchPallets}
-          aria-label="Atualizar"
-        >
-          <RefreshCw className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild className="gap-2">
+            <Link to="/scanner">
+              <QrCode className="h-4 w-4" />
+              Escanear pallet
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={fetchPallets}
+            aria-label="Atualizar"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Busca local */}
@@ -274,24 +282,6 @@ function PalletsPage() {
         </div>
       )}
 
-      {/* Botões desabilitados para próxima etapa */}
-      <div className="flex flex-wrap gap-2">
-        <Button variant="outline" size="sm" disabled>
-          Solicitar movimentação
-        </Button>
-        <Button variant="outline" size="sm" disabled>
-          Registrar saída
-        </Button>
-        <Button variant="outline" size="sm" disabled>
-          Inspeção
-        </Button>
-        <Button variant="outline" size="sm" disabled>
-          RNC
-        </Button>
-        <span className="text-[11px] text-muted-foreground self-center">
-          Será implementado na próxima etapa
-        </span>
-      </div>
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AppVeiculosRouteImport } from './routes/_app.veiculos'
+import { Route as AppScannerRouteImport } from './routes/_app.scanner'
 import { Route as AppSaidasRouteImport } from './routes/_app.saidas'
 import { Route as AppRncsRouteImport } from './routes/_app.rncs'
 import { Route as AppRelatoriosRouteImport } from './routes/_app.relatorios'
@@ -49,6 +50,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppVeiculosRoute = AppVeiculosRouteImport.update({
   id: '/veiculos',
   path: '/veiculos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppScannerRoute = AppScannerRouteImport.update({
+  id: '/scanner',
+  path: '/scanner',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSaidasRoute = AppSaidasRouteImport.update({
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/relatorios': typeof AppRelatoriosRoute
   '/rncs': typeof AppRncsRoute
   '/saidas': typeof AppSaidasRoute
+  '/scanner': typeof AppScannerRoute
   '/veiculos': typeof AppVeiculosRoute
   '/inspecao/rnc': typeof AppInspecaoRncRoute
   '/pallets/$codigo': typeof AppPalletsCodigoRoute
@@ -181,6 +188,7 @@ export interface FileRoutesByTo {
   '/relatorios': typeof AppRelatoriosRoute
   '/rncs': typeof AppRncsRoute
   '/saidas': typeof AppSaidasRoute
+  '/scanner': typeof AppScannerRoute
   '/veiculos': typeof AppVeiculosRoute
   '/': typeof AppIndexRoute
   '/inspecao/rnc': typeof AppInspecaoRncRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/_app/relatorios': typeof AppRelatoriosRoute
   '/_app/rncs': typeof AppRncsRoute
   '/_app/saidas': typeof AppSaidasRoute
+  '/_app/scanner': typeof AppScannerRoute
   '/_app/veiculos': typeof AppVeiculosRoute
   '/_app/': typeof AppIndexRoute
   '/_app/inspecao/rnc': typeof AppInspecaoRncRoute
@@ -232,6 +241,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/rncs'
     | '/saidas'
+    | '/scanner'
     | '/veiculos'
     | '/inspecao/rnc'
     | '/pallets/$codigo'
@@ -254,6 +264,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/rncs'
     | '/saidas'
+    | '/scanner'
     | '/veiculos'
     | '/'
     | '/inspecao/rnc'
@@ -278,6 +289,7 @@ export interface FileRouteTypes {
     | '/_app/relatorios'
     | '/_app/rncs'
     | '/_app/saidas'
+    | '/_app/scanner'
     | '/_app/veiculos'
     | '/_app/'
     | '/_app/inspecao/rnc'
@@ -319,6 +331,13 @@ declare module '@tanstack/react-router' {
       path: '/veiculos'
       fullPath: '/veiculos'
       preLoaderRoute: typeof AppVeiculosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/scanner': {
+      id: '/_app/scanner'
+      path: '/scanner'
+      fullPath: '/scanner'
+      preLoaderRoute: typeof AppScannerRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/saidas': {
@@ -465,6 +484,7 @@ interface AppRouteChildren {
   AppRelatoriosRoute: typeof AppRelatoriosRoute
   AppRncsRoute: typeof AppRncsRoute
   AppSaidasRoute: typeof AppSaidasRoute
+  AppScannerRoute: typeof AppScannerRoute
   AppVeiculosRoute: typeof AppVeiculosRoute
   AppIndexRoute: typeof AppIndexRoute
   AppInspecaoRncRoute: typeof AppInspecaoRncRoute
@@ -488,6 +508,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppRelatoriosRoute: AppRelatoriosRoute,
   AppRncsRoute: AppRncsRoute,
   AppSaidasRoute: AppSaidasRoute,
+  AppScannerRoute: AppScannerRoute,
   AppVeiculosRoute: AppVeiculosRoute,
   AppIndexRoute: AppIndexRoute,
   AppInspecaoRncRoute: AppInspecaoRncRoute,

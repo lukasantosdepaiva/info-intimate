@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { QRCodeCanvas } from "qrcode.react";
 
 import { useEffect, useState, useCallback } from "react";
 import { getSupabase } from "@/lib/supabase";
@@ -10,6 +10,8 @@ import {
   ArrowLeft,
   Printer,
   History,
+  ArrowRightLeft,
+  PackageMinus,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,12 +35,18 @@ interface PalletDetail {
 
 function PalletDetailPage() {
   const params = Route.useParams();
-  const navigate = useNavigate();
   const codigo = params.codigo as string;
 
   const [data, setData] = useState<PalletDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [baseUrl, setBaseUrl] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setBaseUrl(window.location.origin);
+    }
+  }, []);
 
   const fetchDetail = useCallback(async () => {
     if (!codigo) return;
@@ -70,6 +78,8 @@ function PalletDetailPage() {
   useEffect(() => {
     fetchDetail();
   }, [fetchDetail]);
+
+  const qrValue = baseUrl ? `${baseUrl}/pallets/${codigo}` : `/pallets/${codigo}`;
 
   if (loading) {
     return (
@@ -121,16 +131,23 @@ function PalletDetailPage() {
     );
   }
 
-  const qrUrl = `/pallets/${codigo}`;
-
   return (
     <div className="space-y-6">
+      {/* Print CSS: hide navigation/buttons when printing */}
+      <style media="print">{`
+        @page { margin: 12mm; }
+        [data-sidebar="root"], .print\\:hidden { display: none !important; }
+        body { background: white !important; }
+      `}</style>
+
       {/* Voltar */}
-      <Button variant="ghost" size="sm" asChild>
-        <Link to="/pallets">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Pallets
-        </Link>
-      </Button>
+      <div className="print:hidden">
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/pallets">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Pallets
+          </Link>
+        </Button>
+      </div>
 
       {/* Header */}
       <div>
@@ -203,42 +220,54 @@ function PalletDetailPage() {
             <CardTitle className="text-base">QR Code</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4">
-            <div className="rounded-lg border-2 border-border p-4">
-              <QrCode className="h-32 w-32 text-foreground" />
+            <div className="rounded-lg border-2 border-border bg-white p-4">
+              <QRCodeCanvas
+                value={qrValue}
+                size={160}
+                level="M"
+                marginSize={2}
+              />
             </div>
             <p className="text-center text-xs text-muted-foreground">
               Escaneie para acessar rapidamente este pallet no sistema.
             </p>
-            <p className="text-center font-mono text-[11px] text-muted-foreground">
-              {qrUrl}
+            <p className="text-center font-mono text-[11px] text-muted-foreground break-all">
+              {qrValue}
             </p>
-            <Button variant="outline" size="sm" className="gap-2" asChild>
-              <Link to={`/pallets/${codigo}?print=1`}>
-                <Printer className="h-4 w-4" />
-                Imprimir ficha
-              </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 print:hidden"
+              type="button"
+              onClick={() => window.print()}
+            >
+              <Printer className="h-4 w-4" />
+              Imprimir ficha
             </Button>
           </CardContent>
         </Card>
       </div>
 
       {/* Links de ação */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 print:hidden">
         <Button variant="outline" size="sm" asChild>
-          <Link to={`/historico?pallet=${encodeURIComponent(codigo)}`}>
+          <Link to="/historico" search={{ pallet: codigo }}>
             <History className="mr-2 h-4 w-4" />
             Ver histórico do pallet
           </Link>
         </Button>
-        <Button variant="outline" size="sm" disabled>
-          Solicitar movimentação
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/movimentacoes" search={{ pallet: codigo }}>
+            <ArrowRightLeft className="mr-2 h-4 w-4" />
+            Solicitar movimentação
+          </Link>
         </Button>
-        <Button variant="outline" size="sm" disabled>
-          Registrar saída
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/saidas" search={{ pallet: codigo }}>
+            <PackageMinus className="mr-2 h-4 w-4" />
+            Registrar saída
+          </Link>
         </Button>
-        <span className="text-[11px] text-muted-foreground self-center">
-          Será implementado na próxima etapa
-        </span>
       </div>
     </div>
   );
