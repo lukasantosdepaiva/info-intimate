@@ -31,6 +31,7 @@ const mainNav = [
   { title: "Dashboard", href: "/", icon: LayoutDashboard },
   { title: "Recebimento", href: "/recebimento", icon: ClipboardList },
   { title: "Pallets", href: "/pallets", icon: QrCode },
+  { title: "Escanear Pallet", href: "/scanner", icon: QrCode },
   { title: "Estoque", href: "/estoque", icon: Warehouse },
   { title: "Movimentação", href: "/movimentacoes", icon: ArrowRightLeft },
   { title: "Aprovações", href: "/aprovacoes", icon: CheckSquare },
