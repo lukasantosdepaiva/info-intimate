@@ -282,24 +282,6 @@ function PalletsPage() {
         </div>
       )}
 
-      {/* Botões desabilitados para próxima etapa */}
-      <div className="flex flex-wrap gap-2">
-        <Button variant="outline" size="sm" disabled>
-          Solicitar movimentação
-        </Button>
-        <Button variant="outline" size="sm" disabled>
-          Registrar saída
-        </Button>
-        <Button variant="outline" size="sm" disabled>
-          Inspeção
-        </Button>
-        <Button variant="outline" size="sm" disabled>
-          RNC
-        </Button>
-        <span className="text-[11px] text-muted-foreground self-center">
-          Será implementado na próxima etapa
-        </span>
-      </div>
     </div>
   );
 }
