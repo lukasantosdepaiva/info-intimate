@@ -276,6 +276,14 @@ function SaidaArmazem05Page() {
     return () => clearTimeout(t);
   }, [palletBusca, buscarPallet]);
 
+  const { pallet: palletFromUrl } = Route.useSearch();
+  useEffect(() => {
+    if (palletFromUrl && !pallet) {
+      setPalletBusca(palletFromUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [palletFromUrl]);
+
   const buscarOp = useCallback(async (numero: string) => {
     const termo = numero.trim();
 
