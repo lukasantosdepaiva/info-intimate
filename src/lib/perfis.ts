@@ -53,7 +53,7 @@ export const SETORES_VALIDOS: Setor[] = ["administração", "pcp", "logística",
  *  Se um perfil não estiver listado, não tem acesso àquela rota. */
 export const ROTAS_POR_PERFIL: Record<Perfil, string[]> = {
   admin: [
-    "/", "/recebimento", "/pallets", "/estoque", "/movimentacoes",
+    "/", "/recebimento", "/pallets", "/scanner", "/estoque", "/movimentacoes",
     "/aprovacoes", "/inspecao", "/inspecao/rnc", "/pcp",
     "/saidas", "/veiculos", "/historico", "/relatorios", "/configuracoes",
   ],
@@ -61,18 +61,18 @@ export const ROTAS_POR_PERFIL: Record<Perfil, string[]> = {
     "/", "/pcp", "/relatorios", "/historico",
   ],
   logistica: [
-    "/", "/recebimento", "/pallets", "/estoque", "/movimentacoes",
+    "/", "/recebimento", "/pallets", "/scanner", "/estoque", "/movimentacoes",
     "/aprovacoes", "/saidas", "/veiculos", "/historico", "/relatorios",
   ],
   qualidade: [
-    "/", "/pallets", "/estoque", "/inspecao", "/inspecao/rnc",
+    "/", "/pallets", "/scanner", "/estoque", "/inspecao", "/inspecao/rnc",
     "/historico", "/relatorios",
   ],
   portaria: [
     "/", "/veiculos", "/saidas", "/historico",
   ],
   consulta: [
-    "/", "/pallets", "/estoque", "/historico", "/relatorios",
+    "/", "/pallets", "/scanner", "/estoque", "/historico", "/relatorios",
   ],
 };
 
