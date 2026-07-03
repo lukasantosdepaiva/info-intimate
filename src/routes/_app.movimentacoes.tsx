@@ -920,5 +920,8 @@ function MovimentacoesPage() {
 }
 
 export const Route = createFileRoute("/_app/movimentacoes")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    pallet: typeof search.pallet === "string" ? search.pallet : undefined,
+  }),
   component: MovimentacoesPage,
 });
