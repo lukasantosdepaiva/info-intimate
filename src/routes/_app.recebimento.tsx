@@ -34,6 +34,14 @@ interface SdRow {
   numero_sd: string;
 }
 
+interface BuscaRow {
+  referencia_id: string;
+  codigo_referencia: string;
+  descricao: string;
+  sd_id: string | null;
+  numero_sd: string | null;
+}
+
 interface LocalRow {
   id: string;
   codigo_local: string;
