@@ -34,6 +34,14 @@ interface SdRow {
   numero_sd: string;
 }
 
+interface BuscaRow {
+  referencia_id: string;
+  codigo_referencia: string;
+  descricao: string;
+  sd_id: string | null;
+  numero_sd: string | null;
+}
+
 interface LocalRow {
   id: string;
   codigo_local: string;
@@ -56,9 +64,9 @@ function RecebimentoPage() {
   const [responsavel, setResponsavel] = useState("");
   const [observacao, setObservacao] = useState("");
 
-  // Referência
+  // Referência / SD (busca unificada)
   const [refBusca, setRefBusca] = useState("");
-  const [refResultados, setRefResultados] = useState<ReferenciaRow[]>([]);
+  const [refResultados, setRefResultados] = useState<BuscaRow[]>([]);
   const [refBuscaLoading, setRefBuscaLoading] = useState(false);
   const [refSelecionada, setRefSelecionada] = useState<ReferenciaRow | null>(null);
 
@@ -103,22 +111,27 @@ function RecebimentoPage() {
     })();
   }, []);
 
-  // ─── Buscar referência ────────────────────────────────────
+  // ─── Buscar referência / SD (view unificada) ──────────────
   const buscarReferencia = useCallback(async (q: string) => {
-    if (!q.trim() || q.trim().length < 2) {
+    const termo = String(q ?? "").trim();
+    if (termo.length < 2) {
       setRefResultados([]);
       return;
     }
     setRefBuscaLoading(true);
     try {
       const supabase = getSupabase();
-      const { data, error: dbError } = await supabase
-        .from("referencias")
-        .select("id, codigo_referencia, descricao")
-        .ilike("codigo_referencia", `%${q}%`)
-        .limit(10);
+      const like = `%${termo}%`;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error: dbError } = await (supabase as any)
+        .from("vw_busca_referencias_sds")
+        .select("referencia_id, codigo_referencia, descricao, sd_id, numero_sd")
+        .or(
+          `numero_sd.ilike.${like},codigo_referencia.ilike.${like},descricao.ilike.${like}`
+        )
+        .limit(20);
       if (dbError) throw new Error(dbError.message);
-      setRefResultados((data as ReferenciaRow[]) ?? []);
+      setRefResultados((data as BuscaRow[]) ?? []);
     } catch {
       setRefResultados([]);
     } finally {
@@ -132,10 +145,18 @@ function RecebimentoPage() {
     return () => clearTimeout(timer);
   }, [refBusca, buscarReferencia]);
 
-  // ─── Selecionar referência → buscar SDs ───────────────────
-  const selecionarReferencia = useCallback(async (ref: ReferenciaRow) => {
+  // ─── Selecionar resultado → carregar SDs ──────────────────
+  const selecionarResultado = useCallback(async (row: BuscaRow) => {
+    const ref: ReferenciaRow = {
+      id: row.referencia_id,
+      codigo_referencia: String(row.codigo_referencia ?? ""),
+      descricao: String(row.descricao ?? ""),
+    };
     setRefSelecionada(ref);
-    setRefBusca(ref.codigo_referencia);
+    const textoAmigavel = row.numero_sd
+      ? `${row.numero_sd} — ${ref.codigo_referencia}`
+      : ref.codigo_referencia;
+    setRefBusca(textoAmigavel);
     setRefResultados([]);
     setSdSelecionada(null);
 
@@ -149,8 +170,17 @@ function RecebimentoPage() {
       if (dbError) throw new Error(dbError.message);
       const lista = (data as SdRow[]) ?? [];
       setSds(lista);
-      // Auto-select if only one
-      if (lista.length === 1) {
+      // Se o resultado veio com SD, seleciona ela
+      if (row.sd_id && row.numero_sd) {
+        const match = lista.find((s) => s.id === row.sd_id);
+        setSdSelecionada(
+          match ?? {
+            id: row.sd_id,
+            referencia_id: ref.id,
+            numero_sd: String(row.numero_sd ?? ""),
+          }
+        );
+      } else if (lista.length === 1) {
         setSdSelecionada(lista[0]);
       }
     } catch {
@@ -429,16 +459,22 @@ function RecebimentoPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Busca referência */}
               <div className="space-y-1.5">
-                <Label>Referência *</Label>
+                <Label>Referência / SD *</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     value={refBusca}
-                    onChange={(e) => setRefBusca(e.target.value)}
-                    placeholder="Digite o código da referência..."
-                    className="pl-10 font-mono text-xs"
+                    onChange={(e) => {
+                      setRefBusca(e.target.value);
+                      if (refSelecionada) {
+                        setRefSelecionada(null);
+                        setSds([]);
+                        setSdSelecionada(null);
+                      }
+                    }}
+                    placeholder="Busque por SD, código ou nome do frasco..."
+                    className="pl-10 text-xs"
                   />
                   {refBuscaLoading && (
                     <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
@@ -447,38 +483,48 @@ function RecebimentoPage() {
                 {refSelecionada && (
                   <p className="flex items-center gap-1 text-xs text-green-500">
                     <CheckCircle2 className="h-3 w-3" />
-                    Selecionada: {refSelecionada.codigo_referencia} —{" "}
-                    {refSelecionada.descricao}
+                    Selecionado: {sdSelecionada?.numero_sd ? `${sdSelecionada.numero_sd} — ` : ""}
+                    {refSelecionada.codigo_referencia} — {refSelecionada.descricao}
                   </p>
                 )}
               </div>
 
-              {/* Dropdown de resultados da referência */}
+              {/* Dropdown de resultados */}
               {refResultados.length > 0 && !refSelecionada && (
-                <div className="rounded-md border bg-popover shadow-lg max-h-48 overflow-y-auto">
-                  {refResultados.map((ref) => (
-                    <button
-                      key={ref.id}
-                      type="button"
-                      onClick={() => selecionarReferencia(ref)}
-                      className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-muted transition-colors"
-                    >
-                      <span className="font-mono font-semibold">
-                        {ref.codigo_referencia}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {ref.descricao}
-                      </span>
-                    </button>
-                  ))}
+                <div className="rounded-md border bg-popover shadow-lg max-h-64 overflow-y-auto">
+                  {refResultados.map((row, idx) => {
+                    const codigo = String(row.codigo_referencia ?? "");
+                    const descricao = String(row.descricao ?? "");
+                    const numeroSd = String(row.numero_sd ?? "").trim();
+                    const linhaPrincipal = numeroSd
+                      ? `${numeroSd} — ${codigo}`
+                      : codigo;
+                    return (
+                      <button
+                        key={`${row.referencia_id}-${row.sd_id ?? "nosd"}-${idx}`}
+                        type="button"
+                        onClick={() => selecionarResultado(row)}
+                        className="flex w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-muted transition-colors border-b last:border-b-0"
+                      >
+                        <span className="font-mono text-xs font-semibold">
+                          {linhaPrincipal}
+                        </span>
+                        {descricao && (
+                          <span className="text-xs text-muted-foreground">
+                            {descricao}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
+
 
               {/* Nenhum resultado após busca */}
               {refBusca.trim().length >= 2 && !refBuscaLoading && refResultados.length === 0 && !refSelecionada && (
                 <p className="text-xs text-destructive">
-                  Referência não cadastrada. Importe/cadastre a referência mestre
-                  antes do recebimento.
+                  Nenhum resultado. Verifique se a referência/SD está cadastrada e ativa.
                 </p>
               )}
 
