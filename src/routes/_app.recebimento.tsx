@@ -190,11 +190,6 @@ function RecebimentoPage() {
     }
   }, []);
 
-    } finally {
-      setSdsLoading(false);
-    }
-  }, []);
-
   // Busca antiga removida — seleção por cascata (Armazém → Galpão → Rua)
 
 
