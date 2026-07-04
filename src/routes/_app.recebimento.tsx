@@ -64,9 +64,9 @@ function RecebimentoPage() {
   const [responsavel, setResponsavel] = useState("");
   const [observacao, setObservacao] = useState("");
 
-  // Referência
+  // Referência / SD (busca unificada)
   const [refBusca, setRefBusca] = useState("");
-  const [refResultados, setRefResultados] = useState<ReferenciaRow[]>([]);
+  const [refResultados, setRefResultados] = useState<BuscaRow[]>([]);
   const [refBuscaLoading, setRefBuscaLoading] = useState(false);
   const [refSelecionada, setRefSelecionada] = useState<ReferenciaRow | null>(null);
 
