@@ -111,22 +111,27 @@ function RecebimentoPage() {
     })();
   }, []);
 
-  // ─── Buscar referência ────────────────────────────────────
+  // ─── Buscar referência / SD (view unificada) ──────────────
   const buscarReferencia = useCallback(async (q: string) => {
-    if (!q.trim() || q.trim().length < 2) {
+    const termo = String(q ?? "").trim();
+    if (termo.length < 2) {
       setRefResultados([]);
       return;
     }
     setRefBuscaLoading(true);
     try {
       const supabase = getSupabase();
-      const { data, error: dbError } = await supabase
-        .from("referencias")
-        .select("id, codigo_referencia, descricao")
-        .ilike("codigo_referencia", `%${q}%`)
-        .limit(10);
+      const like = `%${termo}%`;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error: dbError } = await (supabase as any)
+        .from("vw_busca_referencias_sds")
+        .select("referencia_id, codigo_referencia, descricao, sd_id, numero_sd")
+        .or(
+          `numero_sd.ilike.${like},codigo_referencia.ilike.${like},descricao.ilike.${like}`
+        )
+        .limit(20);
       if (dbError) throw new Error(dbError.message);
-      setRefResultados((data as ReferenciaRow[]) ?? []);
+      setRefResultados((data as BuscaRow[]) ?? []);
     } catch {
       setRefResultados([]);
     } finally {
@@ -140,10 +145,18 @@ function RecebimentoPage() {
     return () => clearTimeout(timer);
   }, [refBusca, buscarReferencia]);
 
-  // ─── Selecionar referência → buscar SDs ───────────────────
-  const selecionarReferencia = useCallback(async (ref: ReferenciaRow) => {
+  // ─── Selecionar resultado → carregar SDs ──────────────────
+  const selecionarResultado = useCallback(async (row: BuscaRow) => {
+    const ref: ReferenciaRow = {
+      id: row.referencia_id,
+      codigo_referencia: String(row.codigo_referencia ?? ""),
+      descricao: String(row.descricao ?? ""),
+    };
     setRefSelecionada(ref);
-    setRefBusca(ref.codigo_referencia);
+    const textoAmigavel = row.numero_sd
+      ? `${row.numero_sd} — ${ref.codigo_referencia}`
+      : ref.codigo_referencia;
+    setRefBusca(textoAmigavel);
     setRefResultados([]);
     setSdSelecionada(null);
 
@@ -157,12 +170,26 @@ function RecebimentoPage() {
       if (dbError) throw new Error(dbError.message);
       const lista = (data as SdRow[]) ?? [];
       setSds(lista);
-      // Auto-select if only one
-      if (lista.length === 1) {
+      // Se o resultado veio com SD, seleciona ela
+      if (row.sd_id && row.numero_sd) {
+        const match = lista.find((s) => s.id === row.sd_id);
+        setSdSelecionada(
+          match ?? {
+            id: row.sd_id,
+            referencia_id: ref.id,
+            numero_sd: String(row.numero_sd ?? ""),
+          }
+        );
+      } else if (lista.length === 1) {
         setSdSelecionada(lista[0]);
       }
     } catch {
       setSds([]);
+    } finally {
+      setSdsLoading(false);
+    }
+  }, []);
+
     } finally {
       setSdsLoading(false);
     }
