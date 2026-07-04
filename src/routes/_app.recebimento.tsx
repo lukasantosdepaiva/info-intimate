@@ -459,16 +459,22 @@ function RecebimentoPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Busca referência */}
               <div className="space-y-1.5">
-                <Label>Referência *</Label>
+                <Label>Referência / SD *</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     value={refBusca}
-                    onChange={(e) => setRefBusca(e.target.value)}
-                    placeholder="Digite o código da referência..."
-                    className="pl-10 font-mono text-xs"
+                    onChange={(e) => {
+                      setRefBusca(e.target.value);
+                      if (refSelecionada) {
+                        setRefSelecionada(null);
+                        setSds([]);
+                        setSdSelecionada(null);
+                      }
+                    }}
+                    placeholder="Busque por SD, código ou nome do frasco..."
+                    className="pl-10 text-xs"
                   />
                   {refBuscaLoading && (
                     <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
@@ -477,32 +483,43 @@ function RecebimentoPage() {
                 {refSelecionada && (
                   <p className="flex items-center gap-1 text-xs text-green-500">
                     <CheckCircle2 className="h-3 w-3" />
-                    Selecionada: {refSelecionada.codigo_referencia} —{" "}
-                    {refSelecionada.descricao}
+                    Selecionado: {sdSelecionada?.numero_sd ? `${sdSelecionada.numero_sd} — ` : ""}
+                    {refSelecionada.codigo_referencia} — {refSelecionada.descricao}
                   </p>
                 )}
               </div>
 
-              {/* Dropdown de resultados da referência */}
+              {/* Dropdown de resultados */}
               {refResultados.length > 0 && !refSelecionada && (
-                <div className="rounded-md border bg-popover shadow-lg max-h-48 overflow-y-auto">
-                  {refResultados.map((ref) => (
-                    <button
-                      key={ref.id}
-                      type="button"
-                      onClick={() => selecionarReferencia(ref)}
-                      className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-muted transition-colors"
-                    >
-                      <span className="font-mono font-semibold">
-                        {ref.codigo_referencia}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {ref.descricao}
-                      </span>
-                    </button>
-                  ))}
+                <div className="rounded-md border bg-popover shadow-lg max-h-64 overflow-y-auto">
+                  {refResultados.map((row, idx) => {
+                    const codigo = String(row.codigo_referencia ?? "");
+                    const descricao = String(row.descricao ?? "");
+                    const numeroSd = String(row.numero_sd ?? "").trim();
+                    const linhaPrincipal = numeroSd
+                      ? `${numeroSd} — ${codigo}`
+                      : codigo;
+                    return (
+                      <button
+                        key={`${row.referencia_id}-${row.sd_id ?? "nosd"}-${idx}`}
+                        type="button"
+                        onClick={() => selecionarResultado(row)}
+                        className="flex w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-muted transition-colors border-b last:border-b-0"
+                      >
+                        <span className="font-mono text-xs font-semibold">
+                          {linhaPrincipal}
+                        </span>
+                        {descricao && (
+                          <span className="text-xs text-muted-foreground">
+                            {descricao}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
+
 
               {/* Nenhum resultado após busca */}
               {refBusca.trim().length >= 2 && !refBuscaLoading && refResultados.length === 0 && !refSelecionada && (
