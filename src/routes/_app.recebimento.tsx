@@ -524,8 +524,7 @@ function RecebimentoPage() {
               {/* Nenhum resultado após busca */}
               {refBusca.trim().length >= 2 && !refBuscaLoading && refResultados.length === 0 && !refSelecionada && (
                 <p className="text-xs text-destructive">
-                  Referência não cadastrada. Importe/cadastre a referência mestre
-                  antes do recebimento.
+                  Nenhum resultado. Verifique se a referência/SD está cadastrada e ativa.
                 </p>
               )}
 
