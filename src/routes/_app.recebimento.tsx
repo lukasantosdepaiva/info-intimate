@@ -255,12 +255,29 @@ function RecebimentoPage() {
           throw new Error(rpcError.message);
         }
 
-        // RPC retornou sucesso
-        const codigoPallet = data as unknown as string;
+        // RPC retornou sucesso — pode ser codigo_pallet OU um uuid
+        const retorno = data as unknown;
+        console.log("payload recebimento retorno", retorno);
+        let codigoPallet: string | undefined;
+        if (typeof retorno === "string") {
+          const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          if (uuidRe.test(retorno)) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data: palletCriado } = await (supabase as any)
+              .from("pallets")
+              .select("codigo_pallet")
+              .eq("id", retorno)
+              .maybeSingle();
+            console.log("pallet criado", palletCriado);
+            codigoPallet = palletCriado?.codigo_pallet ?? undefined;
+          } else {
+            codigoPallet = retorno;
+          }
+        }
         setResultado({
           sucesso: true,
           mensagem: "Recebimento registrado com sucesso.",
-          codigo_pallet: typeof codigoPallet === "string" ? codigoPallet : undefined,
+          codigo_pallet: codigoPallet,
         });
       } catch (err: unknown) {
         const msg =
