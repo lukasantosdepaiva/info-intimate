@@ -289,23 +289,23 @@ function PalletDetailPage() {
             <dl className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <dt className="text-xs text-muted-foreground">NF de Entrada</dt>
-                <dd className="font-mono font-semibold">{data.nf_entrada ?? "—"}</dd>
+                <dd className="font-mono font-semibold">{textoExibicao(data.nf_entrada)}</dd>
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">Cliente</dt>
-                <dd>{data.cliente ?? "—"}</dd>
+                <dd>{textoExibicao(data.cliente)}</dd>
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">Fornecedor</dt>
-                <dd>{data.fornecedor ?? "—"}</dd>
+                <dd>{textoExibicao(data.fornecedor)}</dd>
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">Referência</dt>
-                <dd>{data.referencia ?? "—"}</dd>
+                <dd>{textoExibicao(data.referencia)}</dd>
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">SD</dt>
-                <dd className="font-mono">{data.sd ?? "—"}</dd>
+                <dd className="font-mono">{textoExibicao(data.sd)}</dd>
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">Criado em</dt>
@@ -318,18 +318,18 @@ function PalletDetailPage() {
               <div>
                 <dt className="text-xs text-muted-foreground">Quantidade Inicial</dt>
                 <dd className="text-lg font-bold tabular-nums">
-                  {data.qtd_inicial?.toLocaleString("pt-BR") ?? "—"}
+                  {numeroExibicao(data.qtd_inicial)}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">Quantidade Atual</dt>
                 <dd className="text-lg font-bold tabular-nums">
-                  {data.qtd_atual?.toLocaleString("pt-BR") ?? "—"}
+                  {numeroExibicao(data.qtd_atual)}
                 </dd>
               </div>
               <div className="col-span-2">
                 <dt className="text-xs text-muted-foreground">Locais e Saldos</dt>
-                <dd className="text-xs">{data.locais_saldos ?? "—"}</dd>
+                <dd className="text-xs">{textoExibicao(data.locais_saldos)}</dd>
               </div>
             </dl>
           </CardContent>
