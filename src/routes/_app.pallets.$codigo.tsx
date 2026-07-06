@@ -22,15 +22,107 @@ import { Link } from "@tanstack/react-router";
 interface PalletDetail {
   codigo_pallet: string;
   status: string;
-  qtd_inicial: number;
-  qtd_atual: number;
-  nf_entrada: string;
-  cliente: string;
-  fornecedor: string;
-  referencia: string;
-  sd: string;
-  locais_saldos: string;
-  criado_em: string;
+  qtd_inicial: number | null;
+  qtd_atual: number | null;
+  nf_entrada: string | null;
+  cliente: string | null;
+  fornecedor: string | null;
+  referencia: string | null;
+  sd: string | null;
+  locais_saldos: string | null;
+  criado_em: string | null;
+}
+
+const textoExibicao = (valor: unknown, fallback = "—") => {
+  const texto = String(valor ?? "").trim();
+  return texto || fallback;
+};
+const numeroExibicao = (valor: unknown, fallback = "—") => {
+  if (valor === null || valor === undefined || valor === "") return fallback;
+  const n = Number(valor);
+  if (!Number.isFinite(n)) return fallback;
+  return n.toLocaleString("pt-BR");
+};
+
+async function fetchFallback(
+  codigo: string,
+): Promise<Partial<PalletDetail> | null> {
+  const supabase = getSupabase();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = supabase as any;
+  const { data: pallet } = await sb
+    .from("pallets")
+    .select("*")
+    .eq("codigo_pallet", codigo)
+    .maybeSingle();
+  if (!pallet) return null;
+
+  const [refRes, sdRes, nfRes, saldosRes] = await Promise.all([
+    pallet.referencia_id
+      ? sb.from("referencias").select("codigo_referencia, descricao").eq("id", pallet.referencia_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    pallet.sd_id
+      ? sb.from("sds").select("numero_sd").eq("id", pallet.sd_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    pallet.nf_entrada_id
+      ? sb
+          .from("nfs_entrada")
+          .select("numero_nf, cliente_id, fornecedor_id")
+          .eq("id", pallet.nf_entrada_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    sb
+      .from("saldos_pallet")
+      .select("quantidade, locais_estoque(codigo_local, descricao)")
+      .eq("pallet_id", pallet.id),
+  ]);
+
+  let cliente: string | null = null;
+  let fornecedor: string | null = null;
+  const nf = nfRes?.data;
+  if (nf?.cliente_id) {
+    const { data: c } = await sb.from("clientes").select("nome").eq("id", nf.cliente_id).maybeSingle();
+    cliente = c?.nome ?? null;
+  }
+  if (nf?.fornecedor_id) {
+    const { data: f } = await sb.from("fornecedores").select("nome").eq("id", nf.fornecedor_id).maybeSingle();
+    fornecedor = f?.nome ?? null;
+  }
+
+  const saldos = (saldosRes?.data ?? []) as Array<{
+    quantidade: number;
+    locais_estoque:
+      | { codigo_local: string; descricao: string }
+      | { codigo_local: string; descricao: string }[]
+      | null;
+  }>;
+  const qtdAtual = saldos.reduce((acc, s) => acc + Number(s.quantidade ?? 0), 0);
+  const locaisSaldos = saldos
+    .map((s) => {
+      const loc = Array.isArray(s.locais_estoque) ? s.locais_estoque[0] : s.locais_estoque;
+      const cod = loc?.codigo_local ?? "";
+      return `${cod}: ${Number(s.quantidade ?? 0).toLocaleString("pt-BR")}`;
+    })
+    .join(" | ");
+
+  const ref = refRes?.data;
+  const referenciaTexto = ref
+    ? [ref.codigo_referencia, ref.descricao].filter(Boolean).join(" — ")
+    : null;
+
+  return {
+    codigo_pallet: pallet.codigo_pallet,
+    status: pallet.status,
+    qtd_inicial: pallet.quantidade_inicial ?? pallet.qtd_inicial ?? null,
+    qtd_atual: saldos.length > 0 ? qtdAtual : null,
+    nf_entrada: nf?.numero_nf ?? null,
+    cliente,
+    fornecedor,
+    referencia: referenciaTexto,
+    sd: sdRes?.data?.numero_sd ?? null,
+    locais_saldos: locaisSaldos || null,
+    criado_em: pallet.created_at ?? pallet.criado_em ?? null,
+  };
 }
 
 function PalletDetailPage() {
@@ -54,21 +146,50 @@ function PalletDetailPage() {
     setError(null);
     try {
       const supabase = getSupabase();
-      const { data: rows, error: dbError } = await supabase
+      const { data: viewRow, error: dbError } = await supabase
         .from("vw_pallet_resumo")
         .select("*")
         .eq("codigo_pallet", codigo)
-        .limit(1);
+        .maybeSingle();
 
-      if (dbError) throw new Error(dbError.message);
-      if (rows && rows.length > 0) {
-        setData(rows[0] as PalletDetail);
-      } else {
-        setData(null);
+      console.log("pallet detalhe (view)", viewRow);
+      if (dbError) console.log("erro pallet detalhe (view)", dbError);
+
+      const base = (viewRow as PalletDetail | null) ?? null;
+
+      const precisaFallback =
+        !base ||
+        base.qtd_inicial == null ||
+        base.referencia == null ||
+        base.criado_em == null ||
+        base.qtd_atual == null;
+
+      let merged: PalletDetail | null = base;
+      if (precisaFallback) {
+        const fb = await fetchFallback(codigo);
+        console.log("pallet detalhe (fallback)", fb);
+        if (fb) {
+          merged = {
+            codigo_pallet: base?.codigo_pallet ?? fb.codigo_pallet ?? codigo,
+            status: base?.status ?? fb.status ?? "",
+            qtd_inicial: base?.qtd_inicial ?? fb.qtd_inicial ?? null,
+            qtd_atual: base?.qtd_atual ?? fb.qtd_atual ?? null,
+            nf_entrada: base?.nf_entrada ?? fb.nf_entrada ?? null,
+            cliente: base?.cliente ?? fb.cliente ?? null,
+            fornecedor: base?.fornecedor ?? fb.fornecedor ?? null,
+            referencia: base?.referencia ?? fb.referencia ?? null,
+            sd: base?.sd ?? fb.sd ?? null,
+            locais_saldos: base?.locais_saldos ?? fb.locais_saldos ?? null,
+            criado_em: base?.criado_em ?? fb.criado_em ?? null,
+          };
+        }
       }
+
+      setData(merged);
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Erro ao carregar detalhe.";
+      console.log("erro pallet detalhe", err);
       setError(message);
     } finally {
       setLoading(false);
