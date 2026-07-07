@@ -139,10 +139,8 @@ const localCombinaComBusca = (local: LocalRow, busca: string) => {
 };
 
 function MovimentacoesPage() {
-  const [palletBusca, setPalletBusca] = useState("");
-  const [palletResultados, setPalletResultados] = useState<PalletResumoRow[]>([]);
-  const [palletBuscaLoading, setPalletBuscaLoading] = useState(false);
-  const [palletSelecionado, setPalletSelecionado] = useState<PalletResumoRow | null>(null);
+  const [palletDialogOpen, setPalletDialogOpen] = useState(false);
+  const [palletSelecionado, setPalletSelecionado] = useState<PalletSearchResult | null>(null);
 
   const [locais, setLocais] = useState<LocalRow[]>([]);
   const [locaisLoading, setLocaisLoading] = useState(true);
@@ -191,39 +189,6 @@ function MovimentacoesPage() {
     carregarLocais();
   }, []);
 
-  const buscarPallet = useCallback(async (q: string) => {
-    const termo = q.trim();
-
-    if (!termo || termo.length < 2) {
-      setPalletResultados([]);
-      return;
-    }
-
-    setPalletBuscaLoading(true);
-
-    try {
-      const supabase = getSupabase();
-
-      const { data, error: dbError } = await supabase
-        .from("vw_pallet_resumo")
-        .select("*")
-        .ilike("codigo_pallet", `%${termo}%`)
-        .limit(10);
-
-      if (dbError) throw new Error(dbError.message);
-
-      setPalletResultados((data ?? []) as PalletResumoRow[]);
-    } catch {
-      setPalletResultados([]);
-    } finally {
-      setPalletBuscaLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => buscarPallet(palletBusca), 300);
-    return () => clearTimeout(timer);
-  }, [palletBusca, buscarPallet]);
 
   const { pallet: palletFromUrl } = Route.useSearch();
   useEffect(() => {
