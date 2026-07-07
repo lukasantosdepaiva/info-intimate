@@ -154,12 +154,37 @@ function SaidaArmazem05Page() {
   const [responsavel, setResponsavel] = useState("");
   const [observacao, setObservacao] = useState("");
 
+  // Vínculo com caminhão (opcional)
+  const [controleVeiculoId, setControleVeiculoId] = useState<string>("");
+  const [controlesVeiculo, setControlesVeiculo] = useState<
+    Array<{ id: string; placa: string | null; motorista: string | null; created_at: string | null }>
+  >([]);
+
   const [submitting, setSubmitting] = useState(false);
   const [resposta, setResposta] = useState<{
     sucesso: boolean;
     mensagem: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const carregar = async () => {
+      try {
+        const supabase = getSupabase();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const sb = supabase as any;
+        const { data } = await sb
+          .from("controle_veiculos")
+          .select("id, placa, motorista, created_at")
+          .order("created_at", { ascending: false })
+          .limit(30);
+        setControlesVeiculo(data ?? []);
+      } catch {
+        setControlesVeiculo([]);
+      }
+    };
+    carregar();
+  }, []);
 
   const buscarPallet = useCallback(async (codigo: string) => {
     const termo = codigo.trim();
