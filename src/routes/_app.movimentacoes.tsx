@@ -190,18 +190,9 @@ function MovimentacoesPage() {
   }, []);
 
 
-  const { pallet: palletFromUrl } = Route.useSearch();
-  useEffect(() => {
-    if (palletFromUrl && !palletSelecionado) {
-      setPalletBusca(palletFromUrl);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [palletFromUrl]);
-
-  const selecionarPallet = useCallback(async (p: PalletResumoRow) => {
+  const selecionarPallet = useCallback(async (p: PalletSearchResult) => {
     setPalletSelecionado(p);
-    setPalletBusca(textoExibicao(p.codigo_pallet, ""));
-    setPalletResultados([]);
+    setPalletDialogOpen(false);
 
     setOrigemSelecionada(null);
     setOrigemBusca("");
