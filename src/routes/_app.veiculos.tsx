@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { getSupabase } from "@/lib/supabase";
 import {
   Truck,
@@ -14,11 +14,15 @@ import {
   X,
   Upload,
   ImageIcon,
+  Package,
+  Plus,
+  Search,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -27,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { PalletSearchDialog, type PalletSearchResult } from "@/components/pallet-search-dialog";
 
 // ─── Tipos ─────────────────────────────────────────────────
 interface ChecklistItem {
