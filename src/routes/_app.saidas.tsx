@@ -596,6 +596,7 @@ function SaidaArmazem05Page() {
       codigoLider,
       responsavel,
       observacao,
+      controleVeiculoId,
     ]
   );
 
