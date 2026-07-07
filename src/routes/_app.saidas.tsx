@@ -987,6 +987,33 @@ function SaidaArmazem05Page() {
                   placeholder="Opcional"
                 />
               </div>
+
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>Vincular a caminhão / controle de veículo (opcional)</Label>
+                <Select
+                  value={controleVeiculoId || "__none__"}
+                  onValueChange={(v) => setControleVeiculoId(v === "__none__" ? "" : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Nenhum" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Nenhum</SelectItem>
+                    {controlesVeiculo.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.placa ?? "sem placa"} — {c.motorista ?? "sem motorista"}
+                        {c.created_at
+                          ? ` (${new Date(c.created_at).toLocaleDateString("pt-BR")})`
+                          : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-muted-foreground">
+                  Se selecionar, ao registrar a saída também será criada uma carga vinculada ao caminhão.
+                </p>
+              </div>
+
             </CardContent>
           </Card>
 
