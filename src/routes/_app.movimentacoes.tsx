@@ -854,6 +854,13 @@ function MovimentacoesPage() {
           )}
         </form>
       )}
+
+      <PalletSearchDialog
+        open={palletDialogOpen}
+        onOpenChange={setPalletDialogOpen}
+        onSelect={(p) => selecionarPallet(p)}
+        title="Buscar pallet para movimentação"
+      />
     </main>
   );
 }
