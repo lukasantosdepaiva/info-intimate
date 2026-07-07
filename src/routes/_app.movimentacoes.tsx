@@ -4,13 +4,14 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { getSupabase } from "@/lib/supabase";
-import { ArrowRightLeft, AlertCircle, Search, Loader2, CheckCircle2, Package, Send } from "lucide-react";
+import { ArrowRightLeft, AlertCircle, Loader2, CheckCircle2, Package, Send, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PalletSearchDialog, type PalletSearchResult } from "@/components/pallet-search-dialog";
 
 interface PalletResumoRow {
   pallet_id: string;
