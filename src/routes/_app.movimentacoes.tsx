@@ -416,8 +416,6 @@ function MovimentacoesPage() {
   );
 
   const limparFormulario = () => {
-    setPalletBusca("");
-    setPalletResultados([]);
     setPalletSelecionado(null);
     setLocaisComSaldo([]);
 
