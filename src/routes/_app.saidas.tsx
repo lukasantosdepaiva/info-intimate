@@ -17,6 +17,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 
 interface Saldo05 {
@@ -147,12 +154,37 @@ function SaidaArmazem05Page() {
   const [responsavel, setResponsavel] = useState("");
   const [observacao, setObservacao] = useState("");
 
+  // Vínculo com caminhão (opcional)
+  const [controleVeiculoId, setControleVeiculoId] = useState<string>("");
+  const [controlesVeiculo, setControlesVeiculo] = useState<
+    Array<{ id: string; placa: string | null; motorista: string | null; created_at: string | null }>
+  >([]);
+
   const [submitting, setSubmitting] = useState(false);
   const [resposta, setResposta] = useState<{
     sucesso: boolean;
     mensagem: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const carregar = async () => {
+      try {
+        const supabase = getSupabase();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const sb = supabase as any;
+        const { data } = await sb
+          .from("controle_veiculos")
+          .select("id, placa, motorista, created_at")
+          .order("created_at", { ascending: false })
+          .limit(30);
+        setControlesVeiculo(data ?? []);
+      } catch {
+        setControlesVeiculo([]);
+      }
+    };
+    carregar();
+  }, []);
 
   const buscarPallet = useCallback(async (codigo: string) => {
     const termo = codigo.trim();
@@ -509,11 +541,40 @@ function SaidaArmazem05Page() {
           throw new Error(rpcError.message);
         }
 
+        let mensagemExtra = "";
+        // Vincula ao caminhão se selecionado
+        if (controleVeiculoId && pallet) {
+          try {
+            // Tenta extrair saida_id do retorno (string uuid) ou null
+            const saidaId = typeof data === "string" ? data : null;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { error: cargaErr } = await (supabase as any).rpc("registrar_carga_veiculo", {
+              p_controle_veiculo_id: controleVeiculoId,
+              p_pallet_id: pallet.id,
+              p_quantidade: Number(quantidade),
+              p_responsavel: responsavel.trim(),
+              p_saida_id: saidaId,
+              p_op_id: op?.id ?? null,
+              p_local_origem_id: localOrigemParaUso,
+              p_nf_saida_numero: nfSaida.trim() || null,
+              p_observacao: observacao.trim() || null,
+            });
+            if (cargaErr) {
+              mensagemExtra = ` (Aviso: falha ao vincular ao caminhão — ${cargaErr.message})`;
+            } else {
+              mensagemExtra = " Vinculada ao caminhão selecionado.";
+            }
+          } catch (e: unknown) {
+            const m = e instanceof Error ? e.message : "erro desconhecido";
+            mensagemExtra = ` (Aviso: falha ao vincular ao caminhão — ${m})`;
+          }
+        }
+
         setResposta({
           sucesso: true,
           mensagem: `Saída registrada com sucesso.${
             typeof data === "string" ? " Código: " + data : ""
-          }`,
+          }${mensagemExtra}`,
         });
       } catch (err: unknown) {
         setError(
@@ -535,6 +596,7 @@ function SaidaArmazem05Page() {
       codigoLider,
       responsavel,
       observacao,
+      controleVeiculoId,
     ]
   );
 
@@ -559,6 +621,7 @@ function SaidaArmazem05Page() {
     setLocalOrigem(null);
     setResponsavel("");
     setObservacao("");
+    setControleVeiculoId("");
 
     setResposta(null);
     setError(null);
@@ -925,6 +988,33 @@ function SaidaArmazem05Page() {
                   placeholder="Opcional"
                 />
               </div>
+
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>Vincular a caminhão / controle de veículo (opcional)</Label>
+                <Select
+                  value={controleVeiculoId || "__none__"}
+                  onValueChange={(v) => setControleVeiculoId(v === "__none__" ? "" : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Nenhum" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Nenhum</SelectItem>
+                    {controlesVeiculo.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.placa ?? "sem placa"} — {c.motorista ?? "sem motorista"}
+                        {c.created_at
+                          ? ` (${new Date(c.created_at).toLocaleDateString("pt-BR")})`
+                          : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-muted-foreground">
+                  Se selecionar, ao registrar a saída também será criada uma carga vinculada ao caminhão.
+                </p>
+              </div>
+
             </CardContent>
           </Card>
 

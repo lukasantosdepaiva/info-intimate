@@ -4,13 +4,14 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { getSupabase } from "@/lib/supabase";
-import { ArrowRightLeft, AlertCircle, Search, Loader2, CheckCircle2, Package, Send } from "lucide-react";
+import { ArrowRightLeft, AlertCircle, Loader2, CheckCircle2, Package, Send, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PalletSearchDialog, type PalletSearchResult } from "@/components/pallet-search-dialog";
 
 interface PalletResumoRow {
   pallet_id: string;
@@ -138,10 +139,8 @@ const localCombinaComBusca = (local: LocalRow, busca: string) => {
 };
 
 function MovimentacoesPage() {
-  const [palletBusca, setPalletBusca] = useState("");
-  const [palletResultados, setPalletResultados] = useState<PalletResumoRow[]>([]);
-  const [palletBuscaLoading, setPalletBuscaLoading] = useState(false);
-  const [palletSelecionado, setPalletSelecionado] = useState<PalletResumoRow | null>(null);
+  const [palletDialogOpen, setPalletDialogOpen] = useState(false);
+  const [palletSelecionado, setPalletSelecionado] = useState<PalletSearchResult | null>(null);
 
   const [locais, setLocais] = useState<LocalRow[]>([]);
   const [locaisLoading, setLocaisLoading] = useState(true);
@@ -190,52 +189,10 @@ function MovimentacoesPage() {
     carregarLocais();
   }, []);
 
-  const buscarPallet = useCallback(async (q: string) => {
-    const termo = q.trim();
 
-    if (!termo || termo.length < 2) {
-      setPalletResultados([]);
-      return;
-    }
-
-    setPalletBuscaLoading(true);
-
-    try {
-      const supabase = getSupabase();
-
-      const { data, error: dbError } = await supabase
-        .from("vw_pallet_resumo")
-        .select("*")
-        .ilike("codigo_pallet", `%${termo}%`)
-        .limit(10);
-
-      if (dbError) throw new Error(dbError.message);
-
-      setPalletResultados((data ?? []) as PalletResumoRow[]);
-    } catch {
-      setPalletResultados([]);
-    } finally {
-      setPalletBuscaLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => buscarPallet(palletBusca), 300);
-    return () => clearTimeout(timer);
-  }, [palletBusca, buscarPallet]);
-
-  const { pallet: palletFromUrl } = Route.useSearch();
-  useEffect(() => {
-    if (palletFromUrl && !palletSelecionado) {
-      setPalletBusca(palletFromUrl);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [palletFromUrl]);
-
-  const selecionarPallet = useCallback(async (p: PalletResumoRow) => {
+  const selecionarPallet = useCallback(async (p: PalletSearchResult) => {
     setPalletSelecionado(p);
-    setPalletBusca(textoExibicao(p.codigo_pallet, ""));
-    setPalletResultados([]);
+    setPalletDialogOpen(false);
 
     setOrigemSelecionada(null);
     setOrigemBusca("");
@@ -459,8 +416,6 @@ function MovimentacoesPage() {
   );
 
   const limparFormulario = () => {
-    setPalletBusca("");
-    setPalletResultados([]);
     setPalletSelecionado(null);
     setLocaisComSaldo([]);
 
@@ -546,42 +501,18 @@ function MovimentacoesPage() {
             </CardHeader>
 
             <CardContent className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setPalletDialogOpen(true)}
+                className="w-full justify-start gap-2"
+              >
+                <Search className="h-4 w-4" />
+                {palletSelecionado
+                  ? `Trocar pallet (atual: ${textoExibicao(palletSelecionado.codigo_pallet)})`
+                  : "Buscar pallet..."}
+              </Button>
 
-                <Input
-                  value={palletBusca}
-                  onChange={(e) => setPalletBusca(e.target.value)}
-                  placeholder="Digite o código do pallet..."
-                  className="pl-10 font-mono text-xs"
-                />
-
-                {palletBuscaLoading && (
-                  <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
-                )}
-              </div>
-
-              {palletResultados.length > 0 && !palletSelecionado && (
-                <div className="max-h-48 overflow-y-auto rounded-md border bg-popover shadow-lg">
-                  {palletResultados.map((p) => (
-                    <button
-                      key={p.pallet_id}
-                      type="button"
-                      onClick={() => selecionarPallet(p)}
-                      className="flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors hover:bg-muted"
-                    >
-                      <span className="font-mono font-semibold">{textoExibicao(p.codigo_pallet)}</span>
-
-                      <span className="text-xs text-muted-foreground">Qtd: {formatarNumero(p.quantidade_atual)}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {palletBusca.trim().length >= 2 &&
-                !palletBuscaLoading &&
-                palletResultados.length === 0 &&
-                !palletSelecionado && <p className="text-xs text-destructive">Nenhum pallet encontrado.</p>}
 
               {palletSelecionado && (
                 <div className="space-y-1 rounded-md border bg-muted/30 p-3 text-xs">
@@ -923,6 +854,13 @@ function MovimentacoesPage() {
           )}
         </form>
       )}
+
+      <PalletSearchDialog
+        open={palletDialogOpen}
+        onOpenChange={setPalletDialogOpen}
+        onSelect={(p) => selecionarPallet(p)}
+        title="Buscar pallet para movimentação"
+      />
     </main>
   );
 }
