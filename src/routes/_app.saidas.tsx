@@ -541,11 +541,40 @@ function SaidaArmazem05Page() {
           throw new Error(rpcError.message);
         }
 
+        let mensagemExtra = "";
+        // Vincula ao caminhão se selecionado
+        if (controleVeiculoId && pallet) {
+          try {
+            // Tenta extrair saida_id do retorno (string uuid) ou null
+            const saidaId = typeof data === "string" ? data : null;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { error: cargaErr } = await (supabase as any).rpc("registrar_carga_veiculo", {
+              p_controle_veiculo_id: controleVeiculoId,
+              p_pallet_id: pallet.id,
+              p_quantidade: Number(quantidade),
+              p_responsavel: responsavel.trim(),
+              p_saida_id: saidaId,
+              p_op_id: op?.id ?? null,
+              p_local_origem_id: localOrigemParaUso,
+              p_nf_saida_numero: nfSaida.trim() || null,
+              p_observacao: observacao.trim() || null,
+            });
+            if (cargaErr) {
+              mensagemExtra = ` (Aviso: falha ao vincular ao caminhão — ${cargaErr.message})`;
+            } else {
+              mensagemExtra = " Vinculada ao caminhão selecionado.";
+            }
+          } catch (e: unknown) {
+            const m = e instanceof Error ? e.message : "erro desconhecido";
+            mensagemExtra = ` (Aviso: falha ao vincular ao caminhão — ${m})`;
+          }
+        }
+
         setResposta({
           sucesso: true,
           mensagem: `Saída registrada com sucesso.${
             typeof data === "string" ? " Código: " + data : ""
-          }`,
+          }${mensagemExtra}`,
         });
       } catch (err: unknown) {
         setError(
