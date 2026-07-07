@@ -378,6 +378,7 @@ function VeiculosPage() {
         }
 
         setUploadProgress(null);
+        if (controleVeiculoId) setUltimoControleId(controleVeiculoId);
         setResposta({
           sucesso: true,
           mensagem:
