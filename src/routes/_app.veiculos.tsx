@@ -938,7 +938,406 @@ function VeiculosPage() {
           </div>
         </form>
       )}
+
+      <CargasCaminhaoCard controleInicialId={ultimoControleId} />
     </main>
+  );
+}
+
+// ─── Cargas do caminhão ───────────────────────────────────
+interface ControleResumo {
+  id: string;
+  placa: string | null;
+  motorista: string | null;
+  transportadora: string | null;
+  status_aprovacao: string | null;
+  created_at: string | null;
+}
+
+interface CargaResumo {
+  controle_veiculo_id: string;
+  placa: string | null;
+  motorista: string | null;
+  transportadora: string | null;
+  status_aprovacao: string | null;
+  quantidade_total: number | string | null;
+  qtd_pallets: number | string | null;
+  ops_vinculadas: string | null;
+  nfs_saida: string | null;
+  ultima_carga_em: string | null;
+}
+
+interface CargaDetalhe {
+  id: string;
+  controle_veiculo_id: string;
+  codigo_pallet: string | null;
+  codigo_referencia: string | null;
+  numero_sd: string | null;
+  quantidade: number | string | null;
+  responsavel: string | null;
+  observacao: string | null;
+  numero_op: string | null;
+  nf_saida_numero: string | null;
+  local_origem_codigo: string | null;
+  created_at: string | null;
+}
+
+const textoOuTraco = (v: unknown, fb = "—") => {
+  const t = String(v ?? "").trim();
+  return t || fb;
+};
+const numFmt = (v: unknown) => {
+  const n = Number(v ?? 0);
+  return Number.isFinite(n) ? n.toLocaleString("pt-BR") : "0";
+};
+
+function CargasCaminhaoCard({ controleInicialId }: { controleInicialId: string | null }) {
+  const [controles, setControles] = useState<ControleResumo[]>([]);
+  const [controleSelId, setControleSelId] = useState<string | null>(null);
+  const [loadingControles, setLoadingControles] = useState(false);
+
+  const [resumo, setResumo] = useState<CargaResumo | null>(null);
+  const [cargas, setCargas] = useState<CargaDetalhe[]>([]);
+  const [loadingCargas, setLoadingCargas] = useState(false);
+
+  const [palletDialogOpen, setPalletDialogOpen] = useState(false);
+  const [palletEscolhido, setPalletEscolhido] = useState<PalletSearchResult | null>(null);
+
+  const [quantidade, setQuantidade] = useState("");
+  const [responsavel, setResponsavel] = useState("");
+  const [nfSaida, setNfSaida] = useState("");
+  const [observacao, setObservacao] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [msg, setMsg] = useState<{ ok: boolean; texto: string } | null>(null);
+
+  const carregarControles = useCallback(async () => {
+    setLoadingControles(true);
+    try {
+      const supabase = getSupabase();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sb = supabase as any;
+      const { data } = await sb
+        .from("controle_veiculos")
+        .select("id, placa, motorista, transportadora, status_aprovacao, created_at")
+        .order("created_at", { ascending: false })
+        .limit(30);
+      setControles((data ?? []) as ControleResumo[]);
+    } finally {
+      setLoadingControles(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    carregarControles();
+  }, [carregarControles]);
+
+  useEffect(() => {
+    if (controleInicialId) setControleSelId(controleInicialId);
+  }, [controleInicialId]);
+
+  const carregarCargas = useCallback(async (controleId: string) => {
+    setLoadingCargas(true);
+    try {
+      const supabase = getSupabase();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sb = supabase as any;
+      const [{ data: r }, { data: d }] = await Promise.all([
+        sb
+          .from("vw_veiculo_cargas_resumo")
+          .select("*")
+          .eq("controle_veiculo_id", controleId)
+          .maybeSingle(),
+        sb
+          .from("vw_veiculo_cargas_detalhe")
+          .select("*")
+          .eq("controle_veiculo_id", controleId)
+          .order("created_at", { ascending: false }),
+      ]);
+      setResumo((r as CargaResumo | null) ?? null);
+      setCargas((d ?? []) as CargaDetalhe[]);
+    } finally {
+      setLoadingCargas(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (controleSelId) carregarCargas(controleSelId);
+    else {
+      setResumo(null);
+      setCargas([]);
+    }
+  }, [controleSelId, carregarCargas]);
+
+  const controleSel = controles.find((c) => c.id === controleSelId) ?? null;
+
+  const registrarCarga = async () => {
+    if (!controleSelId || !palletEscolhido) return;
+    const qtd = Number(quantidade);
+    if (!Number.isFinite(qtd) || qtd <= 0) {
+      setMsg({ ok: false, texto: "Quantidade deve ser maior que zero." });
+      return;
+    }
+    if (!responsavel.trim()) {
+      setMsg({ ok: false, texto: "Responsável é obrigatório." });
+      return;
+    }
+    setSubmitting(true);
+    setMsg(null);
+    try {
+      const supabase = getSupabase();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any).rpc("registrar_carga_veiculo", {
+        p_controle_veiculo_id: controleSelId,
+        p_pallet_id: palletEscolhido.pallet_id,
+        p_quantidade: qtd,
+        p_responsavel: responsavel.trim(),
+        p_saida_id: null,
+        p_op_id: null,
+        p_local_origem_id: null,
+        p_nf_saida_numero: nfSaida.trim() || null,
+        p_observacao: observacao.trim() || null,
+      });
+      if (error) {
+        setMsg({ ok: false, texto: error.message });
+        return;
+      }
+      setMsg({ ok: true, texto: "Carga registrada no caminhão." });
+      setPalletEscolhido(null);
+      setQuantidade("");
+      setNfSaida("");
+      setObservacao("");
+      await carregarCargas(controleSelId);
+    } catch (e: unknown) {
+      setMsg({ ok: false, texto: e instanceof Error ? e.message : "Erro ao registrar carga." });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      <Card className="shadow-none">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Truck className="h-4 w-4 text-muted-foreground" />
+            Cargas do caminhão
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label>Controle de veículo</Label>
+            <Select
+              value={controleSelId ?? ""}
+              onValueChange={(v) => setControleSelId(v || null)}
+            >
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={loadingControles ? "Carregando..." : "Selecione um controle existente"}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {controles.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {textoOuTraco(c.placa)} — {textoOuTraco(c.motorista, "sem motorista")}
+                    {c.created_at ? ` (${new Date(c.created_at).toLocaleDateString("pt-BR")})` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] text-muted-foreground">
+              Registre um controle acima ou selecione um existente para adicionar cargas de pallets.
+            </p>
+          </div>
+
+          {controleSel && (
+            <div className="rounded-md border bg-muted/30 p-3 text-xs space-y-1">
+              <p className="font-semibold flex items-center gap-2">
+                <Truck className="h-3.5 w-3.5" />
+                Placa: <span className="font-mono">{textoOuTraco(controleSel.placa)}</span>
+                <Badge variant="outline" className="text-[10px]">
+                  {textoOuTraco(controleSel.status_aprovacao)}
+                </Badge>
+              </p>
+              <p>
+                Motorista: {textoOuTraco(controleSel.motorista)} • Transportadora:{" "}
+                {textoOuTraco(controleSel.transportadora)}
+              </p>
+              {resumo && (
+                <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-4">
+                  <div>
+                    <span className="text-muted-foreground">Qtd. total</span>
+                    <p className="font-bold">{numFmt(resumo.quantidade_total)}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Pallets</span>
+                    <p className="font-bold">{numFmt(resumo.qtd_pallets)}</p>
+                  </div>
+                  <div className="col-span-2 truncate">
+                    <span className="text-muted-foreground">OPs</span>
+                    <p className="truncate">{textoOuTraco(resumo.ops_vinculadas)}</p>
+                  </div>
+                  <div className="col-span-2 truncate">
+                    <span className="text-muted-foreground">NFs saída</span>
+                    <p className="truncate">{textoOuTraco(resumo.nfs_saida)}</p>
+                  </div>
+                  {resumo.ultima_carga_em && (
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Última carga</span>
+                      <p>{new Date(resumo.ultima_carga_em).toLocaleString("pt-BR")}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {controleSelId && (
+            <div className="space-y-3 rounded-md border p-3">
+              <p className="text-sm font-semibold">Adicionar carga</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setPalletDialogOpen(true)}
+                className="w-full justify-start gap-2"
+              >
+                <Search className="h-4 w-4" />
+                {palletEscolhido
+                  ? `Pallet: ${textoOuTraco(palletEscolhido.codigo_pallet)}`
+                  : "Buscar pallet..."}
+              </Button>
+
+              {palletEscolhido && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label>Quantidade *</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={quantidade}
+                      onChange={(e) => setQuantidade(e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Responsável *</Label>
+                    <Input
+                      value={responsavel}
+                      onChange={(e) => setResponsavel(e.target.value)}
+                      placeholder="Nome do conferente"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>NF saída (opcional)</Label>
+                    <Input
+                      value={nfSaida}
+                      onChange={(e) => setNfSaida(e.target.value)}
+                      placeholder="Ex: NF-SAIDA-001"
+                      className="font-mono text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Observação</Label>
+                    <Input
+                      value={observacao}
+                      onChange={(e) => setObservacao(e.target.value)}
+                      placeholder="Opcional"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={submitting}
+                      onClick={registrarCarga}
+                      className="gap-2"
+                    >
+                      {submitting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
+                      Registrar carga
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {msg && (
+                <p
+                  className={`text-xs ${msg.ok ? "text-green-600" : "text-destructive"}`}
+                >
+                  {msg.texto}
+                </p>
+              )}
+            </div>
+          )}
+
+          {controleSelId && (
+            <div className="space-y-2">
+              <p className="text-sm font-semibold">Pallets carregados</p>
+              {loadingCargas ? (
+                <p className="text-xs text-muted-foreground">Carregando cargas...</p>
+              ) : cargas.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  Nenhuma carga registrada neste caminhão.
+                </p>
+              ) : (
+                <div className="divide-y rounded-md border">
+                  {cargas.map((c) => (
+                    <div key={c.id} className="p-3 text-xs">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Package className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="font-mono font-semibold">
+                          {textoOuTraco(c.codigo_pallet)}
+                        </span>
+                        <Badge variant="outline" className="text-[10px]">
+                          Qtd: {numFmt(c.quantidade)}
+                        </Badge>
+                        {c.numero_op && (
+                          <Badge variant="outline" className="text-[10px]">
+                            OP: {c.numero_op}
+                          </Badge>
+                        )}
+                        {c.nf_saida_numero && (
+                          <Badge variant="outline" className="text-[10px]">
+                            NF: {c.nf_saida_numero}
+                          </Badge>
+                        )}
+                        <span className="ml-auto text-[10px] text-muted-foreground">
+                          {c.created_at
+                            ? new Date(c.created_at).toLocaleString("pt-BR")
+                            : ""}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        Ref: {textoOuTraco(c.codigo_referencia)} • SD:{" "}
+                        {textoOuTraco(c.numero_sd)} • Local:{" "}
+                        {textoOuTraco(c.local_origem_codigo)} • Resp:{" "}
+                        {textoOuTraco(c.responsavel)}
+                      </p>
+                      {c.observacao && (
+                        <p className="mt-0.5 text-[11px]">Obs: {c.observacao}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <PalletSearchDialog
+        open={palletDialogOpen}
+        onOpenChange={setPalletDialogOpen}
+        onSelect={(p) => {
+          setPalletEscolhido(p);
+          setMsg(null);
+        }}
+        title="Buscar pallet para adicionar à carga"
+      />
+    </>
   );
 }
 
