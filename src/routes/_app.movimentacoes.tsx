@@ -501,42 +501,18 @@ function MovimentacoesPage() {
             </CardHeader>
 
             <CardContent className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setPalletDialogOpen(true)}
+                className="w-full justify-start gap-2"
+              >
+                <Search className="h-4 w-4" />
+                {palletSelecionado
+                  ? `Trocar pallet (atual: ${textoExibicao(palletSelecionado.codigo_pallet)})`
+                  : "Buscar pallet..."}
+              </Button>
 
-                <Input
-                  value={palletBusca}
-                  onChange={(e) => setPalletBusca(e.target.value)}
-                  placeholder="Digite o código do pallet..."
-                  className="pl-10 font-mono text-xs"
-                />
-
-                {palletBuscaLoading && (
-                  <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
-                )}
-              </div>
-
-              {palletResultados.length > 0 && !palletSelecionado && (
-                <div className="max-h-48 overflow-y-auto rounded-md border bg-popover shadow-lg">
-                  {palletResultados.map((p) => (
-                    <button
-                      key={p.pallet_id}
-                      type="button"
-                      onClick={() => selecionarPallet(p)}
-                      className="flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors hover:bg-muted"
-                    >
-                      <span className="font-mono font-semibold">{textoExibicao(p.codigo_pallet)}</span>
-
-                      <span className="text-xs text-muted-foreground">Qtd: {formatarNumero(p.quantidade_atual)}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {palletBusca.trim().length >= 2 &&
-                !palletBuscaLoading &&
-                palletResultados.length === 0 &&
-                !palletSelecionado && <p className="text-xs text-destructive">Nenhum pallet encontrado.</p>}
 
               {palletSelecionado && (
                 <div className="space-y-1 rounded-md border bg-muted/30 p-3 text-xs">
