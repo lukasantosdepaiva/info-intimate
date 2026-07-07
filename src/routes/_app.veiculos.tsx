@@ -119,6 +119,7 @@ function VeiculosPage() {
 
   // Submit
   const [submitting, setSubmitting] = useState(false);
+  const [ultimoControleId, setUltimoControleId] = useState<string | null>(null);
   const [resposta, setResposta] = useState<{
     sucesso: boolean;
     mensagem: string;
