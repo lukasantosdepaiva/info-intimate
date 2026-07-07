@@ -621,6 +621,7 @@ function SaidaArmazem05Page() {
     setLocalOrigem(null);
     setResponsavel("");
     setObservacao("");
+    setControleVeiculoId("");
 
     setResposta(null);
     setError(null);
