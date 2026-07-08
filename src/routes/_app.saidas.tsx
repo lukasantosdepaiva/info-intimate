@@ -179,8 +179,8 @@ function SaidaArmazem05Page() {
             const v = Array.isArray(c.veiculos) ? c.veiculos[0] : c.veiculos;
             return {
               id: c.id,
-              placa: c.placa,
-              motorista: c.motorista,
+              placa: v?.placa ?? null,
+              motorista: v?.motorista ?? null,
               created_at: c.created_at,
               tipo_veiculo: v?.tipo_veiculo ?? null,
             };
