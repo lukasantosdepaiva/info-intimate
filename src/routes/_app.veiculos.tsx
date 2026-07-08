@@ -23,13 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PalletSearchDialog, type PalletSearchResult } from "@/components/pallet-search-dialog";
 
@@ -129,11 +123,7 @@ function VeiculosPage() {
 
   // ─── Alternar checklist ──────────────────────────────────
   const toggleChecklist = (id: string) => {
-    setChecklist((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
-    );
+    setChecklist((prev) => prev.map((item) => (item.id === id ? { ...item, checked: !item.checked } : item)));
   };
 
   // ─── Validar fumaça preta ────────────────────────────────
@@ -167,28 +157,19 @@ function VeiculosPage() {
     });
   }, []);
 
-  const fotosPorTipo = useCallback(
-    (tipo: TipoFoto) => fotos.filter((f) => f.tipo === tipo),
-    [fotos]
-  );
+  const fotosPorTipo = useCallback((tipo: TipoFoto) => fotos.filter((f) => f.tipo === tipo), [fotos]);
 
   // ─── Validar formulário ──────────────────────────────────
   const errosValidacao: string[] = [];
   if (!placa.trim()) errosValidacao.push("Placa é obrigatória.");
   if (!tipoVeiculo.trim()) errosValidacao.push("Tipo de veículo é obrigatório.");
-  if (!transportadora.trim())
-    errosValidacao.push("Transportadora é obrigatória.");
+  if (!transportadora.trim()) errosValidacao.push("Transportadora é obrigatória.");
   if (!motorista.trim()) errosValidacao.push("Motorista é obrigatório.");
-  if (!responsavel.trim())
-    errosValidacao.push("Responsável pela conferência é obrigatório.");
-  if (!statusAprovacao)
-    errosValidacao.push("Status de aprovação é obrigatório.");
-  if (!saidaId.trim())
-    errosValidacao.push("ID da saída é obrigatório.");
+  if (!responsavel.trim()) errosValidacao.push("Responsável pela conferência é obrigatório.");
+  if (!statusAprovacao) errosValidacao.push("Status de aprovação é obrigatório.");
 
   const checklistCompleto = checklist.every((item) => item.checked);
-  if (!checklistCompleto)
-    errosValidacao.push("Todos os itens do checklist devem ser marcados.");
+  if (!checklistCompleto) errosValidacao.push("Todos os itens do checklist devem ser marcados.");
 
   // Fumaça preta
   if (diesel) {
@@ -211,9 +192,7 @@ function VeiculosPage() {
     const temAvaria = fotosPorTipo("avaria").length > 0;
     const temObs = observacao.trim().length > 0;
     if (!temAvaria && !temObs) {
-      errosValidacao.push(
-        "Reprovações exigem ao menos uma foto de avaria/problema ou observação explicativa."
-      );
+      errosValidacao.push("Reprovações exigem ao menos uma foto de avaria/problema ou observação explicativa.");
     }
   }
 
@@ -239,13 +218,11 @@ function VeiculosPage() {
         const path = `controle-veiculos/${controleVeiculoId}/${foto.tipo}-${timestamp}-${idx}.${ext}`;
 
         setUploadProgress(`Enviando ${foto.tipo} (${idx})...`);
-        const { error: upErr } = await supabase.storage
-          .from(STORAGE_BUCKET)
-          .upload(path, foto.file, {
-            cacheControl: "3600",
-            upsert: false,
-            contentType: foto.file.type || "image/jpeg",
-          });
+        const { error: upErr } = await supabase.storage.from(STORAGE_BUCKET).upload(path, foto.file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: foto.file.type || "image/jpeg",
+        });
         if (upErr) throw new Error(`Falha no upload (${foto.tipo}): ${upErr.message}`);
 
         enviados.push({
@@ -258,14 +235,11 @@ function VeiculosPage() {
       }
       return enviados;
     },
-    [fotos]
+    [fotos],
   );
 
   const salvarMetadadosFotos = useCallback(
-    async (
-      controleVeiculoId: string,
-      enviadas: Awaited<ReturnType<typeof uploadFotos>>
-    ) => {
+    async (controleVeiculoId: string, enviadas: Awaited<ReturnType<typeof uploadFotos>>) => {
       if (enviadas.length === 0) return;
       const supabase = getSupabase();
       const rows = enviadas.map((f) => ({
@@ -279,12 +253,10 @@ function VeiculosPage() {
         enviado_por: responsavel.trim() || null,
       }));
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: insErr } = await (supabase as any)
-        .from("controle_veiculo_fotos")
-        .insert(rows);
+      const { error: insErr } = await (supabase as any).from("controle_veiculo_fotos").insert(rows);
       if (insErr) throw new Error(`Falha ao salvar metadados das fotos: ${insErr.message}`);
     },
-    [responsavel]
+    [responsavel],
   );
 
   // ─── Submit ──────────────────────────────────────────────
@@ -300,39 +272,29 @@ function VeiculosPage() {
         const supabase = getSupabase();
 
         // Monta observação incluindo checklist e fumaça preta
-        const checklistObs = checklist
-          .map((item) => `${item.checked ? "✅" : "☐"} ${item.label}`)
-          .join("\n");
+        const checklistObs = checklist.map((item) => `${item.checked ? "✅" : "☐"} ${item.label}`).join("\n");
 
         let fumacaObs = "";
         if (diesel) {
           fumacaObs = `\n\n🚛 Fumaça Preta:\n- Diesel: Sim\n- Percentual: ${fumacaPercentual}%\n- Resultado: ${fumacaResultado || validarFumaca(Number(fumacaPercentual))}\n- Responsável: ${fumacaResponsavel}${fumacaObservacao ? `\n- Obs: ${fumacaObservacao}` : ""}`;
         }
 
-        const obsFinal =
-          `📋 CHECKLIST:\n${checklistObs}${fumacaObs}${observacao ? `\n\n📝 Observação: ${observacao}` : ""}`;
+        const obsFinal = `📋 CHECKLIST:\n${checklistObs}${fumacaObs}${observacao ? `\n\n📝 Observação: ${observacao}` : ""}`;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: rpcData, error: rpcError } = await (supabase as any).rpc(
-          "registrar_controle_veiculo_basico",
-          {
-            p_placa: placa.trim(),
-            p_tipo_veiculo: tipoVeiculo.trim(),
-            p_transportadora: transportadora.trim(),
-            p_motorista: motorista.trim(),
-            p_responsavel_conferencia: responsavel.trim(),
-            p_saida_id: saidaId,
-            p_status_aprovacao: statusAprovacao,
-            p_observacao: obsFinal,
-          }
-        );
+        const { data: rpcData, error: rpcError } = await (supabase as any).rpc("registrar_controle_veiculo_basico", {
+          p_placa: placa.trim(),
+          p_tipo_veiculo: tipoVeiculo.trim(),
+          p_transportadora: transportadora.trim(),
+          p_motorista: motorista.trim(),
+          p_responsavel_conferencia: responsavel.trim(),
+          p_saida_id: saidaId,
+          p_status_aprovacao: statusAprovacao,
+          p_observacao: obsFinal,
+        });
 
         if (rpcError) {
-          if (
-            rpcError.message?.includes("permission") ||
-            rpcError.code === "42501" ||
-            rpcError.code === "PGRST301"
-          ) {
+          if (rpcError.message?.includes("permission") || rpcError.code === "42501" || rpcError.code === "PGRST301") {
             setResposta({
               sucesso: false,
               mensagem:
@@ -348,8 +310,7 @@ function VeiculosPage() {
             setSaidaNotFound(true);
             setResposta({
               sucesso: false,
-              mensagem:
-                "Saída não encontrada. Selecione uma saída válida ou verifique o ID informado.",
+              mensagem: "Saída não encontrada. Selecione uma saída válida ou verifique o ID informado.",
             });
             return;
           }
@@ -371,7 +332,7 @@ function VeiculosPage() {
         if (fotos.length > 0) {
           if (!controleVeiculoId) {
             throw new Error(
-              "A RPC registrar_controle_veiculo_basico não retornou o id do controle criado. Ajuste a função para RETURNS uuid retornando o id do registro inserido em controle_veiculos."
+              "A RPC registrar_controle_veiculo_basico não retornou o id do controle criado. Ajuste a função para RETURNS uuid retornando o id do registro inserido em controle_veiculos.",
             );
           }
           const enviadas = await uploadFotos(controleVeiculoId);
@@ -388,9 +349,7 @@ function VeiculosPage() {
               : "Controle de veículo registrado com sucesso.",
         });
       } catch (err: unknown) {
-        setError(
-          err instanceof Error ? err.message : "Erro ao registrar veículo."
-        );
+        setError(err instanceof Error ? err.message : "Erro ao registrar veículo.");
       } finally {
         setSubmitting(false);
         setUploadProgress(null);
@@ -416,7 +375,7 @@ function VeiculosPage() {
       fotos,
       uploadFotos,
       salvarMetadadosFotos,
-    ]
+    ],
   );
 
   const limparFormulario = () => {
@@ -446,29 +405,22 @@ function VeiculosPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Controle de Veículos</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Registro de controle de veículos conforme FQ068 e FQ069. Checklist,
-          fumaça preta, evidências fotográficas e aprovação.
+          Registro de controle de veículos conforme FQ068 e FQ069. Checklist, fumaça preta, evidências fotográficas e
+          aprovação.
         </p>
       </div>
 
       <VeiculoBuscaCard onControleCriado={setControleBuscaId} />
 
-
       {/* Resposta */}
       {resposta && (
         <Card
           className={`shadow-none ${
-            resposta.sucesso
-              ? "border-green-500/30 bg-green-500/5"
-              : "border-destructive/30 bg-destructive/5"
+            resposta.sucesso ? "border-green-500/30 bg-green-500/5" : "border-destructive/30 bg-destructive/5"
           }`}
         >
           <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
-            <div
-              className={`rounded-full p-3 ${
-                resposta.sucesso ? "bg-green-500/10" : "bg-destructive/10"
-              }`}
-            >
+            <div className={`rounded-full p-3 ${resposta.sucesso ? "bg-green-500/10" : "bg-destructive/10"}`}>
               {resposta.sucesso ? (
                 <CheckCircle2 className="h-8 w-8 text-green-500" />
               ) : (
@@ -476,13 +428,9 @@ function VeiculosPage() {
               )}
             </div>
             <h2 className="text-lg font-semibold">
-              {resposta.sucesso
-                ? "Controle registrado"
-                : "Operação não concluída"}
+              {resposta.sucesso ? "Controle registrado" : "Operação não concluída"}
             </h2>
-            <p className="max-w-md text-sm text-muted-foreground">
-              {resposta.mensagem}
-            </p>
+            <p className="max-w-md text-sm text-muted-foreground">{resposta.mensagem}</p>
             {resposta.sucesso && (
               <Button variant="outline" size="sm" onClick={limparFormulario} className="mt-2">
                 Novo controle
@@ -500,9 +448,7 @@ function VeiculosPage() {
               <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
             <h2 className="text-lg font-semibold">Erro ao registrar</h2>
-            <p className="max-w-md text-xs text-muted-foreground font-mono">
-              {error}
-            </p>
+            <p className="max-w-md text-xs text-muted-foreground font-mono">{error}</p>
             <Button variant="outline" size="sm" onClick={() => setError(null)}>
               Tentar novamente
             </Button>
@@ -576,10 +522,7 @@ function VeiculosPage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="status">Status de aprovação *</Label>
-                <Select
-                  value={statusAprovacao}
-                  onValueChange={setStatusAprovacao}
-                >
+                <Select value={statusAprovacao} onValueChange={setStatusAprovacao}>
                   <SelectTrigger id="status">
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
@@ -632,9 +575,7 @@ function VeiculosPage() {
                   <li
                     key={item.id}
                     className={`flex items-center gap-3 rounded-md border p-3 transition-colors ${
-                      item.checked
-                        ? "border-green-500/30 bg-green-500/5"
-                        : "border-muted bg-muted/10"
+                      item.checked ? "border-green-500/30 bg-green-500/5" : "border-muted bg-muted/10"
                     }`}
                   >
                     <Checkbox
@@ -724,21 +665,17 @@ function VeiculosPage() {
                           fumacaResultado === "aprovado"
                             ? "border-green-500/30 bg-green-500/5 text-green-600"
                             : fumacaResultado === "reprovado"
-                            ? "border-destructive/30 bg-destructive/5 text-destructive"
-                            : "border-muted bg-muted/10 text-muted-foreground"
+                              ? "border-destructive/30 bg-destructive/5 text-destructive"
+                              : "border-muted bg-muted/10 text-muted-foreground"
                         }`}
                       >
-                        {fumacaResultado === "aprovado" && (
-                          <CheckCircle2 className="h-4 w-4" />
-                        )}
-                        {fumacaResultado === "reprovado" && (
-                          <AlertCircle className="h-4 w-4" />
-                        )}
+                        {fumacaResultado === "aprovado" && <CheckCircle2 className="h-4 w-4" />}
+                        {fumacaResultado === "reprovado" && <AlertCircle className="h-4 w-4" />}
                         {fumacaResultado === "aprovado"
                           ? "Aprovado (≤40%)"
                           : fumacaResultado === "reprovado"
-                          ? "Reprovado (>40%)"
-                          : "Aguardando percentual"}
+                            ? "Reprovado (>40%)"
+                            : "Aguardando percentual"}
                       </div>
                     </div>
                     <div className="space-y-1.5">
@@ -778,8 +715,8 @@ function VeiculosPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-xs text-muted-foreground">
-                Anexe fotos do veículo. Use a câmera do celular ou selecione arquivos.
-                Obrigatórias para aprovação: Frente, Traseira, Interior do baú, Placa.
+                Anexe fotos do veículo. Use a câmera do celular ou selecione arquivos. Obrigatórias para aprovação:
+                Frente, Traseira, Interior do baú, Placa.
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {TIPOS_FOTO.map((cfg) => {
@@ -793,8 +730,8 @@ function VeiculosPage() {
                         preenchido
                           ? "border-green-500/30 bg-green-500/5"
                           : cfg.obrigatorioAprovado
-                          ? "border-amber-500/30 bg-amber-500/5"
-                          : "border-muted bg-muted/10"
+                            ? "border-amber-500/30 bg-amber-500/5"
+                            : "border-muted bg-muted/10"
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
@@ -802,19 +739,11 @@ function VeiculosPage() {
                           <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
                           {cfg.label}
                           {cfg.obrigatorioAprovado && (
-                            <span className="text-[10px] text-amber-600 dark:text-amber-400">
-                              obrigatória
-                            </span>
+                            <span className="text-[10px] text-amber-600 dark:text-amber-400">obrigatória</span>
                           )}
-                          {cfg.multiplo && (
-                            <span className="text-[10px] text-muted-foreground">
-                              múltiplas
-                            </span>
-                          )}
+                          {cfg.multiplo && <span className="text-[10px] text-muted-foreground">múltiplas</span>}
                         </div>
-                        {preenchido && (
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        )}
+                        {preenchido && <CheckCircle2 className="h-4 w-4 text-green-500" />}
                       </div>
 
                       <input
@@ -830,9 +759,7 @@ function VeiculosPage() {
                         onChange={(e) => {
                           const files = e.target.files;
                           if (!files) return;
-                          Array.from(files).forEach((file) =>
-                            adicionarFoto(cfg.tipo, file)
-                          );
+                          Array.from(files).forEach((file) => adicionarFoto(cfg.tipo, file));
                           e.target.value = "";
                         }}
                       />
@@ -843,9 +770,7 @@ function VeiculosPage() {
                           variant="outline"
                           size="sm"
                           className="gap-1.5 flex-1 text-xs"
-                          onClick={() =>
-                            fileInputRefs.current[inputId]?.click()
-                          }
+                          onClick={() => fileInputRefs.current[inputId]?.click()}
                         >
                           <Upload className="h-3.5 w-3.5" />
                           {preenchido && !cfg.multiplo ? "Trocar" : "Anexar"}
@@ -855,15 +780,8 @@ function VeiculosPage() {
                       {lista.length > 0 && (
                         <div className="grid grid-cols-2 gap-2">
                           {lista.map((foto) => (
-                            <div
-                              key={foto.id}
-                              className="relative group rounded-md overflow-hidden border bg-muted"
-                            >
-                              <img
-                                src={foto.previewUrl}
-                                alt={cfg.label}
-                                className="w-full h-24 object-cover"
-                              />
+                            <div key={foto.id} className="relative group rounded-md overflow-hidden border bg-muted">
+                              <img src={foto.previewUrl} alt={cfg.label} className="w-full h-24 object-cover" />
                               <button
                                 type="button"
                                 onClick={() => removerFoto(foto.id)}
@@ -913,11 +831,7 @@ function VeiculosPage() {
 
           {/* Submit */}
           <div className="flex items-center gap-3">
-            <Button
-              type="submit"
-              disabled={submitting || errosValidacao.length > 0}
-              className="gap-2"
-            >
+            <Button type="submit" disabled={submitting || errosValidacao.length > 0} className="gap-2">
               {submitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -930,13 +844,7 @@ function VeiculosPage() {
                 </>
               )}
             </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={submitting}
-              onClick={limparFormulario}
-            >
+            <Button type="button" variant="ghost" size="sm" disabled={submitting} onClick={limparFormulario}>
               Limpar
             </Button>
           </div>
@@ -1046,11 +954,7 @@ function CargasCaminhaoCard({ controleInicialId }: { controleInicialId: string |
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const sb = supabase as any;
       const [{ data: r }, { data: d }] = await Promise.all([
-        sb
-          .from("vw_veiculo_cargas_resumo")
-          .select("*")
-          .eq("controle_veiculo_id", controleId)
-          .maybeSingle(),
+        sb.from("vw_veiculo_cargas_resumo").select("*").eq("controle_veiculo_id", controleId).maybeSingle(),
         sb
           .from("vw_veiculo_cargas_detalhe")
           .select("*")
@@ -1130,14 +1034,9 @@ function CargasCaminhaoCard({ controleInicialId }: { controleInicialId: string |
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
             <Label>Controle de veículo</Label>
-            <Select
-              value={controleSelId ?? ""}
-              onValueChange={(v) => setControleSelId(v || null)}
-            >
+            <Select value={controleSelId ?? ""} onValueChange={(v) => setControleSelId(v || null)}>
               <SelectTrigger>
-                <SelectValue
-                  placeholder={loadingControles ? "Carregando..." : "Selecione um controle existente"}
-                />
+                <SelectValue placeholder={loadingControles ? "Carregando..." : "Selecione um controle existente"} />
               </SelectTrigger>
               <SelectContent>
                 {controles.map((c) => (
@@ -1206,9 +1105,7 @@ function CargasCaminhaoCard({ controleInicialId }: { controleInicialId: string |
                 className="w-full justify-start gap-2"
               >
                 <Search className="h-4 w-4" />
-                {palletEscolhido
-                  ? `Pallet: ${textoOuTraco(palletEscolhido.codigo_pallet)}`
-                  : "Buscar pallet..."}
+                {palletEscolhido ? `Pallet: ${textoOuTraco(palletEscolhido.codigo_pallet)}` : "Buscar pallet..."}
               </Button>
 
               {palletEscolhido && (
@@ -1242,38 +1139,18 @@ function CargasCaminhaoCard({ controleInicialId }: { controleInicialId: string |
                   </div>
                   <div className="space-y-1.5">
                     <Label>Observação</Label>
-                    <Input
-                      value={observacao}
-                      onChange={(e) => setObservacao(e.target.value)}
-                      placeholder="Opcional"
-                    />
+                    <Input value={observacao} onChange={(e) => setObservacao(e.target.value)} placeholder="Opcional" />
                   </div>
                   <div className="sm:col-span-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      disabled={submitting}
-                      onClick={registrarCarga}
-                      className="gap-2"
-                    >
-                      {submitting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Plus className="h-4 w-4" />
-                      )}
+                    <Button type="button" size="sm" disabled={submitting} onClick={registrarCarga} className="gap-2">
+                      {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                       Registrar carga
                     </Button>
                   </div>
                 </div>
               )}
 
-              {msg && (
-                <p
-                  className={`text-xs ${msg.ok ? "text-green-600" : "text-destructive"}`}
-                >
-                  {msg.texto}
-                </p>
-              )}
+              {msg && <p className={`text-xs ${msg.ok ? "text-green-600" : "text-destructive"}`}>{msg.texto}</p>}
             </div>
           )}
 
@@ -1283,18 +1160,14 @@ function CargasCaminhaoCard({ controleInicialId }: { controleInicialId: string |
               {loadingCargas ? (
                 <p className="text-xs text-muted-foreground">Carregando cargas...</p>
               ) : cargas.length === 0 ? (
-                <p className="text-xs text-muted-foreground">
-                  Nenhuma carga registrada neste caminhão.
-                </p>
+                <p className="text-xs text-muted-foreground">Nenhuma carga registrada neste caminhão.</p>
               ) : (
                 <div className="divide-y rounded-md border">
                   {cargas.map((c) => (
                     <div key={c.id} className="p-3 text-xs">
                       <div className="flex flex-wrap items-center gap-2">
                         <Package className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="font-mono font-semibold">
-                          {textoOuTraco(c.codigo_pallet)}
-                        </span>
+                        <span className="font-mono font-semibold">{textoOuTraco(c.codigo_pallet)}</span>
                         <Badge variant="outline" className="text-[10px]">
                           Qtd: {numFmt(c.quantidade)}
                         </Badge>
@@ -1309,20 +1182,14 @@ function CargasCaminhaoCard({ controleInicialId }: { controleInicialId: string |
                           </Badge>
                         )}
                         <span className="ml-auto text-[10px] text-muted-foreground">
-                          {c.created_at
-                            ? new Date(c.created_at).toLocaleString("pt-BR")
-                            : ""}
+                          {c.created_at ? new Date(c.created_at).toLocaleString("pt-BR") : ""}
                         </span>
                       </div>
                       <p className="mt-1 text-[11px] text-muted-foreground">
-                        Ref: {textoOuTraco(c.codigo_referencia)} • SD:{" "}
-                        {textoOuTraco(c.numero_sd)} • Local:{" "}
-                        {textoOuTraco(c.local_origem_codigo)} • Resp:{" "}
-                        {textoOuTraco(c.responsavel)}
+                        Ref: {textoOuTraco(c.codigo_referencia)} • SD: {textoOuTraco(c.numero_sd)} • Local:{" "}
+                        {textoOuTraco(c.local_origem_codigo)} • Resp: {textoOuTraco(c.responsavel)}
                       </p>
-                      {c.observacao && (
-                        <p className="mt-0.5 text-[11px]">Obs: {c.observacao}</p>
-                      )}
+                      {c.observacao && <p className="mt-0.5 text-[11px]">Obs: {c.observacao}</p>}
                       <p className="mt-1 text-[11px] italic text-muted-foreground">
                         {String(controleSel?.placa ?? "").trim() || "Caminhão selecionado"} carregou{" "}
                         {numFmt(c.quantidade)} unidades do pallet {textoOuTraco(c.codigo_pallet)}
@@ -1398,9 +1265,7 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
       let q = sb.from("veiculos").select("*").limit(30);
       if (t) {
         const like = `%${t.replace(/[,%()]/g, " ")}%`;
-        q = q.or(
-          `placa.ilike.${like},motorista.ilike.${like},transportadora.ilike.${like},tipo_veiculo.ilike.${like}`,
-        );
+        q = q.or(`placa.ilike.${like},motorista.ilike.${like},transportadora.ilike.${like},tipo_veiculo.ilike.${like}`);
       }
       const { data } = await q;
       setResultados((data ?? []) as VeiculoRow[]);
@@ -1549,9 +1414,7 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
 
         {!veiculoSel && (
           <>
-            {buscando && (
-              <p className="text-xs text-muted-foreground">Buscando...</p>
-            )}
+            {buscando && <p className="text-xs text-muted-foreground">Buscando...</p>}
             {!buscando && buscou && resultados.length === 0 && (
               <div className="space-y-2 rounded-md border border-dashed p-3 text-xs">
                 <p className="text-muted-foreground">Nenhum veículo encontrado.</p>
@@ -1582,9 +1445,7 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
                       <span className="font-mono">{v.placa ?? "—"}</span> — {v.tipo_veiculo ?? "—"} —{" "}
                       {v.motorista ?? "—"}
                     </p>
-                    <p className="text-muted-foreground">
-                      Transportadora: {v.transportadora ?? "—"}
-                    </p>
+                    <p className="text-muted-foreground">Transportadora: {v.transportadora ?? "—"}</p>
                     <Badge variant={v.ativo ? "outline" : "secondary"} className="mt-1 text-[10px]">
                       {v.ativo ? "Ativo" : "Inativo"}
                     </Badge>
@@ -1600,11 +1461,7 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
             <p className="sm:col-span-2 text-sm font-semibold">Cadastrar novo veículo</p>
             <div className="space-y-1.5">
               <Label>Placa *</Label>
-              <Input
-                value={novoPlaca}
-                onChange={(e) => setNovoPlaca(e.target.value)}
-                className="font-mono uppercase"
-              />
+              <Input value={novoPlaca} onChange={(e) => setNovoPlaca(e.target.value)} className="font-mono uppercase" />
             </div>
             <div className="space-y-1.5">
               <Label>Tipo de veículo</Label>
@@ -1616,36 +1473,18 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
             </div>
             <div className="space-y-1.5">
               <Label>Transportadora *</Label>
-              <Input
-                value={novoTransportadora}
-                onChange={(e) => setNovoTransportadora(e.target.value)}
-              />
+              <Input value={novoTransportadora} onChange={(e) => setNovoTransportadora(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label>Motorista *</Label>
               <Input value={novoMotorista} onChange={(e) => setNovoMotorista(e.target.value)} />
             </div>
             <div className="sm:col-span-2 flex gap-2">
-              <Button
-                type="button"
-                size="sm"
-                onClick={salvarNovo}
-                disabled={salvandoNovo}
-                className="gap-2"
-              >
-                {salvandoNovo ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Plus className="h-4 w-4" />
-                )}
+              <Button type="button" size="sm" onClick={salvarNovo} disabled={salvandoNovo} className="gap-2">
+                {salvandoNovo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                 Salvar veículo
               </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => setMostrarNovo(false)}
-              >
+              <Button type="button" size="sm" variant="ghost" onClick={() => setMostrarNovo(false)}>
                 Cancelar
               </Button>
             </div>
@@ -1665,18 +1504,8 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
                 <Input value={obsBusca} onChange={(e) => setObsBusca(e.target.value)} />
               </div>
             </div>
-            <Button
-              type="button"
-              size="sm"
-              onClick={criarControle}
-              disabled={criandoControle}
-              className="gap-2"
-            >
-              {criandoControle ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4" />
-              )}
+            <Button type="button" size="sm" onClick={criarControle} disabled={criandoControle} className="gap-2">
+              {criandoControle ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               Novo carregamento para este caminhão
             </Button>
           </div>
@@ -1687,10 +1516,10 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
             <p className="font-semibold">
               Carregamento atual: <span className="font-mono">{controleAtual.placa ?? "—"}</span> —{" "}
               {controleAtual.motorista ?? "—"} —{" "}
-              {controleAtual.created_at
-                ? new Date(controleAtual.created_at).toLocaleDateString("pt-BR")
-                : "—"}{" "}
-              — <Badge variant="outline" className="text-[10px]">{controleAtual.status ?? "pendente"}</Badge>
+              {controleAtual.created_at ? new Date(controleAtual.created_at).toLocaleDateString("pt-BR") : "—"} —{" "}
+              <Badge variant="outline" className="text-[10px]">
+                {controleAtual.status ?? "pendente"}
+              </Badge>
             </p>
             <p className="mt-1 text-muted-foreground">
               Utilize a seção "Cargas do caminhão" abaixo para adicionar pallets.
@@ -1698,11 +1527,7 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
           </div>
         )}
 
-        {msg && (
-          <p className={`text-xs ${msg.ok ? "text-green-600" : "text-destructive"}`}>
-            {msg.texto}
-          </p>
-        )}
+        {msg && <p className={`text-xs ${msg.ok ? "text-green-600" : "text-destructive"}`}>{msg.texto}</p>}
       </CardContent>
     </Card>
   );
@@ -1711,4 +1536,3 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
 export const Route = createFileRoute("/_app/veiculos")({
   component: VeiculosPage,
 });
-
