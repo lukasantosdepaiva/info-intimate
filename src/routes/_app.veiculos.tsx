@@ -1350,6 +1350,365 @@ function CargasCaminhaoCard({ controleInicialId }: { controleInicialId: string |
   );
 }
 
+// ─── Busca e cadastro de veículo ───────────────────────────
+interface VeiculoRow {
+  id: string;
+  placa: string | null;
+  tipo_veiculo: string | null;
+  transportadora: string | null;
+  motorista: string | null;
+  ativo: boolean | null;
+}
+
+function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string) => void }) {
+  const [termo, setTermo] = useState("");
+  const [resultados, setResultados] = useState<VeiculoRow[]>([]);
+  const [buscando, setBuscando] = useState(false);
+  const [veiculoSel, setVeiculoSel] = useState<VeiculoRow | null>(null);
+  const [buscou, setBuscou] = useState(false);
+
+  const [mostrarNovo, setMostrarNovo] = useState(false);
+  const [novoPlaca, setNovoPlaca] = useState("");
+  const [novoTipo, setNovoTipo] = useState("");
+  const [novoTransportadora, setNovoTransportadora] = useState("");
+  const [novoMotorista, setNovoMotorista] = useState("");
+  const [salvandoNovo, setSalvandoNovo] = useState(false);
+
+  const [respBusca, setRespBusca] = useState("");
+  const [obsBusca, setObsBusca] = useState("");
+  const [criandoControle, setCriandoControle] = useState(false);
+  const [controleAtual, setControleAtual] = useState<{
+    id: string;
+    placa: string | null;
+    motorista: string | null;
+    status: string | null;
+    created_at: string | null;
+  } | null>(null);
+
+  const [msg, setMsg] = useState<{ ok: boolean; texto: string } | null>(null);
+
+  const buscar = useCallback(async () => {
+    const t = String(termo ?? "").trim();
+    setBuscando(true);
+    setBuscou(true);
+    try {
+      const supabase = getSupabase();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sb = supabase as any;
+      let q = sb.from("veiculos").select("*").limit(30);
+      if (t) {
+        const like = `%${t.replace(/[,%()]/g, " ")}%`;
+        q = q.or(
+          `placa.ilike.${like},motorista.ilike.${like},transportadora.ilike.${like},tipo_veiculo.ilike.${like}`,
+        );
+      }
+      const { data } = await q;
+      setResultados((data ?? []) as VeiculoRow[]);
+    } finally {
+      setBuscando(false);
+    }
+  }, [termo]);
+
+  const salvarNovo = async () => {
+    if (!novoPlaca.trim() || !novoTransportadora.trim() || !novoMotorista.trim()) {
+      setMsg({ ok: false, texto: "Placa, transportadora e motorista são obrigatórios." });
+      return;
+    }
+    setSalvandoNovo(true);
+    setMsg(null);
+    try {
+      const supabase = getSupabase();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sb = supabase as any;
+      const { data, error } = await sb
+        .from("veiculos")
+        .insert({
+          placa: novoPlaca.trim().toUpperCase(),
+          tipo_veiculo: novoTipo.trim() || null,
+          transportadora: novoTransportadora.trim(),
+          motorista: novoMotorista.trim(),
+          ativo: true,
+        })
+        .select("*")
+        .single();
+      if (error) {
+        setMsg({ ok: false, texto: error.message });
+        return;
+      }
+      setVeiculoSel(data as VeiculoRow);
+      setMostrarNovo(false);
+      setNovoPlaca("");
+      setNovoTipo("");
+      setNovoTransportadora("");
+      setNovoMotorista("");
+      setMsg({ ok: true, texto: "Veículo cadastrado." });
+    } finally {
+      setSalvandoNovo(false);
+    }
+  };
+
+  const criarControle = async () => {
+    if (!veiculoSel) return;
+    if (!respBusca.trim()) {
+      setMsg({ ok: false, texto: "Responsável pela conferência é obrigatório." });
+      return;
+    }
+    setCriandoControle(true);
+    setMsg(null);
+    try {
+      const supabase = getSupabase();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sb = supabase as any;
+      const { data, error } = await sb
+        .from("controle_veiculos")
+        .insert({
+          veiculo_id: veiculoSel.id,
+          placa: veiculoSel.placa,
+          motorista: veiculoSel.motorista,
+          transportadora: veiculoSel.transportadora,
+          tipo_veiculo: veiculoSel.tipo_veiculo,
+          responsavel_conferencia: respBusca.trim(),
+          status_aprovacao: "pendente",
+          observacao: obsBusca.trim() || null,
+        })
+        .select("id, placa, motorista, status_aprovacao, created_at")
+        .single();
+      if (error) {
+        setMsg({ ok: false, texto: error.message });
+        return;
+      }
+      const c = data as {
+        id: string;
+        placa: string | null;
+        motorista: string | null;
+        status_aprovacao: string | null;
+        created_at: string | null;
+      };
+      setControleAtual({
+        id: c.id,
+        placa: c.placa,
+        motorista: c.motorista,
+        status: c.status_aprovacao,
+        created_at: c.created_at,
+      });
+      onControleCriado(c.id);
+      setMsg({ ok: true, texto: "Novo carregamento criado. Registre as cargas abaixo." });
+    } finally {
+      setCriandoControle(false);
+    }
+  };
+
+  return (
+    <Card className="shadow-none">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Search className="h-4 w-4 text-muted-foreground" />
+          Buscar veículo / caminhão
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            value={termo}
+            onChange={(e) => setTermo(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                buscar();
+              }
+            }}
+            placeholder="Placa, motorista, transportadora ou tipo..."
+          />
+          <Button type="button" onClick={buscar} disabled={buscando} className="gap-2">
+            {buscando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+            Buscar
+          </Button>
+        </div>
+
+        {veiculoSel && (
+          <div className="rounded-md border bg-primary/5 p-3 text-xs">
+            <p className="font-semibold">
+              Selecionado: <span className="font-mono">{veiculoSel.placa ?? "—"}</span> —{" "}
+              {veiculoSel.tipo_veiculo ?? "—"} — {veiculoSel.motorista ?? "—"}
+            </p>
+            <p className="text-muted-foreground">Transportadora: {veiculoSel.transportadora ?? "—"}</p>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="mt-2 h-7"
+              onClick={() => {
+                setVeiculoSel(null);
+                setControleAtual(null);
+              }}
+            >
+              Trocar veículo
+            </Button>
+          </div>
+        )}
+
+        {!veiculoSel && (
+          <>
+            {buscando && (
+              <p className="text-xs text-muted-foreground">Buscando...</p>
+            )}
+            {!buscando && buscou && resultados.length === 0 && (
+              <div className="space-y-2 rounded-md border border-dashed p-3 text-xs">
+                <p className="text-muted-foreground">Nenhum veículo encontrado.</p>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setMostrarNovo(true);
+                    setNovoPlaca(termo.trim().toUpperCase());
+                  }}
+                  className="gap-2"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Cadastrar novo veículo
+                </Button>
+              </div>
+            )}
+            {!buscando && resultados.length > 0 && (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {resultados.map((v) => (
+                  <button
+                    key={v.id}
+                    type="button"
+                    onClick={() => setVeiculoSel(v)}
+                    className="rounded-md border p-3 text-left text-xs hover:bg-muted"
+                  >
+                    <p className="font-semibold">
+                      <span className="font-mono">{v.placa ?? "—"}</span> — {v.tipo_veiculo ?? "—"} —{" "}
+                      {v.motorista ?? "—"}
+                    </p>
+                    <p className="text-muted-foreground">
+                      Transportadora: {v.transportadora ?? "—"}
+                    </p>
+                    <Badge variant={v.ativo ? "outline" : "secondary"} className="mt-1 text-[10px]">
+                      {v.ativo ? "Ativo" : "Inativo"}
+                    </Badge>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {mostrarNovo && !veiculoSel && (
+          <div className="grid gap-3 rounded-md border p-3 sm:grid-cols-2">
+            <p className="sm:col-span-2 text-sm font-semibold">Cadastrar novo veículo</p>
+            <div className="space-y-1.5">
+              <Label>Placa *</Label>
+              <Input
+                value={novoPlaca}
+                onChange={(e) => setNovoPlaca(e.target.value)}
+                className="font-mono uppercase"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Tipo de veículo</Label>
+              <Input
+                value={novoTipo}
+                onChange={(e) => setNovoTipo(e.target.value)}
+                placeholder="Caminhão, Carreta, Van..."
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Transportadora *</Label>
+              <Input
+                value={novoTransportadora}
+                onChange={(e) => setNovoTransportadora(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Motorista *</Label>
+              <Input value={novoMotorista} onChange={(e) => setNovoMotorista(e.target.value)} />
+            </div>
+            <div className="sm:col-span-2 flex gap-2">
+              <Button
+                type="button"
+                size="sm"
+                onClick={salvarNovo}
+                disabled={salvandoNovo}
+                className="gap-2"
+              >
+                {salvandoNovo ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                Salvar veículo
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => setMostrarNovo(false)}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {veiculoSel && !controleAtual && (
+          <div className="space-y-3 rounded-md border p-3">
+            <p className="text-sm font-semibold">Novo carregamento para este caminhão</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>Responsável pela conferência *</Label>
+                <Input value={respBusca} onChange={(e) => setRespBusca(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Observação</Label>
+                <Input value={obsBusca} onChange={(e) => setObsBusca(e.target.value)} />
+              </div>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              onClick={criarControle}
+              disabled={criandoControle}
+              className="gap-2"
+            >
+              {criandoControle ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4" />
+              )}
+              Novo carregamento para este caminhão
+            </Button>
+          </div>
+        )}
+
+        {controleAtual && (
+          <div className="rounded-md border border-green-500/30 bg-green-500/5 p-3 text-xs">
+            <p className="font-semibold">
+              Carregamento atual: <span className="font-mono">{controleAtual.placa ?? "—"}</span> —{" "}
+              {controleAtual.motorista ?? "—"} —{" "}
+              {controleAtual.created_at
+                ? new Date(controleAtual.created_at).toLocaleDateString("pt-BR")
+                : "—"}{" "}
+              — <Badge variant="outline" className="text-[10px]">{controleAtual.status ?? "pendente"}</Badge>
+            </p>
+            <p className="mt-1 text-muted-foreground">
+              Utilize a seção "Cargas do caminhão" abaixo para adicionar pallets.
+            </p>
+          </div>
+        )}
+
+        {msg && (
+          <p className={`text-xs ${msg.ok ? "text-green-600" : "text-destructive"}`}>
+            {msg.texto}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export const Route = createFileRoute("/_app/veiculos")({
   component: VeiculosPage,
 });
+
