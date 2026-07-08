@@ -1323,6 +1323,11 @@ function CargasCaminhaoCard({ controleInicialId }: { controleInicialId: string |
                       {c.observacao && (
                         <p className="mt-0.5 text-[11px]">Obs: {c.observacao}</p>
                       )}
+                      <p className="mt-1 text-[11px] italic text-muted-foreground">
+                        {String(controleSel?.placa ?? "").trim() || "Caminhão selecionado"} carregou{" "}
+                        {numFmt(c.quantidade)} unidades do pallet {textoOuTraco(c.codigo_pallet)}
+                        {c.numero_op ? ` vinculado à OP ${c.numero_op}` : ""}.
+                      </p>
                     </div>
                   ))}
                 </div>
