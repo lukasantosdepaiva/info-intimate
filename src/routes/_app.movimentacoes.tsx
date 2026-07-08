@@ -194,20 +194,23 @@ function MovimentacoesPage() {
     try {
       const supabase = getSupabase();
 
-      const { data: saldosData, error: saldosError } = await supabase
-        .from("saldos_pallet")
-        .select("local_estoque_id, quantidade, locais_estoque!inner(codigo_local)")
-        .eq("pallet_id", p.pallet_id)
-        .gt("quantidade", 0);
+      const [
+        { data: saldosData, error: saldosError },
+        { data: pendentesData, error: pendentesError },
+      ] = await Promise.all([
+        supabase
+          .from("saldos_pallet")
+          .select("local_estoque_id, quantidade, locais_estoque!inner(codigo_local)")
+          .eq("pallet_id", p.pallet_id)
+          .gt("quantidade", 0),
+        supabase
+          .from("movimentacoes")
+          .select("local_origem_id, quantidade")
+          .eq("pallet_id", p.pallet_id)
+          .eq("status", "pendente"),
+      ]);
 
       if (saldosError) throw new Error(saldosError.message);
-
-      const { data: pendentesData, error: pendentesError } = await supabase
-        .from("movimentacoes")
-        .select("local_origem_id, quantidade")
-        .eq("pallet_id", p.pallet_id)
-        .eq("status", "pendente");
-
       if (pendentesError) throw new Error(pendentesError.message);
 
       const pendentesPorLocal = new Map<string, number>();
