@@ -120,6 +120,7 @@ function VeiculosPage() {
   // Submit
   const [submitting, setSubmitting] = useState(false);
   const [ultimoControleId, setUltimoControleId] = useState<string | null>(null);
+  const [controleBuscaId, setControleBuscaId] = useState<string | null>(null);
   const [resposta, setResposta] = useState<{
     sucesso: boolean;
     mensagem: string;
@@ -449,6 +450,9 @@ function VeiculosPage() {
           fumaça preta, evidências fotográficas e aprovação.
         </p>
       </div>
+
+      <VeiculoBuscaCard onControleCriado={setControleBuscaId} />
+
 
       {/* Resposta */}
       {resposta && (
@@ -939,7 +943,7 @@ function VeiculosPage() {
         </form>
       )}
 
-      <CargasCaminhaoCard controleInicialId={ultimoControleId} />
+      <CargasCaminhaoCard controleInicialId={controleBuscaId ?? ultimoControleId} />
     </main>
   );
 }
