@@ -2,7 +2,7 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { ArrowRightLeft, AlertCircle, Loader2, CheckCircle2, Package, Send, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PalletSearchDialog, type PalletSearchResult } from "@/components/pallet-search-dialog";
+import { useLocaisEstoque } from "@/contexts/locais-estoque-context";
 
 interface PalletResumoRow {
   pallet_id: string;
@@ -142,8 +143,8 @@ function MovimentacoesPage() {
   const [palletDialogOpen, setPalletDialogOpen] = useState(false);
   const [palletSelecionado, setPalletSelecionado] = useState<PalletSearchResult | null>(null);
 
-  const [locais, setLocais] = useState<LocalRow[]>([]);
-  const [locaisLoading, setLocaisLoading] = useState(true);
+  const { locais: locaisCtx, loading: locaisLoading } = useLocaisEstoque();
+  const locais = locaisCtx as unknown as LocalRow[];
 
   const [locaisComSaldo, setLocaisComSaldo] = useState<SaldoLocal[]>([]);
   const [saldoLoading, setSaldoLoading] = useState(false);
@@ -167,27 +168,8 @@ function MovimentacoesPage() {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const carregarLocais = async () => {
-      setLocaisLoading(true);
 
-      try {
-        const supabase = getSupabase();
 
-        const { data, error: dbError } = await supabase.from("locais_estoque").select("*").order("codigo_local");
-
-        if (dbError) throw new Error(dbError.message);
-
-        setLocais((data ?? []) as LocalRow[]);
-      } catch {
-        setLocais([]);
-      } finally {
-        setLocaisLoading(false);
-      }
-    };
-
-    carregarLocais();
-  }, []);
 
 
   const selecionarPallet = useCallback(async (p: PalletSearchResult) => {
@@ -212,20 +194,23 @@ function MovimentacoesPage() {
     try {
       const supabase = getSupabase();
 
-      const { data: saldosData, error: saldosError } = await supabase
-        .from("saldos_pallet")
-        .select("local_estoque_id, quantidade, locais_estoque!inner(codigo_local)")
-        .eq("pallet_id", p.pallet_id)
-        .gt("quantidade", 0);
+      const [
+        { data: saldosData, error: saldosError },
+        { data: pendentesData, error: pendentesError },
+      ] = await Promise.all([
+        supabase
+          .from("saldos_pallet")
+          .select("local_estoque_id, quantidade, locais_estoque!inner(codigo_local)")
+          .eq("pallet_id", p.pallet_id)
+          .gt("quantidade", 0),
+        supabase
+          .from("movimentacoes")
+          .select("local_origem_id, quantidade")
+          .eq("pallet_id", p.pallet_id)
+          .eq("status", "pendente"),
+      ]);
 
       if (saldosError) throw new Error(saldosError.message);
-
-      const { data: pendentesData, error: pendentesError } = await supabase
-        .from("movimentacoes")
-        .select("local_origem_id, quantidade")
-        .eq("pallet_id", p.pallet_id)
-        .eq("status", "pendente");
-
       if (pendentesError) throw new Error(pendentesError.message);
 
       const pendentesPorLocal = new Map<string, number>();
