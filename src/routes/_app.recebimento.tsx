@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LocalCascadeSelector } from "@/components/local-cascade-selector";
+import { useLocaisEstoque } from "@/contexts/locais-estoque-context";
 
 
 interface ReferenciaRow {
@@ -76,8 +77,8 @@ function RecebimentoPage() {
   const [sdSelecionada, setSdSelecionada] = useState<SdRow | null>(null);
 
   // Local
-  const [locais, setLocais] = useState<LocalRow[]>([]);
-  const [locaisLoading, setLocaisLoading] = useState(true);
+  const { locais: locaisCtx, loading: locaisLoading } = useLocaisEstoque();
+  const locais = locaisCtx as unknown as LocalRow[];
   const [localSelecionado, setLocalSelecionado] = useState<LocalRow | null>(null);
 
 
@@ -90,26 +91,8 @@ function RecebimentoPage() {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // ─── Load locais on mount ─────────────────────────────────
-  useEffect(() => {
-    (async () => {
-      setLocaisLoading(true);
-      try {
-        const supabase = getSupabase();
-        const { data, error: dbError } = await supabase
-          .from("locais_estoque")
-          .select("*")
-          .order("codigo_local");
-        if (dbError) throw new Error(dbError.message);
-        setLocais((data as LocalRow[]) ?? []);
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Erro ao carregar locais.";
-        setError(msg);
-      } finally {
-        setLocaisLoading(false);
-      }
-    })();
-  }, []);
+
+
 
   // ─── Buscar referência / SD (view unificada) ──────────────
   const buscarReferencia = useCallback(async (q: string) => {
