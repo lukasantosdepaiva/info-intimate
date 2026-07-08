@@ -2,28 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { getSupabase } from "@/lib/supabase";
-import {
-  Package,
-  AlertCircle,
-  Search,
-  Loader2,
-  CheckCircle2,
-  Truck,
-  QrCode,
-  ShieldCheck,
-} from "lucide-react";
+import { Package, AlertCircle, Search, Loader2, CheckCircle2, Truck, QrCode, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 interface Saldo05 {
@@ -46,7 +31,6 @@ interface PalletRow {
   locais_e_saldos: string | null;
   saldos_05: Saldo05[];
 }
-
 
 interface PalletViewRow {
   id?: string;
@@ -157,7 +141,13 @@ function SaidaArmazem05Page() {
   // Vínculo com caminhão (opcional)
   const [controleVeiculoId, setControleVeiculoId] = useState<string>("");
   const [controlesVeiculo, setControlesVeiculo] = useState<
-    Array<{ id: string; placa: string | null; motorista: string | null; created_at: string | null; tipo_veiculo: string | null }>
+    Array<{
+      id: string;
+      placa: string | null;
+      motorista: string | null;
+      created_at: string | null;
+      tipo_veiculo: string | null;
+    }>
   >([]);
 
   const [submitting, setSubmitting] = useState(false);
@@ -175,19 +165,27 @@ function SaidaArmazem05Page() {
         const sb = supabase as any;
         const { data } = await sb
           .from("controle_veiculos")
-          .select("id, placa, motorista, created_at, veiculos(tipo_veiculo)")
+          .select("id, created_at, veiculos(placa, motorista, tipo_veiculo)")
           .order("created_at", { ascending: false })
           .limit(30);
-        const rows = (data ?? []).map((c: { id: string; placa: string | null; motorista: string | null; created_at: string | null; veiculos: { tipo_veiculo: string | null } | { tipo_veiculo: string | null }[] | null }) => {
-          const v = Array.isArray(c.veiculos) ? c.veiculos[0] : c.veiculos;
-          return {
-            id: c.id,
-            placa: c.placa,
-            motorista: c.motorista,
-            created_at: c.created_at,
-            tipo_veiculo: v?.tipo_veiculo ?? null,
-          };
-        });
+        const rows = (data ?? []).map(
+          (c: {
+            id: string;
+            placa: string | null;
+            motorista: string | null;
+            created_at: string | null;
+            veiculos: { tipo_veiculo: string | null } | { tipo_veiculo: string | null }[] | null;
+          }) => {
+            const v = Array.isArray(c.veiculos) ? c.veiculos[0] : c.veiculos;
+            return {
+              id: c.id,
+              placa: c.placa,
+              motorista: c.motorista,
+              created_at: c.created_at,
+              tipo_veiculo: v?.tipo_veiculo ?? null,
+            };
+          },
+        );
         setControlesVeiculo(rows);
       } catch {
         setControlesVeiculo([]);
@@ -238,27 +236,21 @@ function SaidaArmazem05Page() {
 
       const { data: saldosData, error: saldosError } = await supabase
         .from("saldos_pallet")
-        .select(
-          "local_estoque_id, quantidade, locais_estoque!inner(id, codigo_local, armazem_codigo, armazem_nome)"
-        )
+        .select("local_estoque_id, quantidade, locais_estoque!inner(id, codigo_local, armazem_codigo, armazem_nome)")
         .eq("pallet_id", palletId)
         .gt("quantidade", 0);
 
       if (saldosError) throw new Error(saldosError.message);
 
-      const saldos = ((saldosData ?? []) as unknown as SaldoPalletJoinRow[]).map(
-        (saldo) => {
-          const local = Array.isArray(saldo.locais_estoque)
-            ? saldo.locais_estoque[0]
-            : saldo.locais_estoque;
+      const saldos = ((saldosData ?? []) as unknown as SaldoPalletJoinRow[]).map((saldo) => {
+        const local = Array.isArray(saldo.locais_estoque) ? saldo.locais_estoque[0] : saldo.locais_estoque;
 
-          return {
-            local_estoque_id: saldo.local_estoque_id,
-            quantidade: numeroSeguro(saldo.quantidade),
-            local,
-          };
-        }
-      );
+        return {
+          local_estoque_id: saldo.local_estoque_id,
+          quantidade: numeroSeguro(saldo.quantidade),
+          local,
+        };
+      });
 
       const saldos05 = saldos.filter((saldo) => {
         const armazemCodigo = String(saldo.local?.armazem_codigo ?? "").trim();
@@ -267,25 +259,17 @@ function SaidaArmazem05Page() {
         return armazemCodigo === "05" || codigoLocal.startsWith("05-");
       });
 
-      const saldoArmazem05 = saldos05.reduce(
-        (total, saldo) => total + saldo.quantidade,
-        0
-      );
+      const saldoArmazem05 = saldos05.reduce((total, saldo) => total + saldo.quantidade, 0);
 
       const primeiroLocal05 = saldos05[0] ?? null;
 
       const palletNormalizado: PalletRow = {
         id: palletId,
         codigo_pallet: textoSeguro(row.codigo_pallet, "—"),
-        referencia_codigo: textoSeguro(
-          row.referencia_codigo ?? row.codigo_referencia,
-          "—"
-        ),
+        referencia_codigo: textoSeguro(row.referencia_codigo ?? row.codigo_referencia, "—"),
         sd_numero: row.sd_numero ?? row.numero_sd ?? null,
         nf_entrada_numero: row.nf_entrada_numero ?? row.nf_entrada ?? null,
-        quantidade_total: numeroSeguro(
-          row.quantidade_atual ?? row.quantidade ?? row.quantidade_inicial
-        ),
+        quantidade_total: numeroSeguro(row.quantidade_atual ?? row.quantidade ?? row.quantidade_inicial),
         saldo_armazem_05: saldoArmazem05,
         local_origem_id: primeiroLocal05?.local_estoque_id ?? null,
         local_origem_codigo: primeiroLocal05?.local?.codigo_local ?? null,
@@ -299,7 +283,6 @@ function SaidaArmazem05Page() {
             quantidade: s.quantidade,
           })),
       };
-
 
       setPallet(palletNormalizado);
       setLocalOrigem(palletNormalizado.local_origem_id);
@@ -395,10 +378,7 @@ function SaidaArmazem05Page() {
       return;
     }
 
-    if (
-      nomeLider.toLowerCase() === "líder teste" ||
-      nomeLider.toLowerCase() === "lider teste"
-    ) {
+    if (nomeLider.toLowerCase() === "líder teste" || nomeLider.toLowerCase() === "lider teste") {
       setLiderId(LIDER_TESTE_ID);
       setLiderNotFound(false);
       return;
@@ -451,7 +431,7 @@ function SaidaArmazem05Page() {
 
     if (pallet && !temSaldoNoArmazem05) {
       erros.push(
-        "Saída permitida somente pelo armazém 05 — Produto Acabado. O pallet não tem saldo em nenhum local do armazém 05."
+        "Saída permitida somente pelo armazém 05 — Produto Acabado. O pallet não tem saldo em nenhum local do armazém 05.",
       );
     }
 
@@ -463,11 +443,9 @@ function SaidaArmazem05Page() {
 
     if (pallet && qtd > pallet.saldo_armazem_05) {
       erros.push(
-        `Quantidade (${formatarNumero(
-          qtd
-        )}) maior que o saldo disponível no Armazém 05 (${formatarNumero(
-          pallet.saldo_armazem_05
-        )}).`
+        `Quantidade (${formatarNumero(qtd)}) maior que o saldo disponível no Armazém 05 (${formatarNumero(
+          pallet.saldo_armazem_05,
+        )}).`,
       );
     }
 
@@ -513,28 +491,21 @@ function SaidaArmazem05Page() {
         const supabase = getSupabase();
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error: rpcError } = await (supabase as any).rpc(
-          "registrar_saida_armazem_05",
-          {
-            p_pallet_id: pallet!.id,
-            p_numero_op: op!.numero_op,
-            p_local_origem_id: localOrigemParaUso,
-            p_quantidade: Number(quantidade),
-            p_nf_saida_numero: nfSaida.trim() || null,
-            p_liberado_por: liberadoPor.trim(),
-            p_lider_id: liderId,
-            p_codigo_lider: codigoLider.trim(),
-            p_responsavel_baixa: responsavel.trim(),
-            p_observacao: observacao.trim() || null,
-          }
-        );
+        const { data, error: rpcError } = await (supabase as any).rpc("registrar_saida_armazem_05", {
+          p_pallet_id: pallet!.id,
+          p_numero_op: op!.numero_op,
+          p_local_origem_id: localOrigemParaUso,
+          p_quantidade: Number(quantidade),
+          p_nf_saida_numero: nfSaida.trim() || null,
+          p_liberado_por: liberadoPor.trim(),
+          p_lider_id: liderId,
+          p_codigo_lider: codigoLider.trim(),
+          p_responsavel_baixa: responsavel.trim(),
+          p_observacao: observacao.trim() || null,
+        });
 
         if (rpcError) {
-          if (
-            rpcError.message?.includes("permission") ||
-            rpcError.code === "42501" ||
-            rpcError.code === "PGRST301"
-          ) {
+          if (rpcError.message?.includes("permission") || rpcError.code === "42501" || rpcError.code === "PGRST301") {
             setResposta({
               sucesso: false,
               mensagem:
@@ -587,9 +558,7 @@ function SaidaArmazem05Page() {
           }${mensagemExtra}`,
         });
       } catch (err: unknown) {
-        setError(
-          err instanceof Error ? err.message : "Erro ao registrar saída."
-        );
+        setError(err instanceof Error ? err.message : "Erro ao registrar saída.");
       } finally {
         setSubmitting(false);
       }
@@ -607,7 +576,7 @@ function SaidaArmazem05Page() {
       responsavel,
       observacao,
       controleVeiculoId,
-    ]
+    ],
   );
 
   const limparFormulario = () => {
@@ -640,29 +609,20 @@ function SaidaArmazem05Page() {
   return (
     <main className="mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          Saída — Armazém 05
-        </h1>
+        <h1 className="text-2xl font-bold tracking-tight">Saída — Armazém 05</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Registro de saída/baixa de produto acabado. Exclusivo para o armazém
-          05.
+          Registro de saída/baixa de produto acabado. Exclusivo para o armazém 05.
         </p>
       </div>
 
       {resposta && (
         <Card
           className={`shadow-none ${
-            resposta.sucesso
-              ? "border-green-500/30 bg-green-500/5"
-              : "border-destructive/30 bg-destructive/5"
+            resposta.sucesso ? "border-green-500/30 bg-green-500/5" : "border-destructive/30 bg-destructive/5"
           }`}
         >
           <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
-            <div
-              className={`rounded-full p-3 ${
-                resposta.sucesso ? "bg-green-500/10" : "bg-destructive/10"
-              }`}
-            >
+            <div className={`rounded-full p-3 ${resposta.sucesso ? "bg-green-500/10" : "bg-destructive/10"}`}>
               {resposta.sucesso ? (
                 <CheckCircle2 className="h-8 w-8 text-green-500" />
               ) : (
@@ -674,9 +634,7 @@ function SaidaArmazem05Page() {
               {resposta.sucesso ? "Saída registrada" : "Operação não concluída"}
             </h2>
 
-            <p className="max-w-md text-sm text-muted-foreground">
-              {resposta.mensagem}
-            </p>
+            <p className="max-w-md text-sm text-muted-foreground">{resposta.mensagem}</p>
 
             {resposta.sucesso && (
               <Button variant="outline" size="sm" onClick={limparFormulario}>
@@ -696,9 +654,7 @@ function SaidaArmazem05Page() {
 
             <h2 className="text-lg font-semibold">Erro ao registrar</h2>
 
-            <p className="max-w-md font-mono text-xs text-muted-foreground">
-              {error}
-            </p>
+            <p className="max-w-md font-mono text-xs text-muted-foreground">{error}</p>
 
             <Button variant="outline" size="sm" onClick={() => setError(null)}>
               Tentar novamente
@@ -733,11 +689,7 @@ function SaidaArmazem05Page() {
                 )}
               </div>
 
-              {palletNotFound && (
-                <p className="text-xs text-destructive">
-                  Pallet não encontrado.
-                </p>
-              )}
+              {palletNotFound && <p className="text-xs text-destructive">Pallet não encontrado.</p>}
 
               {pallet && (
                 <div className="space-y-2 rounded-md border bg-muted/30 p-4">
@@ -745,66 +697,44 @@ function SaidaArmazem05Page() {
                     <Package className="h-4 w-4" />
                     {pallet.codigo_pallet}
 
-                    <Badge
-                      variant="outline"
-                      className={`text-[10px] ${statusColor(pallet.status)}`}
-                    >
+                    <Badge variant="outline" className={`text-[10px] ${statusColor(pallet.status)}`}>
                       {textoSeguro(pallet.status)}
                     </Badge>
                   </h3>
 
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                     <span className="text-muted-foreground">Referência:</span>
-                    <span className="font-mono">
-                      {textoSeguro(pallet.referencia_codigo)}
-                    </span>
+                    <span className="font-mono">{textoSeguro(pallet.referencia_codigo)}</span>
 
                     <span className="text-muted-foreground">SD:</span>
-                    <span className="font-mono">
-                      {textoSeguro(pallet.sd_numero)}
-                    </span>
+                    <span className="font-mono">{textoSeguro(pallet.sd_numero)}</span>
 
                     <span className="text-muted-foreground">NF Entrada:</span>
-                    <span className="font-mono">
-                      {textoSeguro(pallet.nf_entrada_numero)}
-                    </span>
+                    <span className="font-mono">{textoSeguro(pallet.nf_entrada_numero)}</span>
 
                     <span className="text-muted-foreground">Qtd. Total:</span>
-                    <span className="font-bold">
-                      {formatarNumero(pallet.quantidade_total)}
-                    </span>
+                    <span className="font-bold">{formatarNumero(pallet.quantidade_total)}</span>
 
-                    <span className="text-muted-foreground">
-                      Saldo Armazém 05:
-                    </span>
-                    <span className="font-bold text-green-600">
-                      {formatarNumero(pallet.saldo_armazem_05)}
-                    </span>
+                    <span className="text-muted-foreground">Saldo Armazém 05:</span>
+                    <span className="font-bold text-green-600">{formatarNumero(pallet.saldo_armazem_05)}</span>
 
                     <span className="text-muted-foreground">Local 05:</span>
-                    <span className="font-mono text-[10px]">
-                      {textoSeguro(pallet.local_origem_codigo)}
-                    </span>
+                    <span className="font-mono text-[10px]">{textoSeguro(pallet.local_origem_codigo)}</span>
 
                     <span className="text-muted-foreground">Locais:</span>
-                    <span className="font-mono text-[10px]">
-                      {textoSeguro(pallet.locais_e_saldos)}
-                    </span>
+                    <span className="font-mono text-[10px]">{textoSeguro(pallet.locais_e_saldos)}</span>
                   </div>
 
                   {!temSaldoNoArmazem05 && (
                     <p className="flex items-center gap-1 text-xs font-medium text-destructive">
                       <AlertCircle className="h-3 w-3" />
-                      Saída permitida somente pelo armazém 05 — Produto Acabado.
-                      O pallet não tem saldo em local 05.
+                      Saída permitida somente pelo armazém 05 — Produto Acabado. O pallet não tem saldo em local 05.
                     </p>
                   )}
 
                   {temSaldoNoArmazem05 && (
                     <div className="space-y-2 rounded-md border border-primary/30 bg-primary/5 p-3">
-                      <p className="text-xs font-semibold text-primary">
-                        Locais com saldo deste pallet (Armazém 05)
-                      </p>
+                      <p className="text-xs font-semibold text-primary">Locais com saldo deste pallet (Armazém 05)</p>
                       <div className="flex flex-wrap gap-2">
                         {pallet.saldos_05.map((s) => {
                           const active = localOrigem === s.local_estoque_id;
@@ -820,10 +750,7 @@ function SaidaArmazem05Page() {
                               }`}
                             >
                               {s.codigo_local}
-                              <Badge
-                                variant={active ? "secondary" : "outline"}
-                                className="text-[10px]"
-                              >
+                              <Badge variant={active ? "secondary" : "outline"} className="text-[10px]">
                                 {formatarNumero(s.quantidade)}
                               </Badge>
                             </button>
@@ -832,7 +759,6 @@ function SaidaArmazem05Page() {
                       </div>
                     </div>
                   )}
-
                 </div>
               )}
             </CardContent>
@@ -864,8 +790,7 @@ function SaidaArmazem05Page() {
 
               {opNotFound && (
                 <p className="text-xs text-destructive">
-                  OP não encontrada. A OP deve ser criada pela PCP antes da
-                  logística utilizar.
+                  OP não encontrada. A OP deve ser criada pela PCP antes da logística utilizar.
                 </p>
               )}
 
@@ -881,17 +806,11 @@ function SaidaArmazem05Page() {
                   </h3>
 
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                    <span className="text-muted-foreground">
-                      Produto Final:
-                    </span>
-                    <span className="font-medium">
-                      {textoSeguro(op.produto_final)}
-                    </span>
+                    <span className="text-muted-foreground">Produto Final:</span>
+                    <span className="font-medium">{textoSeguro(op.produto_final)}</span>
 
                     <span className="text-muted-foreground">Status:</span>
-                    <span className="font-mono">
-                      {textoSeguro(op.status_op)}
-                    </span>
+                    <span className="font-mono">{textoSeguro(op.status_op)}</span>
                   </div>
                 </div>
               )}
@@ -927,11 +846,7 @@ function SaidaArmazem05Page() {
                   max={pallet?.saldo_armazem_05 || undefined}
                   value={quantidade}
                   onChange={(e) => setQuantidade(e.target.value)}
-                  placeholder={
-                    pallet
-                      ? `Máximo: ${formatarNumero(pallet.saldo_armazem_05)}`
-                      : "Ex: 5000"
-                  }
+                  placeholder={pallet ? `Máximo: ${formatarNumero(pallet.saldo_armazem_05)}` : "Ex: 5000"}
                 />
               </div>
 
@@ -961,11 +876,7 @@ function SaidaArmazem05Page() {
                   </p>
                 )}
 
-                {liderNotFound && (
-                  <p className="text-xs text-destructive">
-                    Líder não encontrado.
-                  </p>
-                )}
+                {liderNotFound && <p className="text-xs text-destructive">Líder não encontrado.</p>}
               </div>
 
               <div className="space-y-1.5">
@@ -1014,9 +925,7 @@ function SaidaArmazem05Page() {
                       <SelectItem key={c.id} value={c.id}>
                         {c.placa ?? "sem placa"} — {c.motorista ?? "sem motorista"}
                         {c.tipo_veiculo ? ` — ${c.tipo_veiculo}` : ""}
-                        {c.created_at
-                          ? ` (${new Date(c.created_at).toLocaleDateString("pt-BR")})`
-                          : ""}
+                        {c.created_at ? ` (${new Date(c.created_at).toLocaleDateString("pt-BR")})` : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1025,7 +934,6 @@ function SaidaArmazem05Page() {
                   Se selecionar, ao registrar a saída também será criada uma carga vinculada ao caminhão.
                 </p>
               </div>
-
             </CardContent>
           </Card>
 
@@ -1043,11 +951,7 @@ function SaidaArmazem05Page() {
           )}
 
           <div className="flex items-center gap-3">
-            <Button
-              type="submit"
-              disabled={submitting || errosValidacao.length > 0}
-              className="gap-2"
-            >
+            <Button type="submit" disabled={submitting || errosValidacao.length > 0} className="gap-2">
               {submitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -1061,13 +965,7 @@ function SaidaArmazem05Page() {
               )}
             </Button>
 
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={submitting}
-              onClick={limparFormulario}
-            >
+            <Button type="button" variant="ghost" size="sm" disabled={submitting} onClick={limparFormulario}>
               Limpar
             </Button>
           </div>
@@ -1076,7 +974,6 @@ function SaidaArmazem05Page() {
     </main>
   );
 }
-
 
 export const Route = createFileRoute("/_app/saidas")({
   validateSearch: (search: Record<string, unknown>) => ({
