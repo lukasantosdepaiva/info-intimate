@@ -157,7 +157,7 @@ function SaidaArmazem05Page() {
   // Vínculo com caminhão (opcional)
   const [controleVeiculoId, setControleVeiculoId] = useState<string>("");
   const [controlesVeiculo, setControlesVeiculo] = useState<
-    Array<{ id: string; placa: string | null; motorista: string | null; created_at: string | null }>
+    Array<{ id: string; placa: string | null; motorista: string | null; created_at: string | null; tipo_veiculo: string | null }>
   >([]);
 
   const [submitting, setSubmitting] = useState(false);
@@ -175,10 +175,20 @@ function SaidaArmazem05Page() {
         const sb = supabase as any;
         const { data } = await sb
           .from("controle_veiculos")
-          .select("id, placa, motorista, created_at")
+          .select("id, placa, motorista, created_at, veiculos(tipo_veiculo)")
           .order("created_at", { ascending: false })
           .limit(30);
-        setControlesVeiculo(data ?? []);
+        const rows = (data ?? []).map((c: { id: string; placa: string | null; motorista: string | null; created_at: string | null; veiculos: { tipo_veiculo: string | null } | { tipo_veiculo: string | null }[] | null }) => {
+          const v = Array.isArray(c.veiculos) ? c.veiculos[0] : c.veiculos;
+          return {
+            id: c.id,
+            placa: c.placa,
+            motorista: c.motorista,
+            created_at: c.created_at,
+            tipo_veiculo: v?.tipo_veiculo ?? null,
+          };
+        });
+        setControlesVeiculo(rows);
       } catch {
         setControlesVeiculo([]);
       }
@@ -1003,6 +1013,7 @@ function SaidaArmazem05Page() {
                     {controlesVeiculo.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.placa ?? "sem placa"} — {c.motorista ?? "sem motorista"}
+                        {c.tipo_veiculo ? ` — ${c.tipo_veiculo}` : ""}
                         {c.created_at
                           ? ` (${new Date(c.created_at).toLocaleDateString("pt-BR")})`
                           : ""}
