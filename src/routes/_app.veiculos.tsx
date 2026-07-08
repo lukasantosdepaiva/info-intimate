@@ -289,6 +289,7 @@ function VeiculosPage() {
           p_motorista: motorista.trim(),
           p_responsavel_conferencia: responsavel.trim(),
           p_saida_id: saidaId,
+          p_saida_id: saidaId.trim() || null,
           p_status_aprovacao: statusAprovacao,
           p_observacao: obsFinal,
         });
