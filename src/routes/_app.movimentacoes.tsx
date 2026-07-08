@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PalletSearchDialog, type PalletSearchResult } from "@/components/pallet-search-dialog";
+import { useLocaisEstoque } from "@/contexts/locais-estoque-context";
 
 interface PalletResumoRow {
   pallet_id: string;
@@ -142,8 +143,8 @@ function MovimentacoesPage() {
   const [palletDialogOpen, setPalletDialogOpen] = useState(false);
   const [palletSelecionado, setPalletSelecionado] = useState<PalletSearchResult | null>(null);
 
-  const [locais, setLocais] = useState<LocalRow[]>([]);
-  const [locaisLoading, setLocaisLoading] = useState(true);
+  const { locais: locaisCtx, loading: locaisLoading } = useLocaisEstoque();
+  const locais = locaisCtx as unknown as LocalRow[];
 
   const [locaisComSaldo, setLocaisComSaldo] = useState<SaldoLocal[]>([]);
   const [saldoLoading, setSaldoLoading] = useState(false);
@@ -167,27 +168,8 @@ function MovimentacoesPage() {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const carregarLocais = async () => {
-      setLocaisLoading(true);
 
-      try {
-        const supabase = getSupabase();
 
-        const { data, error: dbError } = await supabase.from("locais_estoque").select("*").order("codigo_local");
-
-        if (dbError) throw new Error(dbError.message);
-
-        setLocais((data ?? []) as LocalRow[]);
-      } catch {
-        setLocais([]);
-      } finally {
-        setLocaisLoading(false);
-      }
-    };
-
-    carregarLocais();
-  }, []);
 
 
   const selecionarPallet = useCallback(async (p: PalletSearchResult) => {
