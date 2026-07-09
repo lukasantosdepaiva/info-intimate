@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getSupabase } from "@/lib/supabase";
 import {
   QrCode,
@@ -38,17 +38,36 @@ function PalletsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [pagina, setPagina] = useState(0);
+  const TAMANHO_PAGINA = 50;
 
-  const fetchPallets = useCallback(async () => {
+  const fetchPallets = useCallback(async (busca: string, pag: number) => {
     setLoading(true);
     setError(null);
     try {
       const supabase = getSupabase();
-      const { data: rows, error: dbError } = await supabase
+      const inicio = pag * TAMANHO_PAGINA;
+      const fim = inicio + TAMANHO_PAGINA - 1;
+
+      let query = supabase
         .from("vw_pallet_resumo")
         .select("*")
-        .order("codigo_pallet", { ascending: false });
+        .order("codigo_pallet", { ascending: false })
+        .range(inicio, fim);
 
+      if (busca.trim().length >= 2) {
+        const termo = busca.trim();
+        query = query.or(
+          `codigo_pallet.ilike.%${termo}%,` +
+          `nf_entrada.ilike.%${termo}%,` +
+          `referencia.ilike.%${termo}%,` +
+          `sd.ilike.%${termo}%,` +
+          `cliente.ilike.%${termo}%,` +
+          `fornecedor.ilike.%${termo}%`
+        );
+      }
+
+      const { data: rows, error: dbError } = await query;
       if (dbError) throw new Error(dbError.message);
       setData((rows as PalletRow[]) ?? []);
     } catch (err: unknown) {
@@ -61,22 +80,17 @@ function PalletsPage() {
   }, []);
 
   useEffect(() => {
-    fetchPallets();
-  }, [fetchPallets]);
+    const timer = setTimeout(() => {
+      setPagina(0);
+      fetchPallets(search, 0);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search, fetchPallets]);
 
-  const filtered = useMemo(() => {
-    if (!search.trim()) return data;
-    const q = search.toLowerCase();
-    return data.filter(
-      (p) =>
-        p.codigo_pallet?.toLowerCase().includes(q) ||
-        p.nf_entrada?.toLowerCase().includes(q) ||
-        p.referencia?.toLowerCase().includes(q) ||
-        p.sd?.toLowerCase().includes(q) ||
-        p.cliente?.toLowerCase().includes(q) ||
-        p.fornecedor?.toLowerCase().includes(q)
-    );
-  }, [data, search]);
+  useEffect(() => {
+    fetchPallets(search, pagina);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pagina, fetchPallets]);
 
   const statusVariant = (s: string) => {
     const map: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
