@@ -165,7 +165,7 @@ function PalletDetailPage() {
       let merged: PalletDetail | null = base;
       if (precisaFallback) {
         const fb = await fetchFallback(codigo);
-        console.log("pallet detalhe (fallback)", fb);
+        const fb = await fetchFallback(codigo);
         if (fb) {
           merged = {
             codigo_pallet: base?.codigo_pallet ?? fb.codigo_pallet ?? codigo,
