@@ -64,8 +64,15 @@ function HistoricoContent() {
   const [fReferencia, setFReferencia] = useState("");
   const [fSd, setFSd] = useState("");
   const [fTipo, setFTipo] = useState("");
-  const [fDataInicio, setFDataInicio] = useState("");
-  const [fDataFim, setFDataFim] = useState("");
+  const hoje = new Date();
+  const trintaDiasAtras = new Date();
+  trintaDiasAtras.setDate(hoje.getDate() - 30);
+  const [fDataInicio, setFDataInicio] = useState(
+    trintaDiasAtras.toISOString().split("T")[0]
+  );
+  const [fDataFim, setFDataFim] = useState(
+    hoje.toISOString().split("T")[0]
+  );
   const [fResponsavel, setFResponsavel] = useState("");
 
   const fetchHistorico = useCallback(async () => {
@@ -73,11 +80,14 @@ function HistoricoContent() {
     setError(null);
     try {
       const supabase = getSupabase();
-      const { data: rows, error: dbError } = await supabase
+      let query = supabase
         .from("vw_historico_completo")
         .select("*")
-        .order("id", { ascending: false })
-        .limit(500);
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (fDataInicio) query = query.gte("created_at", `${fDataInicio}T00:00:00`);
+      if (fDataFim) query = query.lte("created_at", `${fDataFim}T23:59:59`);
+      const { data: rows, error: dbError } = await query;
 
       if (dbError) throw new Error(dbError.message);
       setData((rows as HistoricoRow[]) ?? []);
@@ -88,7 +98,7 @@ function HistoricoContent() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fDataInicio, fDataFim]);
 
   useEffect(() => {
     fetchHistorico();
@@ -212,6 +222,16 @@ function HistoricoContent() {
           <Input type="date" value={fDataInicio} onChange={(e) => setFDataInicio(e.target.value)} className="h-9 text-xs" />
           <Input type="date" value={fDataFim} onChange={(e) => setFDataFim(e.target.value)} className="h-9 text-xs" />
           <Input placeholder="Responsável" value={fResponsavel} onChange={(e) => setFResponsavel(e.target.value)} className="h-9 text-xs" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setFDataInicio("");
+              setFDataFim("");
+            }}
+          >
+            Ver tudo
+          </Button>
         </div>
       </div>
 

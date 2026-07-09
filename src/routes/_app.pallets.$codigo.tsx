@@ -152,8 +152,6 @@ function PalletDetailPage() {
         .eq("codigo_pallet", codigo)
         .maybeSingle();
 
-      console.log("pallet detalhe (view)", viewRow);
-      if (dbError) console.log("erro pallet detalhe (view)", dbError);
 
       const base = (viewRow as PalletDetail | null) ?? null;
 
