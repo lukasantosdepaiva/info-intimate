@@ -195,6 +195,11 @@ function DashboardPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             Visão geral da operação logística — Special Decor
           </p>
+          {ultimaAtualizacao && (
+            <span className="text-xs text-muted-foreground">
+              Atualizado às {ultimaAtualizacao.toLocaleTimeString("pt-BR")}
+            </span>
+          )}
         </div>
         <Button
           variant="ghost"
