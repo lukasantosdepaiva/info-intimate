@@ -73,9 +73,10 @@ function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardRow>(EMPTY_DASHBOARD);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
+  const INTERVALO_REFRESH_MS = 5 * 60 * 1000; // 5 minutos
 
   const loadDashboard = useCallback(async () => {
-    console.log("[Dashboard] query start");
     try {
       setLoading(true);
       setError(null);
@@ -87,29 +88,26 @@ function DashboardPage() {
         .select("*")
         .limit(1);
 
-      console.log("[Dashboard] query data:", data);
-      console.log("[Dashboard] query error:", queryError);
-
       if (queryError) throw queryError;
 
       const row = Array.isArray(data) ? data[0] : data;
       setDashboardData(row ?? EMPTY_DASHBOARD);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erro ao carregar dashboard";
-      console.error("[Dashboard] query error:", message);
       setError(message);
       setDashboardData(EMPTY_DASHBOARD);
     } finally {
-      console.log("[Dashboard] finally - loading false");
       setLoading(false);
+      setUltimaAtualizacao(new Date());
     }
   }, []);
 
   useEffect(() => {
     loadDashboard();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const intervalo = setInterval(loadDashboard, INTERVALO_REFRESH_MS);
+    return () => clearInterval(intervalo);
+  }, [loadDashboard, INTERVALO_REFRESH_MS]);
 
-  console.log("[Dashboard] render — loading:", loading, "error:", !!error, "data keys:", Object.keys(dashboardData).length);
 
   // ─── Loading ────────────────────────────────────────────
   if (loading) {
