@@ -139,7 +139,7 @@ function PalletsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={fetchPallets}
+              onClick={() => fetchPallets(search, pagina)}
               className="mt-2 gap-2"
             >
               <RefreshCw className="h-4 w-4" />
@@ -157,8 +157,8 @@ function PalletsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Pallets</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {filtered.length} pallet{filtered.length !== 1 ? "s" : ""}{" "}
-            encontrado{filtered.length !== 1 ? "s" : ""}
+            {data.length} pallet{data.length !== 1 ? "s" : ""}{" "}
+            encontrado{data.length !== 1 ? "s" : ""}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -171,7 +171,7 @@ function PalletsPage() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={fetchPallets}
+            onClick={() => fetchPallets(search, pagina)}
             aria-label="Atualizar"
           >
             <RefreshCw className="h-4 w-4" />
@@ -190,7 +190,7 @@ function PalletsPage() {
         />
       </div>
 
-      {filtered.length === 0 ? (
+      {data.length === 0 ? (
         <Card className="shadow-none">
           <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
             <QrCode className="h-12 w-12 text-muted-foreground/40" />
@@ -203,6 +203,7 @@ function PalletsPage() {
           </CardContent>
         </Card>
       ) : (
+        <>
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full text-sm">
             <thead>
@@ -222,7 +223,7 @@ function PalletsPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((p) => (
+              {data.map((p) => (
                 <tr
                   key={p.codigo_pallet}
                   className="border-b transition-colors hover:bg-muted/30"
@@ -294,6 +295,28 @@ function PalletsPage() {
             </tbody>
           </table>
         </div>
+        <div className="flex items-center justify-between mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPagina((p) => Math.max(0, p - 1))}
+            disabled={pagina === 0 || loading}
+          >
+            ← Anterior
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Página {pagina + 1}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPagina((p) => p + 1)}
+            disabled={data.length < TAMANHO_PAGINA || loading}
+          >
+            Próxima →
+          </Button>
+        </div>
+        </>
       )}
 
     </div>
