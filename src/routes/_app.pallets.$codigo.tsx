@@ -152,8 +152,6 @@ function PalletDetailPage() {
         .eq("codigo_pallet", codigo)
         .maybeSingle();
 
-      console.log("pallet detalhe (view)", viewRow);
-      if (dbError) console.log("erro pallet detalhe (view)", dbError);
 
       const base = (viewRow as PalletDetail | null) ?? null;
 
@@ -167,7 +165,6 @@ function PalletDetailPage() {
       let merged: PalletDetail | null = base;
       if (precisaFallback) {
         const fb = await fetchFallback(codigo);
-        console.log("pallet detalhe (fallback)", fb);
         if (fb) {
           merged = {
             codigo_pallet: base?.codigo_pallet ?? fb.codigo_pallet ?? codigo,
@@ -189,7 +186,7 @@ function PalletDetailPage() {
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Erro ao carregar detalhe.";
-      console.log("erro pallet detalhe", err);
+      
       setError(message);
     } finally {
       setLoading(false);

@@ -240,7 +240,7 @@ function RecebimentoPage() {
 
         // RPC retornou sucesso — pode ser codigo_pallet OU um uuid
         const retorno = data as unknown;
-        console.log("payload recebimento retorno", retorno);
+        
         let codigoPallet: string | undefined;
         if (typeof retorno === "string") {
           const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -251,7 +251,7 @@ function RecebimentoPage() {
               .select("codigo_pallet")
               .eq("id", retorno)
               .maybeSingle();
-            console.log("pallet criado", palletCriado);
+            
             codigoPallet = palletCriado?.codigo_pallet ?? undefined;
           } else {
             codigoPallet = retorno;
