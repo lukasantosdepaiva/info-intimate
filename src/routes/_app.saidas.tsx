@@ -174,7 +174,10 @@ function SaidaArmazem05Page() {
             placa: string | null;
             motorista: string | null;
             created_at: string | null;
-            veiculos: { tipo_veiculo: string | null } | { tipo_veiculo: string | null }[] | null;
+            veiculos:
+              | { placa: string | null; motorista: string | null; tipo_veiculo: string | null }
+              | { placa: string | null; motorista: string | null; tipo_veiculo: string | null }[]
+              | null;
           }) => {
             const v = Array.isArray(c.veiculos) ? c.veiculos[0] : c.veiculos;
             return {
