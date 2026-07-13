@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PalletSearchDialog, type PalletSearchResult } from "@/components/pallet-search-dialog";
 import { useLocaisEstoque } from "@/contexts/locais-estoque-context";
+import type { LocalRow } from "@/lib/types";
 
 interface PalletResumoRow {
   pallet_id: string;
@@ -36,16 +37,6 @@ interface SaldoLocal {
   saldo_disponivel: number;
 }
 
-interface LocalRow {
-  id: string;
-  codigo_local: string | null;
-  armazem_codigo: string | null;
-  armazem_nome: string | null;
-  galpao: string | null;
-  rua: string | null;
-  processo: string | null;
-  descricao: string | null;
-}
 
 interface SaldoPalletQueryRow {
   local_estoque_id: string;

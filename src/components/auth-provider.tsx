@@ -2,7 +2,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { getSupabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
-import { LocalesEstoqueProvider } from "@/contexts/locais-estoque-context";
+import { LocaisEstoqueProvider } from "@/contexts/locais-estoque-context";
 
 interface AuthContextValue {
   user: User | null;
@@ -79,9 +79,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
-      <LocalesEstoqueProvider>
+      <LocaisEstoqueProvider>
         {children}
-      </LocalesEstoqueProvider>
+      </LocaisEstoqueProvider>
     </AuthContext.Provider>
   );
 }

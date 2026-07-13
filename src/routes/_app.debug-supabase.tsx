@@ -67,7 +67,7 @@ function DebugSupabasePage() {
       setResults(outputs);
     } catch (err) {
       setGeneralError(
-        err instanceof Error ? err.message : "Erro ao criar client Supabase"
+        err instanceof Error ? err.message : "Erro ao criar client Supabase."
       );
     } finally {
       setLoading(false);

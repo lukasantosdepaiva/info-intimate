@@ -28,27 +28,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import type { ReferenciaRow, SdRow, OpCompleta as OpCompletaBase } from "@/lib/types";
 
-interface OpRow {
-  id: string;
-  numero_op: string;
-  referencia_id: string;
-  sd_id: string;
-  cliente_id: string | null;
-  produto_final: string;
-  quantidade_op: number;
-  status_op: string;
-  observacao: string | null;
-  created_by_pcp: boolean;
+type OpCompleta = OpCompletaBase & {
   created_at: string;
   updated_at: string;
   codigo_referencia?: string;
   numero_sd?: string;
   cliente_nome?: string;
-}
+};
 
-interface ReferenciaRow { id: string; codigo_referencia: string; descricao: string; }
-interface SdRow { id: string; numero_sd: string; referencia_id: string; }
 interface ClienteRow { id: string; nome: string; }
 
 const STATUS_OP = [
@@ -72,7 +61,7 @@ const statusBadgeVariant = (s: string) => {
 
 function OpModal({ open, onClose, onSave, editOp }: {
   open: boolean; onClose: () => void;
-  onSave: (data: Partial<OpRow>) => Promise<void>; editOp: OpRow | null;
+  onSave: (data: Partial<OpCompleta>) => Promise<void>; editOp: OpCompleta | null;
 }) {
   const [numeroOp, setNumeroOp] = useState("");
   const [referenciaId, setReferenciaId] = useState("");
@@ -214,14 +203,14 @@ function OpModal({ open, onClose, onSave, editOp }: {
 }
 
 function PcpPage() {
-  const [ops, setOps] = useState<OpRow[]>([]);
+  const [ops, setOps] = useState<OpCompleta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [statusFiltro, setStatusFiltro] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [editOp, setEditOp] = useState<OpRow | null>(null);
-  const [selectedOp, setSelectedOp] = useState<OpRow | null>(null);
+  const [editOp, setEditOp] = useState<OpCompleta | null>(null);
+  const [selectedOp, setSelectedOp] = useState<OpCompleta | null>(null);
 
   const fetchOps = useCallback(async () => {
     setLoading(true); setError(null);
@@ -236,7 +225,7 @@ function PcpPage() {
       setOps(((data ?? []) as any[]).map((r: any) => ({
         ...r, codigo_referencia: r.referencias?.codigo_referencia ?? "—",
         numero_sd: r.sds?.numero_sd ?? "—", cliente_nome: r.clientes?.nome ?? "—",
-      })) as OpRow[]);
+      })) as OpCompleta[]);
     } catch (err: unknown) { setError(err instanceof Error ? err.message : "Erro ao carregar OPs."); }
     finally { setLoading(false); }
   }, []);
@@ -257,7 +246,7 @@ function PcpPage() {
     return result;
   }, [ops, busca, statusFiltro]);
 
-  const handleSave = useCallback(async (data: Partial<OpRow>) => {
+  const handleSave = useCallback(async (data: Partial<OpCompleta>) => {
     const supabase = getSupabase();
     if (editOp) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

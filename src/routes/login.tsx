@@ -31,7 +31,7 @@ function LoginPage() {
       await login(email, password);
       navigate({ to: "/" });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erro ao fazer login";
+      const message = err instanceof Error ? err.message : "Erro ao fazer login.";
       if (message.includes("Invalid login credentials")) {
         setError("Email ou senha incorretos.");
       } else if (message.includes("Email not confirmed")) {
@@ -55,7 +55,7 @@ function LoginPage() {
       await login(TEST_EMAIL, TEST_PASSWORD);
       navigate({ to: "/" });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erro ao fazer login";
+      const message = err instanceof Error ? err.message : "Erro ao fazer login.";
       setError(
         message.includes("Invalid login credentials")
           ? "Usuário de teste não encontrado neste ambiente."

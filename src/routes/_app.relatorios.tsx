@@ -331,7 +331,7 @@ function RelatoriosPage() {
     total_armazem05: 0, total_saidas: 0, total_rncs_abertas: 0, total_veiculos: 0,
   });
 
-  const fetchSummary = useCallback(async () => {
+  const fetchResumo = useCallback(async () => {
     try {
       const supabase = getSupabase();
       // Recebimentos
@@ -366,9 +366,9 @@ function RelatoriosPage() {
     } catch { /* silent */ }
   }, []);
 
-  useEffect(() => { fetchSummary(); }, [fetchSummary]);
+  useEffect(() => { fetchResumo(); }, [fetchResumo]);
 
-  const fetchReportData = useCallback(async () => {
+  const fetchDadosRelatorio = useCallback(async () => {
     setLoading(true);
     setError(null);
     setData([]);
@@ -561,16 +561,16 @@ function RelatoriosPage() {
         toast.info("Nenhum registro corresponde aos filtros.");
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Erro ao carregar relatório";
+      const msg = err instanceof Error ? err.message : "Erro ao carregar relatório.";
       setError(msg);
-      toast.error("Erro ao carregar dados");
+      toast.error("Erro ao carregar dados.");
     } finally {
       setLoading(false);
     }
   }, [activeReport, filters]);
 
   useEffect(() => {
-    fetchReportData();
+    fetchDadosRelatorio();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeReport]);
 
@@ -590,7 +590,7 @@ function RelatoriosPage() {
           <CardContent className="flex flex-col items-center gap-3 py-10">
             <AlertCircle className="h-8 w-8 text-destructive" />
             <p className="text-sm text-muted-foreground">{error}</p>
-            <Button variant="outline" size="sm" onClick={fetchReportData}>
+            <Button variant="outline" size="sm" onClick={fetchDadosRelatorio}>
               <RefreshCw className="mr-1 h-3 w-3" /> Tentar novamente
             </Button>
           </CardContent>
@@ -709,13 +709,13 @@ function RelatoriosPage() {
         <Button variant="outline" size="sm" className="mt-auto" onClick={() => exportCSV(`relatorio-${activeReport}`, data)} disabled={data.length === 0}>
           <FileDown className="mr-1 h-3 w-3" /> Exportar CSV
         </Button>
-        <Button variant="ghost" size="sm" className="mt-auto" onClick={fetchReportData}>
+        <Button variant="ghost" size="sm" className="mt-auto" onClick={fetchDadosRelatorio}>
           <RefreshCw className="mr-1 h-3 w-3" /> Atualizar
         </Button>
       </div>
 
       {/* Filters */}
-      <FilterPanel filters={filters} setFilters={setFilters} onApply={fetchReportData} onClear={() => { setFilters({}); fetchReportData(); }} />
+      <FilterPanel filters={filters} setFilters={setFilters} onApply={fetchDadosRelatorio} onClear={() => { setFilters({}); fetchDadosRelatorio(); }} />
 
       {/* Table */}
       <div className="text-xs text-muted-foreground">{data.length} registro(s) encontrado(s)</div>
