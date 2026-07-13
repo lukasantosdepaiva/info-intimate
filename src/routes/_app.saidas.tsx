@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import type { OpResumo } from "@/lib/types";
 
 interface Saldo05 {
   local_estoque_id: string;
@@ -68,13 +69,6 @@ interface SaldoPalletJoinRow {
     | null;
 }
 
-interface OpResumo {
-  id: string;
-  numero_op: string;
-  produto_final: string | null;
-  referencia_codigo: string;
-  status_op: string | null;
-}
 
 interface OpDbRow {
   id: string;
