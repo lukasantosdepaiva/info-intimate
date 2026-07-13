@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PalletSearchDialog, type PalletSearchResult } from "@/components/pallet-search-dialog";
 import { useLocaisEstoque } from "@/contexts/locais-estoque-context";
+import type { LocalRow } from "@/lib/types";
 
 interface PalletResumoRow {
   pallet_id: string;

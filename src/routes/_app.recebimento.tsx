@@ -21,19 +21,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LocalCascadeSelector } from "@/components/local-cascade-selector";
 import { useLocaisEstoque } from "@/contexts/locais-estoque-context";
+import type { LocalRow, ReferenciaRow, SdRow } from "@/lib/types";
 
-
-interface ReferenciaRow {
-  id: string;
-  codigo_referencia: string;
-  descricao: string;
-}
-
-interface SdRow {
-  id: string;
-  referencia_id: string;
-  numero_sd: string;
-}
 
 interface BuscaRow {
   referencia_id: string;
@@ -41,17 +30,6 @@ interface BuscaRow {
   descricao: string;
   sd_id: string | null;
   numero_sd: string | null;
-}
-
-interface LocalRow {
-  id: string;
-  codigo_local: string;
-  armazem_codigo: string;
-  armazem_nome: string;
-  galpao: string;
-  rua: string;
-  processo: string | null;
-  descricao: string;
 }
 
 function RecebimentoPage() {
