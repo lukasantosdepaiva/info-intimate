@@ -68,7 +68,7 @@ interface SaldoPalletJoinRow {
     | null;
 }
 
-interface OpRow {
+interface OpResumo {
   id: string;
   numero_op: string;
   produto_final: string | null;
@@ -124,7 +124,7 @@ function SaidaArmazem05Page() {
 
   const [opBusca, setOpBusca] = useState("");
   const [opLoading, setOpLoading] = useState(false);
-  const [op, setOp] = useState<OpRow | null>(null);
+  const [op, setOp] = useState<OpResumo | null>(null);
   const [opNotFound, setOpNotFound] = useState(false);
 
   const [nfSaida, setNfSaida] = useState("");
