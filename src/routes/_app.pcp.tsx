@@ -28,27 +28,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import type { ReferenciaRow, SdRow, OpCompleta as OpCompletaBase } from "@/lib/types";
 
-interface OpRow {
-  id: string;
-  numero_op: string;
-  referencia_id: string;
-  sd_id: string;
-  cliente_id: string | null;
-  produto_final: string;
-  quantidade_op: number;
-  status_op: string;
-  observacao: string | null;
-  created_by_pcp: boolean;
+type OpCompleta = OpCompletaBase & {
   created_at: string;
   updated_at: string;
   codigo_referencia?: string;
   numero_sd?: string;
   cliente_nome?: string;
-}
+};
 
-interface ReferenciaRow { id: string; codigo_referencia: string; descricao: string; }
-interface SdRow { id: string; numero_sd: string; referencia_id: string; }
 interface ClienteRow { id: string; nome: string; }
 
 const STATUS_OP = [
