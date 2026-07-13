@@ -36,16 +36,6 @@ interface SaldoLocal {
   saldo_disponivel: number;
 }
 
-interface LocalRow {
-  id: string;
-  codigo_local: string | null;
-  armazem_codigo: string | null;
-  armazem_nome: string | null;
-  galpao: string | null;
-  rua: string | null;
-  processo: string | null;
-  descricao: string | null;
-}
 
 interface SaldoPalletQueryRow {
   local_estoque_id: string;
