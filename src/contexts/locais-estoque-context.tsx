@@ -18,7 +18,7 @@ export function useLocaisEstoque() {
   return useContext(LocaisEstoqueContext);
 }
 
-export function LocalesEstoqueProvider({ children }: { children: React.ReactNode }) {
+export function LocaisEstoqueProvider({ children }: { children: React.ReactNode }) {
   const [locais, setLocais] = useState<LocalRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
