@@ -920,7 +920,7 @@ function CargasCaminhaoCard({ controleInicialId }: { controleInicialId: string |
   const [nfSaida, setNfSaida] = useState("");
   const [observacao, setObservacao] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [msg, setMsg] = useState<{ ok: boolean; texto: string } | null>(null);
+  const [msg, setMsg] = useState<{ sucesso: boolean; mensagem: string } | null>(null);
 
   const carregarControles = useCallback(async () => {
     setLoadingControles(true);
@@ -982,11 +982,11 @@ function CargasCaminhaoCard({ controleInicialId }: { controleInicialId: string |
     if (!controleSelId || !palletEscolhido) return;
     const qtd = Number(quantidade);
     if (!Number.isFinite(qtd) || qtd <= 0) {
-      setMsg({ ok: false, texto: "Quantidade deve ser maior que zero." });
+      setMsg({ sucesso: false, mensagem: "Quantidade deve ser maior que zero." });
       return;
     }
     if (!responsavel.trim()) {
-      setMsg({ ok: false, texto: "Responsável é obrigatório." });
+      setMsg({ sucesso: false, mensagem: "Responsável é obrigatório." });
       return;
     }
     setSubmitting(true);
@@ -1006,17 +1006,17 @@ function CargasCaminhaoCard({ controleInicialId }: { controleInicialId: string |
         p_observacao: observacao.trim() || null,
       });
       if (error) {
-        setMsg({ ok: false, texto: error.message });
+        setMsg({ sucesso: false, mensagem: error.message });
         return;
       }
-      setMsg({ ok: true, texto: "Carga registrada no caminhão." });
+      setMsg({ sucesso: true, mensagem: "Carga registrada no caminhão." });
       setPalletEscolhido(null);
       setQuantidade("");
       setNfSaida("");
       setObservacao("");
       await carregarCargas(controleSelId);
     } catch (e: unknown) {
-      setMsg({ ok: false, texto: e instanceof Error ? e.message : "Erro ao registrar carga." });
+      setMsg({ sucesso: false, mensagem: e instanceof Error ? e.message : "Erro ao registrar carga." });
     } finally {
       setSubmitting(false);
     }
@@ -1150,7 +1150,7 @@ function CargasCaminhaoCard({ controleInicialId }: { controleInicialId: string |
                 </div>
               )}
 
-              {msg && <p className={`text-xs ${msg.ok ? "text-green-600" : "text-destructive"}`}>{msg.texto}</p>}
+              {msg && <p className={`text-xs ${msg.sucesso ? "text-green-600" : "text-destructive"}`}>{msg.mensagem}</p>}
             </div>
           )}
 
@@ -1252,7 +1252,7 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
     created_at: string | null;
   } | null>(null);
 
-  const [msg, setMsg] = useState<{ ok: boolean; texto: string } | null>(null);
+  const [msg, setMsg] = useState<{ sucesso: boolean; mensagem: string } | null>(null);
 
   const buscar = useCallback(async () => {
     const t = String(termo ?? "").trim();
@@ -1276,7 +1276,7 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
 
   const salvarNovo = async () => {
     if (!novoPlaca.trim() || !novoTransportadora.trim() || !novoMotorista.trim()) {
-      setMsg({ ok: false, texto: "Placa, transportadora e motorista são obrigatórios." });
+      setMsg({ sucesso: false, mensagem: "Placa, transportadora e motorista são obrigatórios." });
       return;
     }
     setSalvandoNovo(true);
@@ -1297,7 +1297,7 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
         .select("*")
         .single();
       if (error) {
-        setMsg({ ok: false, texto: error.message });
+        setMsg({ sucesso: false, mensagem: error.message });
         return;
       }
       setVeiculoSel(data as VeiculoRow);
@@ -1306,7 +1306,7 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
       setNovoTipo("");
       setNovoTransportadora("");
       setNovoMotorista("");
-      setMsg({ ok: true, texto: "Veículo cadastrado." });
+      setMsg({ sucesso: true, mensagem: "Veículo cadastrado." });
     } finally {
       setSalvandoNovo(false);
     }
@@ -1315,7 +1315,7 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
   const criarControle = async () => {
     if (!veiculoSel) return;
     if (!respBusca.trim()) {
-      setMsg({ ok: false, texto: "Responsável pela conferência é obrigatório." });
+      setMsg({ sucesso: false, mensagem: "Responsável pela conferência é obrigatório." });
       return;
     }
     setCriandoControle(true);
@@ -1339,7 +1339,7 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
         .select("id, placa, motorista, status_aprovacao, created_at")
         .single();
       if (error) {
-        setMsg({ ok: false, texto: error.message });
+        setMsg({ sucesso: false, mensagem: error.message });
         return;
       }
       const c = data as {
@@ -1357,7 +1357,7 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
         created_at: c.created_at,
       });
       onControleCriado(c.id);
-      setMsg({ ok: true, texto: "Novo carregamento criado. Registre as cargas abaixo." });
+      setMsg({ sucesso: true, mensagem: "Novo carregamento criado. Registre as cargas abaixo." });
     } finally {
       setCriandoControle(false);
     }
@@ -1527,7 +1527,7 @@ function VeiculoBuscaCard({ onControleCriado }: { onControleCriado: (id: string)
           </div>
         )}
 
-        {msg && <p className={`text-xs ${msg.ok ? "text-green-600" : "text-destructive"}`}>{msg.texto}</p>}
+        {msg && <p className={`text-xs ${msg.sucesso ? "text-green-600" : "text-destructive"}`}>{msg.mensagem}</p>}
       </CardContent>
     </Card>
   );

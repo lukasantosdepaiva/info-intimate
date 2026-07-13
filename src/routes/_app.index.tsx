@@ -139,7 +139,7 @@ function DashboardPage() {
 
       setGraficoData(arr);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erro ao carregar dashboard";
+      const message = err instanceof Error ? err.message : "Erro ao carregar dashboard.";
       setError(message);
       setDashboardData(EMPTY_DASHBOARD);
       setGraficoData([]);

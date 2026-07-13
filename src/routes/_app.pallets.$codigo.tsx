@@ -140,7 +140,7 @@ function PalletDetailPage() {
     }
   }, []);
 
-  const fetchDetail = useCallback(async () => {
+  const fetchPalletDetalhe = useCallback(async () => {
     if (!codigo) return;
     setLoading(true);
     setError(null);
@@ -194,8 +194,8 @@ function PalletDetailPage() {
   }, [codigo]);
 
   useEffect(() => {
-    fetchDetail();
-  }, [fetchDetail]);
+    fetchPalletDetalhe();
+  }, [fetchPalletDetalhe]);
 
   const qrValue = baseUrl ? `${baseUrl}/pallets/${codigo}` : `/pallets/${codigo}`;
 
@@ -218,7 +218,7 @@ function PalletDetailPage() {
           <CardContent className="flex flex-col items-center gap-3 py-12">
             <AlertCircle className="h-8 w-8 text-destructive" />
             <p className="text-sm text-muted-foreground">{error}</p>
-            <Button variant="outline" size="sm" onClick={fetchDetail}>
+            <Button variant="outline" size="sm" onClick={fetchPalletDetalhe}>
               <RefreshCw className="mr-2 h-4 w-4" /> Tentar novamente
             </Button>
           </CardContent>
