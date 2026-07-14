@@ -28,10 +28,17 @@ import { Route as AppDebugSupabaseRouteImport } from './routes/_app.debug-supaba
 import { Route as AppDebugEnvRouteImport } from './routes/_app.debug-env'
 import { Route as AppConfiguracoesRouteImport } from './routes/_app.configuracoes'
 import { Route as AppAprovacoesRouteImport } from './routes/_app.aprovacoes'
+import { Route as AppPcpIndexRouteImport } from './routes/_app.pcp.index'
 import { Route as AppPalletsIndexRouteImport } from './routes/_app.pallets.index'
 import { Route as AppInspecaoIndexRouteImport } from './routes/_app.inspecao.index'
+import { Route as AppPcpSaldosRouteImport } from './routes/_app.pcp.saldos'
+import { Route as AppPcpRoteirosRouteImport } from './routes/_app.pcp.roteiros'
+import { Route as AppPcpOpsRouteImport } from './routes/_app.pcp.ops'
+import { Route as AppPcpEstruturasRouteImport } from './routes/_app.pcp.estruturas'
 import { Route as AppPalletsCodigoRouteImport } from './routes/_app.pallets.$codigo'
 import { Route as AppInspecaoRncRouteImport } from './routes/_app.inspecao.rnc'
+import { Route as AppPcpRoteirosIdRouteImport } from './routes/_app.pcp.roteiros.$id'
+import { Route as AppPcpEstruturasIdRouteImport } from './routes/_app.pcp.estruturas.$id'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -127,6 +134,11 @@ const AppAprovacoesRoute = AppAprovacoesRouteImport.update({
   path: '/aprovacoes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPcpIndexRoute = AppPcpIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppPcpRoute,
+} as any)
 const AppPalletsIndexRoute = AppPalletsIndexRouteImport.update({
   id: '/pallets/',
   path: '/pallets/',
@@ -137,6 +149,26 @@ const AppInspecaoIndexRoute = AppInspecaoIndexRouteImport.update({
   path: '/inspecao/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPcpSaldosRoute = AppPcpSaldosRouteImport.update({
+  id: '/saldos',
+  path: '/saldos',
+  getParentRoute: () => AppPcpRoute,
+} as any)
+const AppPcpRoteirosRoute = AppPcpRoteirosRouteImport.update({
+  id: '/roteiros',
+  path: '/roteiros',
+  getParentRoute: () => AppPcpRoute,
+} as any)
+const AppPcpOpsRoute = AppPcpOpsRouteImport.update({
+  id: '/ops',
+  path: '/ops',
+  getParentRoute: () => AppPcpRoute,
+} as any)
+const AppPcpEstruturasRoute = AppPcpEstruturasRouteImport.update({
+  id: '/estruturas',
+  path: '/estruturas',
+  getParentRoute: () => AppPcpRoute,
+} as any)
 const AppPalletsCodigoRoute = AppPalletsCodigoRouteImport.update({
   id: '/pallets/$codigo',
   path: '/pallets/$codigo',
@@ -146,6 +178,16 @@ const AppInspecaoRncRoute = AppInspecaoRncRouteImport.update({
   id: '/inspecao/rnc',
   path: '/inspecao/rnc',
   getParentRoute: () => AppRoute,
+} as any)
+const AppPcpRoteirosIdRoute = AppPcpRoteirosIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppPcpRoteirosRoute,
+} as any)
+const AppPcpEstruturasIdRoute = AppPcpEstruturasIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppPcpEstruturasRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -160,7 +202,7 @@ export interface FileRoutesByFullPath {
   '/inspecoes': typeof AppInspecoesRoute
   '/movimentacoes': typeof AppMovimentacoesRoute
   '/op-consulta': typeof AppOpConsultaRoute
-  '/pcp': typeof AppPcpRoute
+  '/pcp': typeof AppPcpRouteWithChildren
   '/recebimento': typeof AppRecebimentoRoute
   '/relatorios': typeof AppRelatoriosRoute
   '/rncs': typeof AppRncsRoute
@@ -169,8 +211,15 @@ export interface FileRoutesByFullPath {
   '/veiculos': typeof AppVeiculosRoute
   '/inspecao/rnc': typeof AppInspecaoRncRoute
   '/pallets/$codigo': typeof AppPalletsCodigoRoute
+  '/pcp/estruturas': typeof AppPcpEstruturasRouteWithChildren
+  '/pcp/ops': typeof AppPcpOpsRoute
+  '/pcp/roteiros': typeof AppPcpRoteirosRouteWithChildren
+  '/pcp/saldos': typeof AppPcpSaldosRoute
   '/inspecao/': typeof AppInspecaoIndexRoute
   '/pallets/': typeof AppPalletsIndexRoute
+  '/pcp/': typeof AppPcpIndexRoute
+  '/pcp/estruturas/$id': typeof AppPcpEstruturasIdRoute
+  '/pcp/roteiros/$id': typeof AppPcpRoteirosIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -183,7 +232,6 @@ export interface FileRoutesByTo {
   '/inspecoes': typeof AppInspecoesRoute
   '/movimentacoes': typeof AppMovimentacoesRoute
   '/op-consulta': typeof AppOpConsultaRoute
-  '/pcp': typeof AppPcpRoute
   '/recebimento': typeof AppRecebimentoRoute
   '/relatorios': typeof AppRelatoriosRoute
   '/rncs': typeof AppRncsRoute
@@ -193,8 +241,15 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/inspecao/rnc': typeof AppInspecaoRncRoute
   '/pallets/$codigo': typeof AppPalletsCodigoRoute
+  '/pcp/estruturas': typeof AppPcpEstruturasRouteWithChildren
+  '/pcp/ops': typeof AppPcpOpsRoute
+  '/pcp/roteiros': typeof AppPcpRoteirosRouteWithChildren
+  '/pcp/saldos': typeof AppPcpSaldosRoute
   '/inspecao': typeof AppInspecaoIndexRoute
   '/pallets': typeof AppPalletsIndexRoute
+  '/pcp': typeof AppPcpIndexRoute
+  '/pcp/estruturas/$id': typeof AppPcpEstruturasIdRoute
+  '/pcp/roteiros/$id': typeof AppPcpRoteirosIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -209,7 +264,7 @@ export interface FileRoutesById {
   '/_app/inspecoes': typeof AppInspecoesRoute
   '/_app/movimentacoes': typeof AppMovimentacoesRoute
   '/_app/op-consulta': typeof AppOpConsultaRoute
-  '/_app/pcp': typeof AppPcpRoute
+  '/_app/pcp': typeof AppPcpRouteWithChildren
   '/_app/recebimento': typeof AppRecebimentoRoute
   '/_app/relatorios': typeof AppRelatoriosRoute
   '/_app/rncs': typeof AppRncsRoute
@@ -219,8 +274,15 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/_app/inspecao/rnc': typeof AppInspecaoRncRoute
   '/_app/pallets/$codigo': typeof AppPalletsCodigoRoute
+  '/_app/pcp/estruturas': typeof AppPcpEstruturasRouteWithChildren
+  '/_app/pcp/ops': typeof AppPcpOpsRoute
+  '/_app/pcp/roteiros': typeof AppPcpRoteirosRouteWithChildren
+  '/_app/pcp/saldos': typeof AppPcpSaldosRoute
   '/_app/inspecao/': typeof AppInspecaoIndexRoute
   '/_app/pallets/': typeof AppPalletsIndexRoute
+  '/_app/pcp/': typeof AppPcpIndexRoute
+  '/_app/pcp/estruturas/$id': typeof AppPcpEstruturasIdRoute
+  '/_app/pcp/roteiros/$id': typeof AppPcpRoteirosIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -245,8 +307,15 @@ export interface FileRouteTypes {
     | '/veiculos'
     | '/inspecao/rnc'
     | '/pallets/$codigo'
+    | '/pcp/estruturas'
+    | '/pcp/ops'
+    | '/pcp/roteiros'
+    | '/pcp/saldos'
     | '/inspecao/'
     | '/pallets/'
+    | '/pcp/'
+    | '/pcp/estruturas/$id'
+    | '/pcp/roteiros/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -259,7 +328,6 @@ export interface FileRouteTypes {
     | '/inspecoes'
     | '/movimentacoes'
     | '/op-consulta'
-    | '/pcp'
     | '/recebimento'
     | '/relatorios'
     | '/rncs'
@@ -269,8 +337,15 @@ export interface FileRouteTypes {
     | '/'
     | '/inspecao/rnc'
     | '/pallets/$codigo'
+    | '/pcp/estruturas'
+    | '/pcp/ops'
+    | '/pcp/roteiros'
+    | '/pcp/saldos'
     | '/inspecao'
     | '/pallets'
+    | '/pcp'
+    | '/pcp/estruturas/$id'
+    | '/pcp/roteiros/$id'
   id:
     | '__root__'
     | '/_app'
@@ -294,8 +369,15 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/_app/inspecao/rnc'
     | '/_app/pallets/$codigo'
+    | '/_app/pcp/estruturas'
+    | '/_app/pcp/ops'
+    | '/_app/pcp/roteiros'
+    | '/_app/pcp/saldos'
     | '/_app/inspecao/'
     | '/_app/pallets/'
+    | '/_app/pcp/'
+    | '/_app/pcp/estruturas/$id'
+    | '/_app/pcp/roteiros/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -438,6 +520,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAprovacoesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/pcp/': {
+      id: '/_app/pcp/'
+      path: '/'
+      fullPath: '/pcp/'
+      preLoaderRoute: typeof AppPcpIndexRouteImport
+      parentRoute: typeof AppPcpRoute
+    }
     '/_app/pallets/': {
       id: '/_app/pallets/'
       path: '/pallets'
@@ -451,6 +540,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/inspecao/'
       preLoaderRoute: typeof AppInspecaoIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_app/pcp/saldos': {
+      id: '/_app/pcp/saldos'
+      path: '/saldos'
+      fullPath: '/pcp/saldos'
+      preLoaderRoute: typeof AppPcpSaldosRouteImport
+      parentRoute: typeof AppPcpRoute
+    }
+    '/_app/pcp/roteiros': {
+      id: '/_app/pcp/roteiros'
+      path: '/roteiros'
+      fullPath: '/pcp/roteiros'
+      preLoaderRoute: typeof AppPcpRoteirosRouteImport
+      parentRoute: typeof AppPcpRoute
+    }
+    '/_app/pcp/ops': {
+      id: '/_app/pcp/ops'
+      path: '/ops'
+      fullPath: '/pcp/ops'
+      preLoaderRoute: typeof AppPcpOpsRouteImport
+      parentRoute: typeof AppPcpRoute
+    }
+    '/_app/pcp/estruturas': {
+      id: '/_app/pcp/estruturas'
+      path: '/estruturas'
+      fullPath: '/pcp/estruturas'
+      preLoaderRoute: typeof AppPcpEstruturasRouteImport
+      parentRoute: typeof AppPcpRoute
     }
     '/_app/pallets/$codigo': {
       id: '/_app/pallets/$codigo'
@@ -466,8 +583,64 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppInspecaoRncRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/pcp/roteiros/$id': {
+      id: '/_app/pcp/roteiros/$id'
+      path: '/$id'
+      fullPath: '/pcp/roteiros/$id'
+      preLoaderRoute: typeof AppPcpRoteirosIdRouteImport
+      parentRoute: typeof AppPcpRoteirosRoute
+    }
+    '/_app/pcp/estruturas/$id': {
+      id: '/_app/pcp/estruturas/$id'
+      path: '/$id'
+      fullPath: '/pcp/estruturas/$id'
+      preLoaderRoute: typeof AppPcpEstruturasIdRouteImport
+      parentRoute: typeof AppPcpEstruturasRoute
+    }
   }
 }
+
+interface AppPcpEstruturasRouteChildren {
+  AppPcpEstruturasIdRoute: typeof AppPcpEstruturasIdRoute
+}
+
+const AppPcpEstruturasRouteChildren: AppPcpEstruturasRouteChildren = {
+  AppPcpEstruturasIdRoute: AppPcpEstruturasIdRoute,
+}
+
+const AppPcpEstruturasRouteWithChildren =
+  AppPcpEstruturasRoute._addFileChildren(AppPcpEstruturasRouteChildren)
+
+interface AppPcpRoteirosRouteChildren {
+  AppPcpRoteirosIdRoute: typeof AppPcpRoteirosIdRoute
+}
+
+const AppPcpRoteirosRouteChildren: AppPcpRoteirosRouteChildren = {
+  AppPcpRoteirosIdRoute: AppPcpRoteirosIdRoute,
+}
+
+const AppPcpRoteirosRouteWithChildren = AppPcpRoteirosRoute._addFileChildren(
+  AppPcpRoteirosRouteChildren,
+)
+
+interface AppPcpRouteChildren {
+  AppPcpEstruturasRoute: typeof AppPcpEstruturasRouteWithChildren
+  AppPcpOpsRoute: typeof AppPcpOpsRoute
+  AppPcpRoteirosRoute: typeof AppPcpRoteirosRouteWithChildren
+  AppPcpSaldosRoute: typeof AppPcpSaldosRoute
+  AppPcpIndexRoute: typeof AppPcpIndexRoute
+}
+
+const AppPcpRouteChildren: AppPcpRouteChildren = {
+  AppPcpEstruturasRoute: AppPcpEstruturasRouteWithChildren,
+  AppPcpOpsRoute: AppPcpOpsRoute,
+  AppPcpRoteirosRoute: AppPcpRoteirosRouteWithChildren,
+  AppPcpSaldosRoute: AppPcpSaldosRoute,
+  AppPcpIndexRoute: AppPcpIndexRoute,
+}
+
+const AppPcpRouteWithChildren =
+  AppPcpRoute._addFileChildren(AppPcpRouteChildren)
 
 interface AppRouteChildren {
   AppAprovacoesRoute: typeof AppAprovacoesRoute
@@ -479,7 +652,7 @@ interface AppRouteChildren {
   AppInspecoesRoute: typeof AppInspecoesRoute
   AppMovimentacoesRoute: typeof AppMovimentacoesRoute
   AppOpConsultaRoute: typeof AppOpConsultaRoute
-  AppPcpRoute: typeof AppPcpRoute
+  AppPcpRoute: typeof AppPcpRouteWithChildren
   AppRecebimentoRoute: typeof AppRecebimentoRoute
   AppRelatoriosRoute: typeof AppRelatoriosRoute
   AppRncsRoute: typeof AppRncsRoute
@@ -503,7 +676,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppInspecoesRoute: AppInspecoesRoute,
   AppMovimentacoesRoute: AppMovimentacoesRoute,
   AppOpConsultaRoute: AppOpConsultaRoute,
-  AppPcpRoute: AppPcpRoute,
+  AppPcpRoute: AppPcpRouteWithChildren,
   AppRecebimentoRoute: AppRecebimentoRoute,
   AppRelatoriosRoute: AppRelatoriosRoute,
   AppRncsRoute: AppRncsRoute,
@@ -526,13 +699,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

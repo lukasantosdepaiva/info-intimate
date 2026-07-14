@@ -54,11 +54,13 @@ export const SETORES_VALIDOS: Setor[] = ["administração", "pcp", "logística",
 export const ROTAS_POR_PERFIL: Record<Perfil, string[]> = {
   admin: [
     "/", "/recebimento", "/pallets", "/scanner", "/estoque", "/movimentacoes",
-    "/aprovacoes", "/inspecao", "/inspecao/rnc", "/pcp",
+    "/aprovacoes", "/inspecao", "/inspecao/rnc",
+    "/pcp", "/pcp/estruturas", "/pcp/roteiros", "/pcp/ops", "/pcp/saldos",
     "/saidas", "/veiculos", "/historico", "/relatorios", "/configuracoes",
   ],
   pcp: [
-    "/", "/pcp", "/relatorios", "/historico",
+    "/", "/pcp", "/pcp/estruturas", "/pcp/roteiros", "/pcp/ops", "/pcp/saldos",
+    "/relatorios", "/historico",
   ],
   logistica: [
     "/", "/recebimento", "/pallets", "/scanner", "/estoque", "/movimentacoes",
