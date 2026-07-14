@@ -3,13 +3,13 @@ import { PageGuard } from "@/components/page-guard";
 import { cn } from "@/lib/utils";
 import { LayoutDashboard, Boxes, Route as RouteIcon, FileText, Warehouse } from "lucide-react";
 
-const TABS = [
+const TABS: ReadonlyArray<{ to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }> = [
   { to: "/pcp", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/pcp/estruturas", label: "Estruturas (BOM)", icon: Boxes },
   { to: "/pcp/roteiros", label: "Roteiros", icon: RouteIcon },
   { to: "/pcp/ops", label: "Ordens de Produção", icon: FileText },
   { to: "/pcp/saldos", label: "Consulta de Saldo", icon: Warehouse },
-] as const;
+];
 
 function PcpLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
