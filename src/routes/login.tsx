@@ -12,6 +12,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 
 const TEST_EMAIL = "admin@specialdecor.test";
 const TEST_PASSWORD = "Admin@123456";
+const PCP_TEST_EMAIL = "pcp@specialdecor.test";
+const PCP_TEST_PASSWORD = "Pcp@123456";
 
 async function redirectByPerfil(navigate: ReturnType<typeof useNavigate>) {
   try {
