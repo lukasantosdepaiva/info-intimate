@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { RefreshCw, AlertCircle, Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,8 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CronogramaPcpRow } from "@/lib/types";
 
-function isoWeek(d: Date): string {
-  const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+function isoWeekFromParts(year: number, month: number, dayOfMonth: number): string {
+  const dt = new Date(Date.UTC(year, month, dayOfMonth));
   const day = dt.getUTCDay() || 7;
   dt.setUTCDate(dt.getUTCDate() + 4 - day);
   const yearStart = new Date(Date.UTC(dt.getUTCFullYear(), 0, 1));
@@ -18,15 +18,28 @@ function isoWeek(d: Date): string {
   return `${dt.getUTCFullYear()}-W${String(wk).padStart(2, "0")}`;
 }
 
+function isoWeek(d: Date): string {
+  return isoWeekFromParts(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
 function weekRange(weekStr: string): { start: Date; end: Date } | null {
   const m = weekStr.match(/^(\d{4})-W(\d{2})$/);
   if (!m) return null;
   const year = Number(m[1]);
   const week = Number(m[2]);
-  const simple = new Date(Date.UTC(year, 0, 1 + (week - 1) * 7));
-  const dow = simple.getUTCDay();
-  const start = new Date(simple);
-  start.setUTCDate(simple.getUTCDate() - ((dow + 6) % 7));
+  if (week < 1 || week > 53) return null;
+
+  // A semana ISO 1 sempre contém 4 de janeiro; segunda-feira é o primeiro dia.
+  const januaryFourth = new Date(Date.UTC(year, 0, 4));
+  const januaryFourthDay = januaryFourth.getUTCDay() || 7;
+  const start = new Date(januaryFourth);
+  start.setUTCDate(januaryFourth.getUTCDate() - januaryFourthDay + 1 + (week - 1) * 7);
+  if (
+    isoWeekFromParts(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()) !== weekStr
+  ) {
+    return null;
+  }
+
   const end = new Date(start);
   end.setUTCDate(start.getUTCDate() + 7);
   return { start, end };
@@ -34,12 +47,18 @@ function weekRange(weekStr: string): { start: Date; end: Date } | null {
 
 const statusBadge = (s: string | null) => {
   switch (s) {
-    case "liberada": return "default";
-    case "aberta": return "secondary";
-    case "em_producao": return "outline";
-    case "finalizada": return "secondary";
-    case "cancelada": return "destructive";
-    default: return "outline";
+    case "liberada":
+      return "default";
+    case "aberta":
+      return "secondary";
+    case "em_producao":
+      return "outline";
+    case "finalizada":
+      return "secondary";
+    case "cancelada":
+      return "destructive";
+    default:
+      return "outline";
   }
 };
 
@@ -50,33 +69,32 @@ function DashboardPcp() {
   const [semana, setSemana] = useState(isoWeek(new Date()));
 
   const fetch = useCallback(async () => {
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
+      const range = weekRange(semana);
+      if (!range) throw new Error("Semana inválida.");
+
       const supabase = getSupabase();
       const { data, error: dbErr } = await supabase
         .from("vw_cronograma_pcp")
         .select("*")
-        .order("data_criacao", { ascending: false })
-        .limit(500);
+        .gte("data_planejamento", range.start.toISOString().slice(0, 10))
+        .lt("data_planejamento", range.end.toISOString().slice(0, 10))
+        .order("data_planejamento", { ascending: true })
+        .limit(1000);
       if (dbErr) throw new Error(dbErr.message);
       setRows((data ?? []) as CronogramaPcpRow[]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro ao carregar cronograma.");
-    } finally { setLoading(false); }
-  }, []);
+    } finally {
+      setLoading(false);
+    }
+  }, [semana]);
 
-  useEffect(() => { fetch(); }, [fetch]);
-
-  const filtered = useMemo(() => {
-    const range = weekRange(semana);
-    if (!range) return rows;
-    return rows.filter((r) => {
-      const ref = r.data_prevista_veiculo ?? r.data_criacao;
-      if (!ref) return false;
-      const d = new Date(ref);
-      return d >= range.start && d < range.end;
-    });
-  }, [rows, semana]);
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
 
   return (
     <main className="space-y-4">
@@ -87,18 +105,35 @@ function DashboardPcp() {
         </div>
         <div className="flex items-end gap-2">
           <div className="space-y-1">
-            <label className="text-[10px] font-medium uppercase text-muted-foreground">Semana</label>
+            <label className="text-[10px] font-medium uppercase text-muted-foreground">
+              Semana
+            </label>
             <div className="relative">
               <Calendar className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input type="week" value={semana} onChange={(e) => setSemana(e.target.value)} className="h-8 pl-7 text-xs w-48" />
+              <Input
+                type="week"
+                value={semana}
+                onChange={(e) => setSemana(e.target.value)}
+                className="h-8 pl-7 text-xs w-48"
+              />
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setSemana(isoWeek(new Date()))}>Esta semana</Button>
-          <Button variant="ghost" size="icon" onClick={fetch}><RefreshCw className="h-4 w-4" /></Button>
+          <Button variant="outline" size="sm" onClick={() => setSemana(isoWeek(new Date()))}>
+            Esta semana
+          </Button>
+          <Button variant="ghost" size="icon" onClick={fetch}>
+            <RefreshCw className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      {loading && <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>}
+      {loading && (
+        <div className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
+        </div>
+      )}
 
       {!loading && error && (
         <Card className="border-destructive/50 bg-destructive/5">
@@ -125,10 +160,14 @@ function DashboardPcp() {
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 && (
-                <tr><td colSpan={8} className="p-6 text-center text-sm text-muted-foreground">Nenhuma OP na semana selecionada.</td></tr>
+              {rows.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="p-6 text-center text-sm text-muted-foreground">
+                    Nenhuma OP na semana selecionada.
+                  </td>
+                </tr>
               )}
-              {filtered.map((r) => (
+              {rows.map((r) => (
                 <tr key={r.op_id} className="border-b hover:bg-muted/30">
                   <td className="p-3 font-mono font-semibold">
                     {r.op_pai_id && <span className="text-muted-foreground mr-1">↳</span>}
@@ -136,10 +175,22 @@ function DashboardPcp() {
                   </td>
                   <td className="p-3">{r.codigo_referencia ?? "—"}</td>
                   <td className="p-3">{r.produto_final ?? r.descricao_produto ?? "—"}</td>
-                  <td className="p-3 text-right tabular-nums">{r.quantidade_op?.toLocaleString("pt-BR") ?? "—"}</td>
-                  <td className="p-3"><Badge variant={statusBadge(r.status_op)} className="text-[10px]">{r.status_op ?? "—"}</Badge></td>
-                  <td className="p-3 text-xs">{r.data_prevista_veiculo ? new Date(r.data_prevista_veiculo).toLocaleDateString("pt-BR") : "—"}</td>
-                  <td className="p-3 text-xs text-muted-foreground">{r.data_criacao ? new Date(r.data_criacao).toLocaleDateString("pt-BR") : "—"}</td>
+                  <td className="p-3 text-right tabular-nums">
+                    {r.quantidade_op?.toLocaleString("pt-BR") ?? "—"}
+                  </td>
+                  <td className="p-3">
+                    <Badge variant={statusBadge(r.status_op)} className="text-[10px]">
+                      {r.status_op ?? "—"}
+                    </Badge>
+                  </td>
+                  <td className="p-3 text-xs">
+                    {r.data_prevista_veiculo
+                      ? new Date(r.data_prevista_veiculo).toLocaleDateString("pt-BR")
+                      : "—"}
+                  </td>
+                  <td className="p-3 text-xs text-muted-foreground">
+                    {r.data_criacao ? new Date(r.data_criacao).toLocaleDateString("pt-BR") : "—"}
+                  </td>
                   <td className="p-3 text-xs">{r.op_pai_id ? "Filha" : "—"}</td>
                 </tr>
               ))}

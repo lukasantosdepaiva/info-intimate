@@ -24,8 +24,8 @@ const mainNav = [
   { title: "Roteiros", href: "/pcp/roteiros", icon: RouteIcon },
   { title: "Ordens de Produção", href: "/pcp/ops", icon: FileText },
   { title: "Consulta de Saldo", href: "/pcp/saldos", icon: Warehouse },
-  { title: "Histórico", href: "/historico", icon: History },
-  { title: "Relatórios", href: "/relatorios", icon: BarChart3 },
+  { title: "Histórico", href: "/pcp/historico", icon: History },
+  { title: "Relatórios", href: "/pcp/relatorios", icon: BarChart3 },
 ];
 
 export function PcpSidebar() {
@@ -55,13 +55,13 @@ export function PcpSidebar() {
       data-sidebar="root"
       className={cn(
         "fixed top-0 left-0 z-30 flex h-full flex-col border-r border-border bg-sidebar transition-all duration-200 ease-in-out",
-        collapsed ? "w-16" : "w-60"
+        collapsed ? "w-16" : "w-60",
       )}
     >
       <div
         className={cn(
           "flex h-14 items-center border-b border-border px-3",
-          collapsed ? "justify-center" : "justify-between"
+          collapsed ? "justify-center" : "justify-between",
         )}
       >
         {!collapsed && (
@@ -94,7 +94,7 @@ export function PcpSidebar() {
                 collapsed && "justify-center px-2",
                 active
                   ? "bg-sidebar-accent text-sidebar-primary"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
               )}
               title={collapsed ? item.title : undefined}
             >
@@ -112,21 +112,23 @@ export function PcpSidebar() {
           onClick={toggleTheme}
           className={cn(
             "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-            collapsed && "justify-center px-2"
+            collapsed && "justify-center px-2",
           )}
           title={collapsed ? "Alternar tema" : undefined}
         >
           {mounted ? (
-            isDark ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />
+            isDark ? (
+              <Sun className="h-4 w-4 shrink-0" />
+            ) : (
+              <Moon className="h-4 w-4 shrink-0" />
+            )
           ) : (
             <span className="h-4 w-4 shrink-0" />
           )}
           {!collapsed && <span>{isDark ? "Modo claro" : "Modo escuro"}</span>}
         </button>
         {!collapsed && (
-          <p className="mt-1 px-3 text-[10px] text-sidebar-foreground/40">
-            Módulo PCP v1.0
-          </p>
+          <p className="mt-1 px-3 text-[10px] text-sidebar-foreground/40">Módulo PCP v1.0</p>
         )}
       </div>
     </aside>
@@ -176,7 +178,7 @@ export function PcpSidebar() {
                         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                         active
                           ? "bg-sidebar-accent text-sidebar-primary"
-                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
                       )}
                     >
                       <Icon className="h-4 w-4 shrink-0" />
@@ -192,7 +194,11 @@ export function PcpSidebar() {
                   className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                 >
                   {mounted ? (
-                    isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />
+                    isDark ? (
+                      <Sun className="h-4 w-4" />
+                    ) : (
+                      <Moon className="h-4 w-4" />
+                    )
                   ) : (
                     <span className="h-4 w-4 shrink-0" />
                   )}

@@ -10,7 +10,7 @@ interface LocaisEstoqueContextValue {
 
 const LocaisEstoqueContext = createContext<LocaisEstoqueContextValue>({
   locais: [],
-  loading: true,
+  loading: false,
   error: null,
 });
 
@@ -18,12 +18,25 @@ export function useLocaisEstoque() {
   return useContext(LocaisEstoqueContext);
 }
 
-export function LocaisEstoqueProvider({ children }: { children: React.ReactNode }) {
+export function LocaisEstoqueProvider({
+  children,
+  userId,
+}: {
+  children: React.ReactNode;
+  userId: string | null;
+}) {
   const [locais, setLocais] = useState<LocalRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!userId) {
+      setLocais([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     let cancelado = false;
     (async () => {
       setLoading(true);
@@ -35,7 +48,7 @@ export function LocaisEstoqueProvider({ children }: { children: React.ReactNode 
           .order("codigo_local");
         if (dbError) throw new Error(dbError.message);
         if (!cancelado) {
-          setLocais(((data ?? []) as unknown as LocalRow[]));
+          setLocais((data ?? []) as unknown as LocalRow[]);
           setError(null);
         }
       } catch (err: unknown) {
@@ -50,7 +63,7 @@ export function LocaisEstoqueProvider({ children }: { children: React.ReactNode 
     return () => {
       cancelado = true;
     };
-  }, []);
+  }, [userId]);
 
   return (
     <LocaisEstoqueContext.Provider value={{ locais, loading, error }}>

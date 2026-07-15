@@ -1,6 +1,7 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import { getSupabase } from "@/lib/supabase";
+import { getAuthenticatedLandingPath } from "@/lib/auth-landing";
 import type { User } from "@supabase/supabase-js";
 import { LocaisEstoqueProvider } from "@/contexts/locais-estoque-context";
 
@@ -31,37 +32,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const redirectRequest = useRef(0);
 
   useEffect(() => {
     const supabase = getSupabase();
+    let active = true;
 
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setUser(data.user);
+    void (async () => {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (error) throw error;
+        if (active) setUser(data.user ?? null);
+      } catch {
+        await supabase.auth.signOut({ scope: "local" }).catch(() => undefined);
+        if (active) setUser(null);
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return;
+      setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => listener?.subscription.unsubscribe();
+    return () => {
+      active = false;
+      listener?.subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
     if (loading) return;
-    const isPublic = PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
+    const isPublic = PUBLIC_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
     if (!user && !isPublic) {
-      navigate({ to: "/login" });
+      redirectRequest.current += 1;
+      void navigate({ to: "/login", replace: true });
+      return;
     }
     if (user && isPublic) {
-      navigate({ to: "/" });
+      const requestId = ++redirectRequest.current;
+      void getAuthenticatedLandingPath(user.id)
+        .then((to) => {
+          if (redirectRequest.current === requestId) {
+            void navigate({ to, replace: true });
+          }
+        })
+        .catch(() => {
+          if (redirectRequest.current === requestId) {
+            void navigate({ to: "/", replace: true });
+          }
+        });
     }
   }, [user, loading, pathname, navigate]);
 
   const login = useCallback(async (email: string, password: string) => {
     const supabase = getSupabase();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
+    setUser(data.user);
   }, []);
 
   const signup = useCallback(async (email: string, password: string) => {
@@ -72,16 +102,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     const supabase = getSupabase();
-    await supabase.auth.signOut();
-    setUser(null);
-    navigate({ to: "/login" });
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      redirectRequest.current += 1;
+      setUser(null);
+      setLoading(false);
+      void navigate({ to: "/login", replace: true });
+    }
   }, [navigate]);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
-      <LocaisEstoqueProvider>
-        {children}
-      </LocaisEstoqueProvider>
+      <LocaisEstoqueProvider userId={user?.id ?? null}>{children}</LocaisEstoqueProvider>
     </AuthContext.Provider>
   );
 }

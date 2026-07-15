@@ -48,7 +48,11 @@ interface RecebimentoRow {
   created_at: string;
   quantidade_recebida: number;
   responsavel: string | null;
-  nfs_entrada?: { numero_nf?: string; clientes?: { nome?: string }; fornecedores?: { nome?: string } } | null;
+  nfs_entrada?: {
+    numero_nf?: string;
+    clientes?: { nome?: string };
+    fornecedores?: { nome?: string };
+  } | null;
   referencias?: { codigo_referencia?: string } | null;
   sds?: { numero_sd?: string } | null;
   pallets?: { codigo_pallet?: string } | null;
@@ -124,7 +128,12 @@ interface VeiculoControleRow {
   created_at: string;
   status_aprovacao: string | null;
   responsavel_conferencia: string | null;
-  veiculos?: { placa?: string; tipo_veiculo?: string; transportadora?: string; motorista?: string } | null;
+  veiculos?: {
+    placa?: string;
+    tipo_veiculo?: string;
+    transportadora?: string;
+    motorista?: string;
+  } | null;
   saidas_armazem_05?: { nf_saida_numero?: string } | null;
 }
 
@@ -172,19 +181,15 @@ function DateRangePicker({
             variant="outline"
             className={cn(
               "w-full justify-start text-left font-normal",
-              !date && "text-muted-foreground"
+              !date && "text-muted-foreground",
             )}
           >
             <CalendarDays className="mr-2 h-4 w-4" />
-            {date?.from ? (
-              date.to ? (
-                `${format(date.from, "dd/MM/yy")} - ${format(date.to, "dd/MM/yy")}`
-              ) : (
-                format(date.from, "dd/MM/yy")
-              )
-            ) : (
-              "Selecionar período"
-            )}
+            {date?.from
+              ? date.to
+                ? `${format(date.from, "dd/MM/yy")} - ${format(date.to, "dd/MM/yy")}`
+                : format(date.from, "dd/MM/yy")
+              : "Selecionar período"}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -238,43 +243,75 @@ function FilterPanel({
           <DateRangePicker label="Período" date={dateRange} setDate={setDateRange} />
           <div className="grid gap-1">
             <Label className="text-xs">Pallet</Label>
-            <Input className="h-8 text-xs" placeholder="Código" value={filters.pallet ?? ""}
-              onChange={e => setFilters({ ...filters, pallet: e.target.value })} />
+            <Input
+              className="h-8 text-xs"
+              placeholder="Código"
+              value={filters.pallet ?? ""}
+              onChange={(e) => setFilters({ ...filters, pallet: e.target.value })}
+            />
           </div>
           <div className="grid gap-1">
             <Label className="text-xs">NF</Label>
-            <Input className="h-8 text-xs" placeholder="Número" value={filters.nf ?? ""}
-              onChange={e => setFilters({ ...filters, nf: e.target.value })} />
+            <Input
+              className="h-8 text-xs"
+              placeholder="Número"
+              value={filters.nf ?? ""}
+              onChange={(e) => setFilters({ ...filters, nf: e.target.value })}
+            />
           </div>
           <div className="grid gap-1">
             <Label className="text-xs">Referência</Label>
-            <Input className="h-8 text-xs" placeholder="Código" value={filters.referencia ?? ""}
-              onChange={e => setFilters({ ...filters, referencia: e.target.value })} />
+            <Input
+              className="h-8 text-xs"
+              placeholder="Código"
+              value={filters.referencia ?? ""}
+              onChange={(e) => setFilters({ ...filters, referencia: e.target.value })}
+            />
           </div>
           <div className="grid gap-1">
             <Label className="text-xs">SD</Label>
-            <Input className="h-8 text-xs" placeholder="Número" value={filters.sd ?? ""}
-              onChange={e => setFilters({ ...filters, sd: e.target.value })} />
+            <Input
+              className="h-8 text-xs"
+              placeholder="Número"
+              value={filters.sd ?? ""}
+              onChange={(e) => setFilters({ ...filters, sd: e.target.value })}
+            />
           </div>
           <div className="grid gap-1">
             <Label className="text-xs">Status</Label>
-            <Input className="h-8 text-xs" placeholder="Status" value={filters.status ?? ""}
-              onChange={e => setFilters({ ...filters, status: e.target.value })} />
+            <Input
+              className="h-8 text-xs"
+              placeholder="Status"
+              value={filters.status ?? ""}
+              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+            />
           </div>
           <div className="grid gap-1">
             <Label className="text-xs">Armazém/Local</Label>
-            <Input className="h-8 text-xs" placeholder="Código" value={filters.armazemLocal ?? ""}
-              onChange={e => setFilters({ ...filters, armazemLocal: e.target.value })} />
+            <Input
+              className="h-8 text-xs"
+              placeholder="Código"
+              value={filters.armazemLocal ?? ""}
+              onChange={(e) => setFilters({ ...filters, armazemLocal: e.target.value })}
+            />
           </div>
           <div className="grid gap-1">
             <Label className="text-xs">Responsável</Label>
-            <Input className="h-8 text-xs" placeholder="Nome" value={filters.responsavel ?? ""}
-              onChange={e => setFilters({ ...filters, responsavel: e.target.value })} />
+            <Input
+              className="h-8 text-xs"
+              placeholder="Nome"
+              value={filters.responsavel ?? ""}
+              onChange={(e) => setFilters({ ...filters, responsavel: e.target.value })}
+            />
           </div>
           <div className="grid gap-1">
             <Label className="text-xs">Placa</Label>
-            <Input className="h-8 text-xs" placeholder="Veículo" value={filters.placa ?? ""}
-              onChange={e => setFilters({ ...filters, placa: e.target.value })} />
+            <Input
+              className="h-8 text-xs"
+              placeholder="Veículo"
+              value={filters.placa ?? ""}
+              onChange={(e) => setFilters({ ...filters, placa: e.target.value })}
+            />
           </div>
         </div>
         <div className="mt-4 flex justify-end">
@@ -289,9 +326,18 @@ function FilterPanel({
 
 // --- CSV Export ---
 function exportCSV(filename: string, rows: Record<string, unknown>[]) {
-  if (!rows?.length) { toast.info("Nenhum dado para exportar."); return; }
+  if (!rows?.length) {
+    toast.info("Nenhum dado para exportar.");
+    return;
+  }
   const header = Object.keys(rows[0]).join(",");
-  const body = rows.map(r => Object.values(r).map(v => String(v ?? "")).join(",")).join("\n");
+  const body = rows
+    .map((r) =>
+      Object.values(r)
+        .map((v) => String(v ?? ""))
+        .join(","),
+    )
+    .join("\n");
   const blob = new Blob(["\uFEFF" + header + "\n" + body], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -320,39 +366,66 @@ const REPORTS: ReportDef[] = [
 ];
 
 // --- Main Page ---
-function RelatoriosPage() {
+export function RelatoriosPage() {
   const [activeReport, setActiveReport] = useState("recebimentos");
   const [filters, setFilters] = useState<ReportFilters>({});
   const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<SummaryData>({
-    total_recebido: 0, total_estoque: 0, total_movimentado: 0,
-    total_armazem05: 0, total_saidas: 0, total_rncs_abertas: 0, total_veiculos: 0,
+    total_recebido: 0,
+    total_estoque: 0,
+    total_movimentado: 0,
+    total_armazem05: 0,
+    total_saidas: 0,
+    total_rncs_abertas: 0,
+    total_veiculos: 0,
   });
 
   const fetchResumo = useCallback(async () => {
     try {
       const supabase = getSupabase();
       // Recebimentos
-      const { count: totalRec } = await supabase.from("recebimentos").select("*", { count: "exact", head: true });
+      const { count: totalRec } = await supabase
+        .from("recebimentos")
+        .select("*", { count: "exact", head: true });
       // Saldos
       const { data: saldos } = await supabase.from("saldos_pallet").select("quantidade");
-      const totalEstoque = (saldos as { quantidade: number }[] ?? []).reduce((a, b) => a + (b.quantidade ?? 0), 0);
+      const totalEstoque = ((saldos as { quantidade: number }[]) ?? []).reduce(
+        (a, b) => a + (b.quantidade ?? 0),
+        0,
+      );
       // Movimentações
-      const { count: totalMov } = await supabase.from("movimentacoes").select("*", { count: "exact", head: true });
+      const { count: totalMov } = await supabase
+        .from("movimentacoes")
+        .select("*", { count: "exact", head: true });
       // Saídas Arm 05
-      const { data: locaisData } = await supabase.from("locais_estoque").select("id").ilike("codigo_local", "05-%");
-      const locaisIds = ((locaisData ?? []) as { id: string }[]).map(l => l.id);
-      const { data: saidas05 } = await supabase.from("saldos_pallet").select("quantidade")
+      const { data: locaisData } = await supabase
+        .from("locais_estoque")
+        .select("id")
+        .ilike("codigo_local", "05-%");
+      const locaisIds = ((locaisData ?? []) as { id: string }[]).map((l) => l.id);
+      const { data: saidas05 } = await supabase
+        .from("saldos_pallet")
+        .select("quantidade")
         .in("local_estoque_id", locaisIds.length > 0 ? locaisIds : ["none"]);
-      const totalArm05 = (saidas05 as { quantidade: number }[] ?? []).reduce((a, b) => a + (b.quantidade ?? 0), 0);
+      const totalArm05 = ((saidas05 as { quantidade: number }[]) ?? []).reduce(
+        (a, b) => a + (b.quantidade ?? 0),
+        0,
+      );
       // Saídas
-      const { count: totalSai } = await supabase.from("saidas_armazem_05").select("*", { count: "exact", head: true });
+      const { count: totalSai } = await supabase
+        .from("saidas_armazem_05")
+        .select("*", { count: "exact", head: true });
       // RNCs abertas
-      const { count: totalRnc } = await supabase.from("rncs").select("*", { count: "exact", head: true }).eq("status", "aberta");
+      const { count: totalRnc } = await supabase
+        .from("rncs")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "aberta");
       // Veículos
-      const { count: totalVei } = await supabase.from("veiculos").select("*", { count: "exact", head: true });
+      const { count: totalVei } = await supabase
+        .from("veiculos")
+        .select("*", { count: "exact", head: true });
 
       setSummary({
         total_recebido: totalRec ?? 0,
@@ -363,10 +436,14 @@ function RelatoriosPage() {
         total_rncs_abertas: totalRnc ?? 0,
         total_veiculos: totalVei ?? 0,
       });
-    } catch { /* silent */ }
+    } catch {
+      /* silent */
+    }
   }, []);
 
-  useEffect(() => { fetchResumo(); }, [fetchResumo]);
+  useEffect(() => {
+    fetchResumo();
+  }, [fetchResumo]);
 
   const fetchDadosRelatorio = useCallback(async () => {
     setLoading(true);
@@ -380,9 +457,11 @@ function RelatoriosPage() {
         case "recebimentos": {
           const { data } = await supabase
             .from("recebimentos")
-            .select("*, nfs_entrada!nf_entrada_id(*, clientes!cliente_id(*), fornecedores!fornecedor_id(*)), referencias!referencia_id(*), sds!sd_id(*), pallets!recebimento_id(*)")
+            .select(
+              "*, nfs_entrada!nf_entrada_id(*, clientes!cliente_id(*), fornecedores!fornecedor_id(*)), referencias!referencia_id(*), sds!sd_id(*), pallets!recebimento_id(*)",
+            )
             .order("created_at", { ascending: false });
-          rows = ((data ?? []) as RecebimentoRow[]).map(r => ({
+          rows = ((data ?? []) as RecebimentoRow[]).map((r) => ({
             data: r.created_at,
             nf_entrada: r.nfs_entrada?.numero_nf ?? "—",
             cliente: r.nfs_entrada?.clientes?.nome ?? "—",
@@ -398,16 +477,21 @@ function RelatoriosPage() {
         case "pallets": {
           const { data } = await supabase
             .from("pallets")
-            .select("*, referencias!referencia_id(*), sds!sd_id(*), nfs_entrada!nf_entrada_id(*), saldos_pallet(*)")
+            .select(
+              "*, referencias!referencia_id(*), sds!sd_id(*), nfs_entrada!nf_entrada_id(*), saldos_pallet(*)",
+            )
             .order("created_at", { ascending: false });
-          rows = ((data ?? []) as PalletFullRow[]).map(r => ({
+          rows = ((data ?? []) as PalletFullRow[]).map((r) => ({
             codigo: r.codigo_pallet,
             status: r.status ?? "—",
             referencia: r.referencias?.codigo_referencia ?? "—",
             sd: r.sds?.numero_sd ?? "—",
             nf_entrada: r.nfs_entrada?.numero_nf ?? "—",
             qtd_inicial: r.quantidade_inicial,
-            qtd_atual: (r.saldos_pallet ?? []).reduce((a: number, b: { quantidade: number }) => a + (b.quantidade ?? 0), 0),
+            qtd_atual: (r.saldos_pallet ?? []).reduce(
+              (a: number, b: { quantidade: number }) => a + (b.quantidade ?? 0),
+              0,
+            ),
             locais: (r.saldos_pallet ?? []).length + " local(is)",
           }));
           break;
@@ -417,7 +501,7 @@ function RelatoriosPage() {
             .from("vw_saldos_por_local")
             .select("*")
             .order("codigo_local");
-          rows = ((data ?? []) as EstoqueRow[]).map(r => ({
+          rows = ((data ?? []) as EstoqueRow[]).map((r) => ({
             armazem: r.armazem_codigo ?? "—",
             local: r.codigo_local ?? "—",
             total_pallets: r.total_pallets ?? 0,
@@ -428,9 +512,11 @@ function RelatoriosPage() {
         case "movimentacoes": {
           const { data } = await supabase
             .from("movimentacoes")
-            .select("*, pallets!pallet_id(codigo_pallet), local_origem!local_origem_id(codigo_local), local_destino!local_destino_id(codigo_local), lideres!lider_id(nome)")
+            .select(
+              "*, pallets!pallet_id(codigo_pallet), local_origem!local_origem_id(codigo_local), local_destino!local_destino_id(codigo_local), lideres!lider_id(nome)",
+            )
             .order("created_at", { ascending: false });
-          rows = ((data ?? []) as MovimentacaoFullRow[]).map(r => ({
+          rows = ((data ?? []) as MovimentacaoFullRow[]).map((r) => ({
             data: r.created_at,
             pallet: r.pallets?.codigo_pallet ?? r.pallet_id?.slice(0, 8) ?? "—",
             origem: r.local_origem?.codigo_local ?? "—",
@@ -447,7 +533,7 @@ function RelatoriosPage() {
             .from("inspecoes")
             .select("*, pallets!pallet_id(codigo_pallet)")
             .order("created_at", { ascending: false });
-          rows = ((data ?? []) as InspecaoFullRow[]).map(r => ({
+          rows = ((data ?? []) as InspecaoFullRow[]).map((r) => ({
             data: r.created_at,
             pallet: r.pallets?.codigo_pallet ?? r.pallet_id?.slice(0, 8) ?? "—",
             resultado: r.resultado ?? "—",
@@ -460,9 +546,11 @@ function RelatoriosPage() {
         case "rncs": {
           const { data } = await supabase
             .from("rncs")
-            .select("*, pallets!pallet_id(codigo_pallet), referencias!referencia_id(codigo_referencia), sds!sd_id(numero_sd)")
+            .select(
+              "*, pallets!pallet_id(codigo_pallet), referencias!referencia_id(codigo_referencia), sds!sd_id(numero_sd)",
+            )
             .order("created_at", { ascending: false });
-          rows = ((data ?? []) as RncFullRow[]).map(r => ({
+          rows = ((data ?? []) as RncFullRow[]).map((r) => ({
             data: r.created_at,
             pallet: r.pallets?.codigo_pallet ?? r.pallet_id?.slice(0, 8) ?? "—",
             tipo_defeito: r.tipo_defeito ?? "—",
@@ -476,9 +564,11 @@ function RelatoriosPage() {
         case "saidas": {
           const { data } = await supabase
             .from("saidas_armazem_05")
-            .select("*, pallets!pallet_id(codigo_pallet), ops_pcp!op_id(numero_op, produto_final), nfs_entrada!nf_entrada_id(numero_nf)")
+            .select(
+              "*, pallets!pallet_id(codigo_pallet), ops_pcp!op_id(numero_op, produto_final), nfs_entrada!nf_entrada_id(numero_nf)",
+            )
             .order("created_at", { ascending: false });
-          rows = ((data ?? []) as SaidaFullRow[]).map(r => ({
+          rows = ((data ?? []) as SaidaFullRow[]).map((r) => ({
             data: r.created_at,
             pallet: r.pallets?.codigo_pallet ?? r.pallet_id?.slice(0, 8) ?? "—",
             op: r.ops_pcp?.numero_op ?? "—",
@@ -493,9 +583,11 @@ function RelatoriosPage() {
         case "veiculos": {
           const { data } = await supabase
             .from("controle_veiculos")
-            .select("*, veiculos!veiculo_id(placa, tipo_veiculo, transportadora, motorista), saidas_armazem_05!saida_id(nf_saida_numero)")
+            .select(
+              "*, veiculos!veiculo_id(placa, tipo_veiculo, transportadora, motorista), saidas_armazem_05!saida_id(nf_saida_numero)",
+            )
             .order("created_at", { ascending: false });
-          rows = ((data ?? []) as VeiculoControleRow[]).map(r => ({
+          rows = ((data ?? []) as VeiculoControleRow[]).map((r) => ({
             data: r.created_at,
             placa: r.veiculos?.placa ?? "—",
             tipo: r.veiculos?.tipo_veiculo ?? "—",
@@ -511,49 +603,81 @@ function RelatoriosPage() {
 
       // Apply in-memory filters
       let filtered = rows;
-      if (filters.dataInicio) filtered = filtered.filter(r => String(r.data ?? "").startsWith(filters.dataInicio!));
-      if (filters.dataFim) filtered = filtered.filter(r => String(r.data ?? "").startsWith(filters.dataFim!));
+      if (filters.dataInicio)
+        filtered = filtered.filter((r) => String(r.data ?? "").startsWith(filters.dataInicio!));
+      if (filters.dataFim)
+        filtered = filtered.filter((r) => String(r.data ?? "").startsWith(filters.dataFim!));
       if (filters.pallet) {
         const q = filters.pallet.toLowerCase();
-        filtered = filtered.filter(r =>
-          String(r.pallet ?? r.codigo ?? "").toLowerCase().includes(q) ||
-          String(r.pallet_codigo ?? "").toLowerCase().includes(q)
+        filtered = filtered.filter(
+          (r) =>
+            String(r.pallet ?? r.codigo ?? "")
+              .toLowerCase()
+              .includes(q) ||
+            String(r.pallet_codigo ?? "")
+              .toLowerCase()
+              .includes(q),
         );
       }
       if (filters.nf) {
         const q = filters.nf.toLowerCase();
-        filtered = filtered.filter(r =>
-          String(r.nf_entrada ?? r.nf_saida ?? "").toLowerCase().includes(q)
+        filtered = filtered.filter((r) =>
+          String(r.nf_entrada ?? r.nf_saida ?? "")
+            .toLowerCase()
+            .includes(q),
         );
       }
       if (filters.referencia) {
         const q = filters.referencia.toLowerCase();
-        filtered = filtered.filter(r => String(r.referencia ?? "").toLowerCase().includes(q));
+        filtered = filtered.filter((r) =>
+          String(r.referencia ?? "")
+            .toLowerCase()
+            .includes(q),
+        );
       }
       if (filters.sd) {
         const q = filters.sd.toLowerCase();
-        filtered = filtered.filter(r => String(r.sd ?? "").toLowerCase().includes(q));
+        filtered = filtered.filter((r) =>
+          String(r.sd ?? "")
+            .toLowerCase()
+            .includes(q),
+        );
       }
       if (filters.status) {
         const q = filters.status.toLowerCase();
-        filtered = filtered.filter(r => String(r.status ?? "").toLowerCase().includes(q));
+        filtered = filtered.filter((r) =>
+          String(r.status ?? "")
+            .toLowerCase()
+            .includes(q),
+        );
       }
       if (filters.armazemLocal) {
         const q = filters.armazemLocal.toLowerCase();
-        filtered = filtered.filter(r =>
-          String(r.origem ?? r.destino ?? r.armazem ?? r.local ?? "").toLowerCase().includes(q)
+        filtered = filtered.filter((r) =>
+          String(r.origem ?? r.destino ?? r.armazem ?? r.local ?? "")
+            .toLowerCase()
+            .includes(q),
         );
       }
       if (filters.responsavel) {
         const q = filters.responsavel.toLowerCase();
-        filtered = filtered.filter(r =>
-          String(r.responsavel ?? r.lider ?? r.liberado ?? "").toLowerCase().includes(q) ||
-          String(r.responsavel_baixa ?? "").toLowerCase().includes(q)
+        filtered = filtered.filter(
+          (r) =>
+            String(r.responsavel ?? r.lider ?? r.liberado ?? "")
+              .toLowerCase()
+              .includes(q) ||
+            String(r.responsavel_baixa ?? "")
+              .toLowerCase()
+              .includes(q),
         );
       }
       if (filters.placa) {
         const q = filters.placa.toLowerCase();
-        filtered = filtered.filter(r => String(r.placa ?? "").toLowerCase().includes(q));
+        filtered = filtered.filter((r) =>
+          String(r.placa ?? "")
+            .toLowerCase()
+            .includes(q),
+        );
       }
 
       setData(filtered);
@@ -613,9 +737,9 @@ function RelatoriosPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              {cols.map(col => (
+              {cols.map((col) => (
                 <TableHead key={col} className="text-xs whitespace-nowrap">
-                  {col.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}
+                  {col.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                 </TableHead>
               ))}
             </TableRow>
@@ -623,12 +747,17 @@ function RelatoriosPage() {
           <TableBody>
             {data.map((row, i) => (
               <TableRow key={i}>
-                {cols.map(col => (
+                {cols.map((col) => (
                   <TableCell key={col} className="text-xs whitespace-nowrap max-w-[200px] truncate">
-                    {row[col] == null ? "—" :
-                     typeof row[col] === "number" ? Number(row[col]).toLocaleString("pt-BR") :
-                     typeof row[col] === "boolean" ? (row[col] ? "Sim" : "Não") :
-                     String(row[col])}
+                    {row[col] == null
+                      ? "—"
+                      : typeof row[col] === "number"
+                        ? Number(row[col]).toLocaleString("pt-BR")
+                        : typeof row[col] === "boolean"
+                          ? row[col]
+                            ? "Sim"
+                            : "Não"
+                          : String(row[col])}
                   </TableCell>
                 ))}
               </TableRow>
@@ -649,46 +778,72 @@ function RelatoriosPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Relatórios</h1>
-        <p className="text-sm text-muted-foreground">Relatórios gerenciais da operação logística.</p>
+        <p className="text-sm text-muted-foreground">
+          Relatórios gerenciais da operação logística.
+        </p>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
-        <Card><CardContent className="p-3 text-center">
-          <ClipboardList className="h-4 w-4 mx-auto text-blue-400" />
-          <div className="text-lg font-bold">{summary.total_recebido.toLocaleString("pt-BR")}</div>
-          <div className="text-[10px] text-muted-foreground">Total Recebido</div>
-        </CardContent></Card>
-        <Card><CardContent className="p-3 text-center">
-          <Warehouse className="h-4 w-4 mx-auto text-emerald-400" />
-          <div className="text-lg font-bold">{summary.total_estoque.toLocaleString("pt-BR")}</div>
-          <div className="text-[10px] text-muted-foreground">Total em Estoque</div>
-        </CardContent></Card>
-        <Card><CardContent className="p-3 text-center">
-          <ArrowRightLeft className="h-4 w-4 mx-auto text-orange-400" />
-          <div className="text-lg font-bold">{summary.total_movimentado.toLocaleString("pt-BR")}</div>
-          <div className="text-[10px] text-muted-foreground">Movimentações</div>
-        </CardContent></Card>
-        <Card><CardContent className="p-3 text-center">
-          <Package className="h-4 w-4 mx-auto text-purple-400" />
-          <div className="text-lg font-bold">{summary.total_armazem05.toLocaleString("pt-BR")}</div>
-          <div className="text-[10px] text-muted-foreground">Em Armazém 05</div>
-        </CardContent></Card>
-        <Card><CardContent className="p-3 text-center">
-          <Truck className="h-4 w-4 mx-auto text-cyan-400" />
-          <div className="text-lg font-bold">{summary.total_saidas.toLocaleString("pt-BR")}</div>
-          <div className="text-[10px] text-muted-foreground">Total Saídas</div>
-        </CardContent></Card>
-        <Card><CardContent className="p-3 text-center">
-          <AlertCircle className="h-4 w-4 mx-auto text-red-400" />
-          <div className="text-lg font-bold">{summary.total_rncs_abertas.toLocaleString("pt-BR")}</div>
-          <div className="text-[10px] text-muted-foreground">RNCs Abertas</div>
-        </CardContent></Card>
-        <Card><CardContent className="p-3 text-center">
-          <Truck className="h-4 w-4 mx-auto text-amber-400" />
-          <div className="text-lg font-bold">{summary.total_veiculos.toLocaleString("pt-BR")}</div>
-          <div className="text-[10px] text-muted-foreground">Veículos</div>
-        </CardContent></Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <ClipboardList className="h-4 w-4 mx-auto text-blue-400" />
+            <div className="text-lg font-bold">
+              {summary.total_recebido.toLocaleString("pt-BR")}
+            </div>
+            <div className="text-[10px] text-muted-foreground">Total Recebido</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <Warehouse className="h-4 w-4 mx-auto text-emerald-400" />
+            <div className="text-lg font-bold">{summary.total_estoque.toLocaleString("pt-BR")}</div>
+            <div className="text-[10px] text-muted-foreground">Total em Estoque</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <ArrowRightLeft className="h-4 w-4 mx-auto text-orange-400" />
+            <div className="text-lg font-bold">
+              {summary.total_movimentado.toLocaleString("pt-BR")}
+            </div>
+            <div className="text-[10px] text-muted-foreground">Movimentações</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <Package className="h-4 w-4 mx-auto text-purple-400" />
+            <div className="text-lg font-bold">
+              {summary.total_armazem05.toLocaleString("pt-BR")}
+            </div>
+            <div className="text-[10px] text-muted-foreground">Em Armazém 05</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <Truck className="h-4 w-4 mx-auto text-cyan-400" />
+            <div className="text-lg font-bold">{summary.total_saidas.toLocaleString("pt-BR")}</div>
+            <div className="text-[10px] text-muted-foreground">Total Saídas</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <AlertCircle className="h-4 w-4 mx-auto text-red-400" />
+            <div className="text-lg font-bold">
+              {summary.total_rncs_abertas.toLocaleString("pt-BR")}
+            </div>
+            <div className="text-[10px] text-muted-foreground">RNCs Abertas</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <Truck className="h-4 w-4 mx-auto text-amber-400" />
+            <div className="text-lg font-bold">
+              {summary.total_veiculos.toLocaleString("pt-BR")}
+            </div>
+            <div className="text-[10px] text-muted-foreground">Veículos</div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Controls */}
@@ -700,13 +855,21 @@ function RelatoriosPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {REPORTS.map(r => (
-                <SelectItem key={r.key} value={r.key}>{r.label}</SelectItem>
+              {REPORTS.map((r) => (
+                <SelectItem key={r.key} value={r.key}>
+                  {r.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <Button variant="outline" size="sm" className="mt-auto" onClick={() => exportCSV(`relatorio-${activeReport}`, data)} disabled={data.length === 0}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-auto"
+          onClick={() => exportCSV(`relatorio-${activeReport}`, data)}
+          disabled={data.length === 0}
+        >
           <FileDown className="mr-1 h-3 w-3" /> Exportar CSV
         </Button>
         <Button variant="ghost" size="sm" className="mt-auto" onClick={fetchDadosRelatorio}>
@@ -715,7 +878,15 @@ function RelatoriosPage() {
       </div>
 
       {/* Filters */}
-      <FilterPanel filters={filters} setFilters={setFilters} onApply={fetchDadosRelatorio} onClear={() => { setFilters({}); fetchDadosRelatorio(); }} />
+      <FilterPanel
+        filters={filters}
+        setFilters={setFilters}
+        onApply={fetchDadosRelatorio}
+        onClear={() => {
+          setFilters({});
+          fetchDadosRelatorio();
+        }}
+      />
 
       {/* Table */}
       <div className="text-xs text-muted-foreground">{data.length} registro(s) encontrado(s)</div>

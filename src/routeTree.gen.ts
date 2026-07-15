@@ -34,7 +34,9 @@ import { Route as AppPalletsIndexRouteImport } from './routes/_app.pallets.index
 import { Route as AppInspecaoIndexRouteImport } from './routes/_app.inspecao.index'
 import { Route as PcpPcpSaldosRouteImport } from './routes/_pcp.pcp.saldos'
 import { Route as PcpPcpRoteirosRouteImport } from './routes/_pcp.pcp.roteiros'
+import { Route as PcpPcpRelatoriosRouteImport } from './routes/_pcp.pcp.relatorios'
 import { Route as PcpPcpOpsRouteImport } from './routes/_pcp.pcp.ops'
+import { Route as PcpPcpHistoricoRouteImport } from './routes/_pcp.pcp.historico'
 import { Route as PcpPcpEstruturasRouteImport } from './routes/_pcp.pcp.estruturas'
 import { Route as AppPalletsCodigoRouteImport } from './routes/_app.pallets.$codigo'
 import { Route as AppInspecaoRncRouteImport } from './routes/_app.inspecao.rnc'
@@ -164,9 +166,19 @@ const PcpPcpRoteirosRoute = PcpPcpRoteirosRouteImport.update({
   path: '/roteiros',
   getParentRoute: () => PcpPcpRoute,
 } as any)
+const PcpPcpRelatoriosRoute = PcpPcpRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => PcpPcpRoute,
+} as any)
 const PcpPcpOpsRoute = PcpPcpOpsRouteImport.update({
   id: '/ops',
   path: '/ops',
+  getParentRoute: () => PcpPcpRoute,
+} as any)
+const PcpPcpHistoricoRoute = PcpPcpHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
   getParentRoute: () => PcpPcpRoute,
 } as any)
 const PcpPcpEstruturasRoute = PcpPcpEstruturasRouteImport.update({
@@ -217,7 +229,9 @@ export interface FileRoutesByFullPath {
   '/inspecao/rnc': typeof AppInspecaoRncRoute
   '/pallets/$codigo': typeof AppPalletsCodigoRoute
   '/pcp/estruturas': typeof PcpPcpEstruturasRouteWithChildren
+  '/pcp/historico': typeof PcpPcpHistoricoRoute
   '/pcp/ops': typeof PcpPcpOpsRoute
+  '/pcp/relatorios': typeof PcpPcpRelatoriosRoute
   '/pcp/roteiros': typeof PcpPcpRoteirosRouteWithChildren
   '/pcp/saldos': typeof PcpPcpSaldosRoute
   '/inspecao/': typeof AppInspecaoIndexRoute
@@ -247,7 +261,9 @@ export interface FileRoutesByTo {
   '/inspecao/rnc': typeof AppInspecaoRncRoute
   '/pallets/$codigo': typeof AppPalletsCodigoRoute
   '/pcp/estruturas': typeof PcpPcpEstruturasRouteWithChildren
+  '/pcp/historico': typeof PcpPcpHistoricoRoute
   '/pcp/ops': typeof PcpPcpOpsRoute
+  '/pcp/relatorios': typeof PcpPcpRelatoriosRoute
   '/pcp/roteiros': typeof PcpPcpRoteirosRouteWithChildren
   '/pcp/saldos': typeof PcpPcpSaldosRoute
   '/inspecao': typeof AppInspecaoIndexRoute
@@ -281,7 +297,9 @@ export interface FileRoutesById {
   '/_app/inspecao/rnc': typeof AppInspecaoRncRoute
   '/_app/pallets/$codigo': typeof AppPalletsCodigoRoute
   '/_pcp/pcp/estruturas': typeof PcpPcpEstruturasRouteWithChildren
+  '/_pcp/pcp/historico': typeof PcpPcpHistoricoRoute
   '/_pcp/pcp/ops': typeof PcpPcpOpsRoute
+  '/_pcp/pcp/relatorios': typeof PcpPcpRelatoriosRoute
   '/_pcp/pcp/roteiros': typeof PcpPcpRoteirosRouteWithChildren
   '/_pcp/pcp/saldos': typeof PcpPcpSaldosRoute
   '/_app/inspecao/': typeof AppInspecaoIndexRoute
@@ -314,7 +332,9 @@ export interface FileRouteTypes {
     | '/inspecao/rnc'
     | '/pallets/$codigo'
     | '/pcp/estruturas'
+    | '/pcp/historico'
     | '/pcp/ops'
+    | '/pcp/relatorios'
     | '/pcp/roteiros'
     | '/pcp/saldos'
     | '/inspecao/'
@@ -344,7 +364,9 @@ export interface FileRouteTypes {
     | '/inspecao/rnc'
     | '/pallets/$codigo'
     | '/pcp/estruturas'
+    | '/pcp/historico'
     | '/pcp/ops'
+    | '/pcp/relatorios'
     | '/pcp/roteiros'
     | '/pcp/saldos'
     | '/inspecao'
@@ -377,7 +399,9 @@ export interface FileRouteTypes {
     | '/_app/inspecao/rnc'
     | '/_app/pallets/$codigo'
     | '/_pcp/pcp/estruturas'
+    | '/_pcp/pcp/historico'
     | '/_pcp/pcp/ops'
+    | '/_pcp/pcp/relatorios'
     | '/_pcp/pcp/roteiros'
     | '/_pcp/pcp/saldos'
     | '/_app/inspecao/'
@@ -570,11 +594,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PcpPcpRoteirosRouteImport
       parentRoute: typeof PcpPcpRoute
     }
+    '/_pcp/pcp/relatorios': {
+      id: '/_pcp/pcp/relatorios'
+      path: '/relatorios'
+      fullPath: '/pcp/relatorios'
+      preLoaderRoute: typeof PcpPcpRelatoriosRouteImport
+      parentRoute: typeof PcpPcpRoute
+    }
     '/_pcp/pcp/ops': {
       id: '/_pcp/pcp/ops'
       path: '/ops'
       fullPath: '/pcp/ops'
       preLoaderRoute: typeof PcpPcpOpsRouteImport
+      parentRoute: typeof PcpPcpRoute
+    }
+    '/_pcp/pcp/historico': {
+      id: '/_pcp/pcp/historico'
+      path: '/historico'
+      fullPath: '/pcp/historico'
+      preLoaderRoute: typeof PcpPcpHistoricoRouteImport
       parentRoute: typeof PcpPcpRoute
     }
     '/_pcp/pcp/estruturas': {
@@ -688,7 +726,9 @@ const PcpPcpRoteirosRouteWithChildren = PcpPcpRoteirosRoute._addFileChildren(
 
 interface PcpPcpRouteChildren {
   PcpPcpEstruturasRoute: typeof PcpPcpEstruturasRouteWithChildren
+  PcpPcpHistoricoRoute: typeof PcpPcpHistoricoRoute
   PcpPcpOpsRoute: typeof PcpPcpOpsRoute
+  PcpPcpRelatoriosRoute: typeof PcpPcpRelatoriosRoute
   PcpPcpRoteirosRoute: typeof PcpPcpRoteirosRouteWithChildren
   PcpPcpSaldosRoute: typeof PcpPcpSaldosRoute
   PcpPcpIndexRoute: typeof PcpPcpIndexRoute
@@ -696,7 +736,9 @@ interface PcpPcpRouteChildren {
 
 const PcpPcpRouteChildren: PcpPcpRouteChildren = {
   PcpPcpEstruturasRoute: PcpPcpEstruturasRouteWithChildren,
+  PcpPcpHistoricoRoute: PcpPcpHistoricoRoute,
   PcpPcpOpsRoute: PcpPcpOpsRoute,
+  PcpPcpRelatoriosRoute: PcpPcpRelatoriosRoute,
   PcpPcpRoteirosRoute: PcpPcpRoteirosRouteWithChildren,
   PcpPcpSaldosRoute: PcpPcpSaldosRoute,
   PcpPcpIndexRoute: PcpPcpIndexRoute,
@@ -723,3 +765,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -65,10 +65,10 @@ export interface OpCompleta {
 // ─── PCP: Estruturas de Produto (BOM) ─────────────────────────
 export interface EstruturaProduto {
   id: string;
-  referencia_id: string;
+  produto_pai_id: string;
   revisao: number;
-  status: string | null;
-  data_inicio_vigencia: string | null;
+  status: "ativa" | "inativa";
+  data_inicio_vigencia: string;
   data_fim_vigencia: string | null;
   observacao: string | null;
   created_at?: string;
@@ -77,18 +77,18 @@ export interface EstruturaProduto {
 export interface EstruturaProdutoItem {
   id: string;
   estrutura_id: string;
-  componente_id: string;
+  produto_componente_id: string;
   quantidade: number;
-  indice_perda: number | null;
+  indice_perda: number;
   sequencia: number;
 }
 
 // ─── PCP: Roteiros de Produção ────────────────────────────────
 export interface RoteiroProducao {
   id: string;
-  referencia_id: string;
-  descricao: string | null;
-  ativo: boolean | null;
+  produto_id: string;
+  nome: string;
+  status: "ativo" | "inativo";
   created_at?: string;
 }
 
@@ -96,9 +96,9 @@ export interface RoteiroOperacao {
   id: string;
   roteiro_id: string;
   sequencia: number;
-  descricao: string;
+  descricao_operacao: string;
   local_execucao_id: string | null;
-  tempo_padrao_min: number | null;
+  tempo_padrao_minutos: number | null;
 }
 
 // ─── PCP: Cronograma (view) ───────────────────────────────────
@@ -114,6 +114,7 @@ export interface CronogramaPcpRow {
   descricao_produto: string | null;
   data_prevista_veiculo: string | null;
   saida_vinculada_id: string | null;
+  data_planejamento: string | null;
 }
 
 // ─── Referências e SDs ────────────────────────────────────────

@@ -26,13 +26,13 @@
  *   ON perfis_usuarios FOR SELECT
  *   USING (auth.uid() = user_id);
  *
- * -- Inserir perfil admin (substituir o UUID pelo real user_id do Auth)
- * INSERT INTO perfis_usuarios (user_id, nome, email, perfil, setor, ativo)
- * VALUES ('SUBSTITUA_PELO_USER_ID_REAL', 'Administrador Teste', 'admin@specialdecor.test', 'admin', 'administração', true);
+ * Perfis administrativos devem ser criados por um fluxo seguro de provisionamento,
+ * sem dados sensíveis ou identificadores pessoais no frontend.
  */
 
 export type Perfil = "admin" | "pcp" | "logistica" | "qualidade" | "portaria" | "consulta";
-export type Setor = "administração" | "pcp" | "logística" | "qualidade" | "expedição" | "portaria" | "consulta";
+export type Setor =
+  "administração" | "pcp" | "logística" | "qualidade" | "expedição" | "portaria" | "consulta";
 
 export interface PerfilUsuario {
   id: string;
@@ -46,36 +46,85 @@ export interface PerfilUsuario {
   updated_at: string;
 }
 
-export const PERFIS_VALIDOS: Perfil[] = ["admin", "pcp", "logistica", "qualidade", "portaria", "consulta"];
-export const SETORES_VALIDOS: Setor[] = ["administração", "pcp", "logística", "qualidade", "expedição", "portaria", "consulta"];
+export const PERFIS_VALIDOS: Perfil[] = [
+  "admin",
+  "pcp",
+  "logistica",
+  "qualidade",
+  "portaria",
+  "consulta",
+];
+export const SETORES_VALIDOS: Setor[] = [
+  "administração",
+  "pcp",
+  "logística",
+  "qualidade",
+  "expedição",
+  "portaria",
+  "consulta",
+];
 
 /** Definição das rotas permitidas por perfil.
  *  Se um perfil não estiver listado, não tem acesso àquela rota. */
 export const ROTAS_POR_PERFIL: Record<Perfil, string[]> = {
   admin: [
-    "/", "/recebimento", "/pallets", "/scanner", "/estoque", "/movimentacoes",
-    "/aprovacoes", "/inspecao", "/inspecao/rnc",
-    "/pcp", "/pcp/estruturas", "/pcp/roteiros", "/pcp/ops", "/pcp/saldos",
-    "/saidas", "/veiculos", "/historico", "/relatorios", "/configuracoes",
+    "/",
+    "/recebimento",
+    "/pallets",
+    "/scanner",
+    "/estoque",
+    "/movimentacoes",
+    "/aprovacoes",
+    "/inspecao",
+    "/inspecao/rnc",
+    "/pcp",
+    "/pcp/estruturas",
+    "/pcp/roteiros",
+    "/pcp/ops",
+    "/pcp/saldos",
+    "/pcp/historico",
+    "/pcp/relatorios",
+    "/saidas",
+    "/veiculos",
+    "/historico",
+    "/relatorios",
+    "/configuracoes",
   ],
   pcp: [
-    "/", "/pcp", "/pcp/estruturas", "/pcp/roteiros", "/pcp/ops", "/pcp/saldos",
-    "/relatorios", "/historico",
+    "/",
+    "/pcp",
+    "/pcp/estruturas",
+    "/pcp/roteiros",
+    "/pcp/ops",
+    "/pcp/saldos",
+    "/pcp/relatorios",
+    "/pcp/historico",
   ],
   logistica: [
-    "/", "/recebimento", "/pallets", "/scanner", "/estoque", "/movimentacoes",
-    "/aprovacoes", "/saidas", "/veiculos", "/historico", "/relatorios",
+    "/",
+    "/recebimento",
+    "/pallets",
+    "/scanner",
+    "/estoque",
+    "/movimentacoes",
+    "/aprovacoes",
+    "/saidas",
+    "/veiculos",
+    "/historico",
+    "/relatorios",
   ],
   qualidade: [
-    "/", "/pallets", "/scanner", "/estoque", "/inspecao", "/inspecao/rnc",
-    "/historico", "/relatorios",
+    "/",
+    "/pallets",
+    "/scanner",
+    "/estoque",
+    "/inspecao",
+    "/inspecao/rnc",
+    "/historico",
+    "/relatorios",
   ],
-  portaria: [
-    "/", "/veiculos", "/saidas", "/historico",
-  ],
-  consulta: [
-    "/", "/pallets", "/scanner", "/estoque", "/historico", "/relatorios",
-  ],
+  portaria: ["/", "/veiculos", "/saidas", "/historico"],
+  consulta: ["/", "/pallets", "/scanner", "/estoque", "/historico", "/relatorios"],
 };
 
 export const LABELS_PERFIL: Record<Perfil, string> = {

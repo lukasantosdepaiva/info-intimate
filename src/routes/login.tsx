@@ -1,112 +1,80 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useNavigate } from "@tanstack/react-router";
-
 import { useState } from "react";
 import { useAuth } from "@/components/auth-provider";
-import { getSupabase } from "@/lib/supabase";
-import { Package, Eye, EyeOff, AlertCircle, Loader2, UserPlus } from "lucide-react";
+import { Package, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
-const TEST_EMAIL = "admin@specialdecor.test";
-const TEST_PASSWORD = "Admin@123456";
-const PCP_TEST_EMAIL = "pcp@specialdecor.test";
-const PCP_TEST_PASSWORD = "Pcp@123456";
+type QuickLogin = {
+  label: string;
+  email: string;
+  password: string;
+};
 
-async function redirectByPerfil(navigate: ReturnType<typeof useNavigate>) {
-  try {
-    const supabase = getSupabase();
-    const { data: userData } = await supabase.auth.getUser();
-    const uid = userData.user?.id;
-    if (!uid) {
-      navigate({ to: "/" });
-      return;
-    }
-    const { data } = await supabase
-      .from("perfis_usuarios")
-      .select("perfil")
-      .eq("user_id", uid)
-      .single<{ perfil: string }>();
-    if (data?.perfil === "pcp") {
-      navigate({ to: "/pcp" });
-    } else {
-      navigate({ to: "/" });
-    }
-  } catch {
-    navigate({ to: "/" });
+const QUICK_LOGINS: QuickLogin[] = import.meta.env.DEV
+  ? [
+      {
+        label: "Entrar como Administrador",
+        email: import.meta.env.VITE_TEST_ADMIN_EMAIL ?? "",
+        password: import.meta.env.VITE_TEST_ADMIN_PASSWORD ?? "",
+      },
+      {
+        label: "Entrar como PCP",
+        email: import.meta.env.VITE_TEST_PCP_EMAIL ?? "",
+        password: import.meta.env.VITE_TEST_PCP_PASSWORD ?? "",
+      },
+    ].filter((account) => account.email && account.password)
+  : [];
+
+function loginErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : "Erro ao fazer login.";
+  if (message.includes("Invalid login credentials")) return "Email ou senha incorretos.";
+  if (message.includes("Email not confirmed")) {
+    return "Confirme seu email antes de fazer login. Verifique sua caixa de entrada.";
   }
+  if (message.includes("User already registered")) {
+    return "Este email já está cadastrado. Faça login.";
+  }
+  return message;
 }
 
 function LoginPage() {
-  const navigate = useNavigate();
   const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [quickLoginLabel, setQuickLoginLabel] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const performLogin = async (loginEmail: string, loginPassword: string, label?: string) => {
+    setError(null);
+    setLoading(true);
+    setQuickLoginLabel(label ?? null);
+
+    try {
+      await login(loginEmail, loginPassword);
+    } catch (err) {
+      setError(loginErrorMessage(err));
+    } finally {
+      setLoading(false);
+      setQuickLoginLabel(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    try {
-      await login(email, password);
-      await redirectByPerfil(navigate);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Erro ao fazer login.";
-      if (message.includes("Invalid login credentials")) {
-        setError("Email ou senha incorretos.");
-      } else if (message.includes("Email not confirmed")) {
-        setError("Confirme seu email antes de fazer login. Verifique sua caixa de entrada.");
-      } else if (message.includes("User already registered")) {
-        setError("Este email já está cadastrado. Faça login.");
-      } else {
-        setError(message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const entrarComoPcpTeste = async () => {
-    setEmail(PCP_TEST_EMAIL);
-    setPassword(PCP_TEST_PASSWORD);
-    setError(null);
-    setLoading(true);
-    try {
-      await login(PCP_TEST_EMAIL, PCP_TEST_PASSWORD);
-      navigate({ to: "/pcp" });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Erro ao fazer login.";
-      setError(
-        message.includes("Invalid login credentials") ? "Usuário de teste PCP não encontrado neste ambiente." : message,
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const entrarComoAdminTeste = async () => {
-    setEmail(TEST_EMAIL);
-    setPassword(TEST_PASSWORD);
-    setError(null);
-    setLoading(true);
-    try {
-      await login(TEST_EMAIL, TEST_PASSWORD);
-      await redirectByPerfil(navigate);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Erro ao fazer login.";
-      setError(
-        message.includes("Invalid login credentials") ? "Usuário de teste não encontrado neste ambiente." : message,
-      );
-    } finally {
-      setLoading(false);
-    }
+    await performLogin(email, password);
   };
 
   return (
@@ -167,45 +135,39 @@ function LoginPage() {
                 </button>
               </div>
             </div>
-
-            <div className="space-y-2 rounded-md border border-dashed border-amber-500/40 bg-amber-500/5 p-3">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="w-full gap-2 text-xs"
-                onClick={entrarComoAdminTeste}
-                disabled={loading}
-              >
-                <UserPlus className="h-3.5 w-3.5" />
-                Entrar como Admin Teste
-              </Button>
-              <p className="text-center text-[10px] text-muted-foreground">Ambiente de teste. Não usar dados reais.</p>
-            </div>
-
-            <div className="space-y-2 rounded-md border border-dashed border-sky-500/40 bg-sky-500/5 p-3">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="w-full gap-2 text-xs"
-                onClick={entrarComoPcpTeste}
-                disabled={loading}
-              >
-                <UserPlus className="h-3.5 w-3.5" />
-                Entrar como PCP Teste
-              </Button>
-              <p className="text-center text-[10px] text-muted-foreground">
-                Ambiente de teste. Não usar dados reais.
-              </p>
-            </div>
           </CardContent>
 
           <CardFooter className="flex flex-col gap-3">
             <Button type="submit" className="w-full gap-2" disabled={loading}>
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {loading ? "Entrando..." : "Entrar"}
+              {loading && !quickLoginLabel && <Loader2 className="h-4 w-4 animate-spin" />}
+              {loading && !quickLoginLabel ? "Entrando..." : "Entrar"}
             </Button>
+
+            {QUICK_LOGINS.length > 0 && (
+              <div className="w-full space-y-2 border-t pt-3">
+                <p className="text-center text-xs font-medium text-muted-foreground">
+                  Acessos rápidos — somente ambiente de teste
+                </p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {QUICK_LOGINS.map((account) => (
+                    <Button
+                      key={account.label}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={loading}
+                      onClick={() => performLogin(account.email, account.password, account.label)}
+                      className="gap-2"
+                    >
+                      {quickLoginLabel === account.label && (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      )}
+                      {quickLoginLabel === account.label ? "Entrando..." : account.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
           </CardFooter>
         </form>
       </Card>
