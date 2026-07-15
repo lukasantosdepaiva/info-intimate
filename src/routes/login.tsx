@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 import { useState } from "react";
 import { useAuth } from "@/components/auth-provider";
+import { getSupabase } from "@/lib/supabase";
 import { Package, Eye, EyeOff, AlertCircle, Loader2, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,30 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 
 const TEST_EMAIL = "admin@specialdecor.test";
 const TEST_PASSWORD = "Admin@123456";
+
+async function redirectByPerfil(navigate: ReturnType<typeof useNavigate>) {
+  try {
+    const supabase = getSupabase();
+    const { data: userData } = await supabase.auth.getUser();
+    const uid = userData.user?.id;
+    if (!uid) {
+      navigate({ to: "/" });
+      return;
+    }
+    const { data } = await supabase
+      .from("perfis_usuarios")
+      .select("perfil")
+      .eq("user_id", uid)
+      .single();
+    if (data?.perfil === "pcp") {
+      navigate({ to: "/pcp" });
+    } else {
+      navigate({ to: "/" });
+    }
+  } catch {
+    navigate({ to: "/" });
+  }
+}
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -53,7 +78,7 @@ function LoginPage() {
     setLoading(true);
     try {
       await login(TEST_EMAIL, TEST_PASSWORD);
-      navigate({ to: "/" });
+      await redirectByPerfil(navigate);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erro ao fazer login.";
       setError(

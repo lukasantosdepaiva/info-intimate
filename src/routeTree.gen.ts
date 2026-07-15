@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PcpRouteImport } from './routes/_pcp'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as PcpPcpRouteImport } from './routes/_pcp.pcp'
@@ -45,6 +46,10 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PcpRoute = PcpRouteImport.update({
+  id: '/_pcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
@@ -55,9 +60,9 @@ const AppIndexRoute = AppIndexRouteImport.update({
   getParentRoute: () => AppRoute,
 } as any)
 const PcpPcpRoute = PcpPcpRouteImport.update({
-  id: '/_pcp/pcp',
+  id: '/pcp',
   path: '/pcp',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => PcpRoute,
 } as any)
 const AppVeiculosRoute = AppVeiculosRouteImport.update({
   id: '/veiculos',
@@ -222,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/pcp/roteiros/$id': typeof PcpPcpRoteirosIdRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/aprovacoes': typeof AppAprovacoesRoute
   '/configuracoes': typeof AppConfiguracoesRoute
@@ -238,7 +244,6 @@ export interface FileRoutesByTo {
   '/saidas': typeof AppSaidasRoute
   '/scanner': typeof AppScannerRoute
   '/veiculos': typeof AppVeiculosRoute
-  '/': typeof AppIndexRoute
   '/inspecao/rnc': typeof AppInspecaoRncRoute
   '/pallets/$codigo': typeof AppPalletsCodigoRoute
   '/pcp/estruturas': typeof PcpPcpEstruturasRouteWithChildren
@@ -254,6 +259,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/_pcp': typeof PcpRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/aprovacoes': typeof AppAprovacoesRoute
   '/_app/configuracoes': typeof AppConfiguracoesRoute
@@ -318,6 +324,7 @@ export interface FileRouteTypes {
     | '/pcp/roteiros/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/login'
     | '/aprovacoes'
     | '/configuracoes'
@@ -334,7 +341,6 @@ export interface FileRouteTypes {
     | '/saidas'
     | '/scanner'
     | '/veiculos'
-    | '/'
     | '/inspecao/rnc'
     | '/pallets/$codigo'
     | '/pcp/estruturas'
@@ -349,6 +355,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_app'
+    | '/_pcp'
     | '/login'
     | '/_app/aprovacoes'
     | '/_app/configuracoes'
@@ -382,8 +389,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  PcpRoute: typeof PcpRouteWithChildren
   LoginRoute: typeof LoginRoute
-  PcpPcpRoute: typeof PcpPcpRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -393,6 +400,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_pcp': {
+      id: '/_pcp'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof PcpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app': {
@@ -414,7 +428,7 @@ declare module '@tanstack/react-router' {
       path: '/pcp'
       fullPath: '/pcp'
       preLoaderRoute: typeof PcpPcpRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PcpRoute
     }
     '/_app/veiculos': {
       id: '/_app/veiculos'
@@ -691,10 +705,20 @@ const PcpPcpRouteChildren: PcpPcpRouteChildren = {
 const PcpPcpRouteWithChildren =
   PcpPcpRoute._addFileChildren(PcpPcpRouteChildren)
 
+interface PcpRouteChildren {
+  PcpPcpRoute: typeof PcpPcpRouteWithChildren
+}
+
+const PcpRouteChildren: PcpRouteChildren = {
+  PcpPcpRoute: PcpPcpRouteWithChildren,
+}
+
+const PcpRouteWithChildren = PcpRoute._addFileChildren(PcpRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  PcpRoute: PcpRouteWithChildren,
   LoginRoute: LoginRoute,
-  PcpPcpRoute: PcpPcpRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
