@@ -20,7 +20,10 @@ type QuickLogin = {
   password: string;
 };
 
-const TEST_LOGIN_ENABLED = import.meta.env.DEV || import.meta.env.VITE_ENABLE_TEST_LOGIN === "true";
+const TEST_LOGIN_ENABLED =
+  import.meta.env.DEV ||
+  import.meta.env.VITE_ENABLE_TEST_LOGIN === "true" ||
+  Boolean(import.meta.env.VITE_TEST_PCP_EMAIL && import.meta.env.VITE_TEST_PCP_PASSWORD);
 
 const QUICK_LOGINS: QuickLogin[] = TEST_LOGIN_ENABLED
   ? [
@@ -37,7 +40,10 @@ const QUICK_LOGINS: QuickLogin[] = TEST_LOGIN_ENABLED
     ].filter((account) => account.email && account.password)
   : [];
 
-const AUTO_LOGIN_PCP = QUICK_LOGINS.find((account) => account.label === "Entrar como PCP") ?? null;
+const AUTO_LOGIN_PCP =
+  import.meta.env.DEV || import.meta.env.VITE_AUTO_LOGIN_PCP === "true"
+    ? (QUICK_LOGINS.find((account) => account.label === "Entrar como PCP") ?? null)
+    : null;
 const AUTO_LOGIN_SKIP_ONCE_KEY = "info-intimate:skip-pcp-auto-login-once";
 const AUTO_LOGIN_LABEL = "Login automático PCP";
 

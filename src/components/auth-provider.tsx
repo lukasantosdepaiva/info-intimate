@@ -26,7 +26,10 @@ export function useAuth() {
 }
 
 const PUBLIC_ROUTES = ["/login", "/auth/callback"];
-const TEST_LOGIN_ENABLED = import.meta.env.DEV || import.meta.env.VITE_ENABLE_TEST_LOGIN === "true";
+const TEST_LOGIN_ENABLED =
+  import.meta.env.DEV ||
+  import.meta.env.VITE_ENABLE_TEST_LOGIN === "true" ||
+  Boolean(import.meta.env.VITE_TEST_PCP_EMAIL && import.meta.env.VITE_TEST_PCP_PASSWORD);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
