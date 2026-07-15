@@ -163,22 +163,6 @@ function LoginPage() {
                   tabIndex={-1}
                   aria-label={showPassword ? "Esconder senha" : "Mostrar senha"}
                 >
-                  <div className="space-y-2 rounded-md border border-dashed border-sky-500/40 bg-sky-500/5 p-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="w-full gap-2 text-xs"
-                      onClick={entrarComoPcpTeste}
-                      disabled={loading}
-                    >
-                      <UserPlus className="h-3.5 w-3.5" />
-                      Entrar como PCP Teste
-                    </Button>
-                    <p className="text-center text-[10px] text-muted-foreground">
-                      Ambiente de teste. Não usar dados reais.
-                    </p>
-                  </div>
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
@@ -197,6 +181,23 @@ function LoginPage() {
                 Entrar como Admin Teste
               </Button>
               <p className="text-center text-[10px] text-muted-foreground">Ambiente de teste. Não usar dados reais.</p>
+            </div>
+
+            <div className="space-y-2 rounded-md border border-dashed border-sky-500/40 bg-sky-500/5 p-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full gap-2 text-xs"
+                onClick={entrarComoPcpTeste}
+                disabled={loading}
+              >
+                <UserPlus className="h-3.5 w-3.5" />
+                Entrar como PCP Teste
+              </Button>
+              <p className="text-center text-[10px] text-muted-foreground">
+                Ambiente de teste. Não usar dados reais.
+              </p>
             </div>
           </CardContent>
 
