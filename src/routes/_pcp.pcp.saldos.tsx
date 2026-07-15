@@ -121,6 +121,6 @@ function SaldosPage() {
   );
 }
 
-export const Route = createFileRoute("/_app/pcp/saldos")({
+export const Route = createFileRoute("/_pcp/pcp/saldos")({
   component: SaldosPage,
 });

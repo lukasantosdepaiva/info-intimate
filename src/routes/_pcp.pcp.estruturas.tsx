@@ -138,6 +138,6 @@ function EstruturasPage() {
   );
 }
 
-export const Route = createFileRoute("/_app/pcp/estruturas")({
+export const Route = createFileRoute("/_pcp/pcp/estruturas")({
   component: EstruturasPage,
 });

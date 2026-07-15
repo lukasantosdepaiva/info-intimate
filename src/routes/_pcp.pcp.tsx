@@ -45,6 +45,6 @@ function PcpLayout() {
   );
 }
 
-export const Route = createFileRoute("/_app/pcp")({
+export const Route = createFileRoute("/_pcp/pcp")({
   component: PcpLayout,
 });
