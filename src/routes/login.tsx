@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { Package, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,10 @@ const QUICK_LOGINS: QuickLogin[] = import.meta.env.DEV
     ].filter((account) => account.email && account.password)
   : [];
 
+const AUTO_LOGIN_PCP = QUICK_LOGINS.find((account) => account.label === "Entrar como PCP") ?? null;
+const AUTO_LOGIN_SKIP_ONCE_KEY = "info-intimate:skip-pcp-auto-login-once";
+const AUTO_LOGIN_LABEL = "Login automático PCP";
+
 function loginErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : "Erro ao fazer login.";
   if (message.includes("Invalid login credentials")) return "Email ou senha incorretos.";
@@ -48,7 +52,7 @@ function loginErrorMessage(error: unknown): string {
 }
 
 function LoginPage() {
-  const { login } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -56,21 +60,38 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [quickLoginLabel, setQuickLoginLabel] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const autoLoginStarted = useRef(false);
 
-  const performLogin = async (loginEmail: string, loginPassword: string, label?: string) => {
-    setError(null);
-    setLoading(true);
-    setQuickLoginLabel(label ?? null);
+  const performLogin = useCallback(
+    async (loginEmail: string, loginPassword: string, label?: string) => {
+      setError(null);
+      setLoading(true);
+      setQuickLoginLabel(label ?? null);
 
-    try {
-      await login(loginEmail, loginPassword);
-    } catch (err) {
-      setError(loginErrorMessage(err));
-    } finally {
-      setLoading(false);
-      setQuickLoginLabel(null);
+      try {
+        await login(loginEmail, loginPassword);
+      } catch (err) {
+        setError(loginErrorMessage(err));
+      } finally {
+        setLoading(false);
+        setQuickLoginLabel(null);
+      }
+    },
+    [login],
+  );
+
+  useEffect(() => {
+    if (authLoading || user || !AUTO_LOGIN_PCP || autoLoginStarted.current) return;
+
+    const skipOnce = window.sessionStorage.getItem(AUTO_LOGIN_SKIP_ONCE_KEY) === "true";
+    if (skipOnce) {
+      window.sessionStorage.removeItem(AUTO_LOGIN_SKIP_ONCE_KEY);
+      return;
     }
-  };
+
+    autoLoginStarted.current = true;
+    void performLogin(AUTO_LOGIN_PCP.email, AUTO_LOGIN_PCP.password, AUTO_LOGIN_LABEL);
+  }, [authLoading, performLogin, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +115,13 @@ function LoginPage() {
               <div className="flex items-start gap-2 rounded-md border border-destructive/50 bg-destructive/5 p-3 text-sm text-destructive">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>{error}</span>
+              </div>
+            )}
+
+            {quickLoginLabel === AUTO_LOGIN_LABEL && (
+              <div className="flex items-center justify-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-amber-700 dark:text-amber-300">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Entrando automaticamente como PCP...
               </div>
             )}
 

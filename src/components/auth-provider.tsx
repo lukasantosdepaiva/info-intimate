@@ -105,6 +105,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await supabase.auth.signOut();
     } finally {
+      if (import.meta.env.DEV && typeof window !== "undefined") {
+        window.sessionStorage.setItem("info-intimate:skip-pcp-auto-login-once", "true");
+      }
       redirectRequest.current += 1;
       setUser(null);
       setLoading(false);

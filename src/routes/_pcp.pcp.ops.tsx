@@ -14,6 +14,7 @@ import {
   Eye,
   X,
   CornerDownRight,
+  Ban,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import type { ReferenciaRow, SdRow, OpCompleta as OpCompletaBase } from "@/lib/types";
 
@@ -51,6 +60,11 @@ interface ClienteRow {
   nome: string;
 }
 
+interface LiderPcpRow {
+  id: string;
+  nome: string;
+}
+
 const STATUS_OP = [
   { value: "aberta", label: "Aberta" },
   { value: "liberada", label: "Liberada" },
@@ -60,6 +74,8 @@ const STATUS_OP = [
 ];
 
 const OPS_PAGE_SIZE = 50;
+
+const canCancelOp = (status: string) => !["cancelada", "concluida"].includes(status);
 
 const statusBadgeVariant = (s: string) => {
   switch (s) {
@@ -258,6 +274,234 @@ function GerarOpModal({
   );
 }
 
+function CancelarOpModal({
+  open,
+  op,
+  onOpenChange,
+  onDone,
+}: {
+  open: boolean;
+  op: OpCompleta | null;
+  onOpenChange: (open: boolean) => void;
+  onDone: () => void | Promise<void>;
+}) {
+  const [step, setStep] = useState<1 | 2>(1);
+  const [motivo, setMotivo] = useState("");
+  const [liderId, setLiderId] = useState("");
+  const [codigoLider, setCodigoLider] = useState("");
+  const [lideres, setLideres] = useState<LiderPcpRow[]>([]);
+  const [lideresLoading, setLideresLoading] = useState(false);
+  const [lideresError, setLideresError] = useState<string | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+
+    setStep(1);
+    setMotivo("");
+    setLiderId("");
+    setCodigoLider("");
+    setLideres([]);
+    setLideresError(null);
+    setCancelError(null);
+
+    let active = true;
+    const fetchLideresPcp = async () => {
+      setLideresLoading(true);
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from("lideres")
+        .select("id,nome")
+        .eq("modulo", "pcp")
+        .eq("ativo", true)
+        .order("nome");
+
+      if (!active) return;
+
+      if (error) {
+        setLideresError(error.message);
+        setLideres([]);
+      } else {
+        setLideres((data as LiderPcpRow[]) ?? []);
+      }
+      setLideresLoading(false);
+    };
+
+    void fetchLideresPcp();
+    return () => {
+      active = false;
+    };
+  }, [open]);
+
+  const handleDialogOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && cancelling) return;
+    onOpenChange(nextOpen);
+  };
+
+  const handleConfirm = async () => {
+    if (!op || !motivo.trim() || !liderId || !codigoLider.trim()) return;
+
+    setCancelling(true);
+    setCancelError(null);
+    try {
+      const supabase = getSupabase();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any).rpc("cancelar_op_pcp", {
+        p_op_id: op.id,
+        p_lider_id: liderId,
+        p_codigo_lider: codigoLider.trim(),
+        p_motivo: motivo.trim(),
+      });
+
+      if (error) {
+        setCancelError(error.message);
+        return;
+      }
+
+      onOpenChange(false);
+      toast.success("OP cancelada com sucesso");
+      await onDone();
+    } catch (error) {
+      setCancelError(error instanceof Error ? error.message : "Erro ao cancelar OP.");
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <div className="mb-1 flex items-center justify-between gap-4 pr-6">
+            <DialogTitle>Cancelar OP {op?.numero_op}</DialogTitle>
+            <Badge variant="outline" className="shrink-0 text-[10px]">
+              Etapa {step} de 2
+            </Badge>
+          </div>
+          <DialogDescription>
+            O cancelamento também alcança as OPs filhas e libera os empenhos ativos vinculados.
+          </DialogDescription>
+        </DialogHeader>
+
+        {step === 1 ? (
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="motivo-cancelamento">Motivo do cancelamento *</Label>
+              <textarea
+                id="motivo-cancelamento"
+                value={motivo}
+                onChange={(event) => setMotivo(event.target.value)}
+                placeholder="Descreva por que esta OP deve ser cancelada"
+                className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring min-h-24 w-full resize-y rounded-md border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                autoFocus
+              />
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Fechar
+              </Button>
+              <Button
+                type="button"
+                disabled={!motivo.trim()}
+                onClick={() => {
+                  setCancelError(null);
+                  setStep(2);
+                }}
+              >
+                Continuar
+              </Button>
+            </DialogFooter>
+          </div>
+        ) : (
+          <div className="space-y-4 py-2">
+            <div className="rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-700 dark:text-amber-300">
+              Autorização exclusiva de um líder ativo do módulo PCP.
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="lider-pcp">Líder PCP *</Label>
+              <Select value={liderId} onValueChange={setLiderId} disabled={lideresLoading}>
+                <SelectTrigger id="lider-pcp">
+                  <SelectValue
+                    placeholder={lideresLoading ? "Carregando líderes..." : "Selecione o líder PCP"}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {lideres.map((lider) => (
+                    <SelectItem key={lider.id} value={lider.id}>
+                      {lider.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {!lideresLoading && !lideresError && lideres.length === 0 && (
+                <p className="text-xs text-destructive">Nenhum líder PCP ativo disponível.</p>
+              )}
+              {lideresError && <p className="text-xs text-destructive">{lideresError}</p>}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="codigo-lider-pcp">Código do líder *</Label>
+              <Input
+                id="codigo-lider-pcp"
+                type="password"
+                value={codigoLider}
+                onChange={(event) => setCodigoLider(event.target.value)}
+                placeholder="Digite o código"
+                autoComplete="off"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") void handleConfirm();
+                }}
+              />
+            </div>
+
+            {cancelError && (
+              <div
+                role="alert"
+                className="flex gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive"
+              >
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{cancelError}</span>
+              </div>
+            )}
+
+            <DialogFooter className="gap-2 sm:justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={cancelling}
+                onClick={() => {
+                  setCancelError(null);
+                  setCodigoLider("");
+                  setStep(1);
+                }}
+              >
+                Voltar
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={cancelling || !liderId || !codigoLider.trim() || Boolean(lideresError)}
+                onClick={() => void handleConfirm()}
+                className="gap-1.5"
+              >
+                {cancelling ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Ban className="h-4 w-4" />
+                )}
+                Confirmar cancelamento
+              </Button>
+            </DialogFooter>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function OpsPage() {
   const { user } = useAuth();
   const { perfil } = usePerfil(user);
@@ -273,6 +517,7 @@ function OpsPage() {
   const [totalRoots, setTotalRoots] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedOp, setSelectedOp] = useState<OpCompleta | null>(null);
+  const [cancelOp, setCancelOp] = useState<OpCompleta | null>(null);
 
   const fetchOps = useCallback(async () => {
     setLoading(true);
@@ -317,6 +562,10 @@ function OpsPage() {
     if (page === 0) void fetchOps();
     else setPage(0);
   }, [fetchOps, page]);
+
+  const handleOpCancelled = useCallback(async () => {
+    await fetchOps();
+  }, [fetchOps]);
 
   return (
     <main className="space-y-4">
@@ -452,15 +701,29 @@ function OpsPage() {
                     {op.created_at ? new Date(op.created_at).toLocaleDateString("pt-BR") : "—"}
                   </td>
                   <td className="p-3 text-center">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      title="Detalhes"
-                      onClick={() => setSelectedOp(selectedOp?.id === op.id ? null : op)}
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                    </Button>
+                    <div className="flex items-center justify-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        title="Detalhes"
+                        onClick={() => setSelectedOp(selectedOp?.id === op.id ? null : op)}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                      {canWrite && canCancelOp(op.status_op) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 gap-1 px-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          title={`Cancelar OP ${op.numero_op}`}
+                          onClick={() => setCancelOp(op)}
+                        >
+                          <Ban className="h-3.5 w-3.5" />
+                          Cancelar OP
+                        </Button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -544,6 +807,14 @@ function OpsPage() {
       </div>
 
       <GerarOpModal open={modalOpen} onClose={() => setModalOpen(false)} onDone={handleOpCreated} />
+      <CancelarOpModal
+        open={Boolean(cancelOp)}
+        op={cancelOp}
+        onOpenChange={(open) => {
+          if (!open) setCancelOp(null);
+        }}
+        onDone={handleOpCancelled}
+      />
     </main>
   );
 }
