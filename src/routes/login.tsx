@@ -71,6 +71,24 @@ function LoginPage() {
     }
   };
 
+  const entrarComoPcpTeste = async () => {
+    setEmail(PCP_TEST_EMAIL);
+    setPassword(PCP_TEST_PASSWORD);
+    setError(null);
+    setLoading(true);
+    try {
+      await login(PCP_TEST_EMAIL, PCP_TEST_PASSWORD);
+      navigate({ to: "/pcp" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erro ao fazer login.";
+      setError(
+        message.includes("Invalid login credentials") ? "Usuário de teste PCP não encontrado neste ambiente." : message,
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const entrarComoAdminTeste = async () => {
     setEmail(TEST_EMAIL);
     setPassword(TEST_PASSWORD);
@@ -82,9 +100,7 @@ function LoginPage() {
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erro ao fazer login.";
       setError(
-        message.includes("Invalid login credentials")
-          ? "Usuário de teste não encontrado neste ambiente."
-          : message,
+        message.includes("Invalid login credentials") ? "Usuário de teste não encontrado neste ambiente." : message,
       );
     } finally {
       setLoading(false);
@@ -145,6 +161,22 @@ function LoginPage() {
                   tabIndex={-1}
                   aria-label={showPassword ? "Esconder senha" : "Mostrar senha"}
                 >
+                  <div className="space-y-2 rounded-md border border-dashed border-sky-500/40 bg-sky-500/5 p-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-2 text-xs"
+                      onClick={entrarComoPcpTeste}
+                      disabled={loading}
+                    >
+                      <UserPlus className="h-3.5 w-3.5" />
+                      Entrar como PCP Teste
+                    </Button>
+                    <p className="text-center text-[10px] text-muted-foreground">
+                      Ambiente de teste. Não usar dados reais.
+                    </p>
+                  </div>
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
@@ -162,9 +194,7 @@ function LoginPage() {
                 <UserPlus className="h-3.5 w-3.5" />
                 Entrar como Admin Teste
               </Button>
-              <p className="text-center text-[10px] text-muted-foreground">
-                Ambiente de teste. Não usar dados reais.
-              </p>
+              <p className="text-center text-[10px] text-muted-foreground">Ambiente de teste. Não usar dados reais.</p>
             </div>
           </CardContent>
 
@@ -179,7 +209,6 @@ function LoginPage() {
     </div>
   );
 }
-
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
