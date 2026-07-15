@@ -345,6 +345,6 @@ function OpsPage() {
   );
 }
 
-export const Route = createFileRoute("/_app/pcp/ops")({
+export const Route = createFileRoute("/_pcp/pcp/ops")({
   component: OpsPage,
 });

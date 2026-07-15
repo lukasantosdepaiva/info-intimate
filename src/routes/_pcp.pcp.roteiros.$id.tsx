@@ -207,6 +207,6 @@ function RoteiroEditor() {
   );
 }
 
-export const Route = createFileRoute("/_app/pcp/roteiros/$id")({
+export const Route = createFileRoute("/_pcp/pcp/roteiros/$id")({
   component: RoteiroEditor,
 });

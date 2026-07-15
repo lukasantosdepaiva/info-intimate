@@ -281,6 +281,6 @@ function EstruturaEditor() {
   );
 }
 
-export const Route = createFileRoute("/_app/pcp/estruturas/$id")({
+export const Route = createFileRoute("/_pcp/pcp/estruturas/$id")({
   component: EstruturaEditor,
 });

@@ -108,6 +108,6 @@ function RoteirosPage() {
   );
 }
 
-export const Route = createFileRoute("/_app/pcp/roteiros")({
+export const Route = createFileRoute("/_pcp/pcp/roteiros")({
   component: RoteirosPage,
 });
