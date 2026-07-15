@@ -26,7 +26,7 @@ async function redirectByPerfil(navigate: ReturnType<typeof useNavigate>) {
       .from("perfis_usuarios")
       .select("perfil")
       .eq("user_id", uid)
-      .single();
+      .single<{ perfil: string }>();
     if (data?.perfil === "pcp") {
       navigate({ to: "/pcp" });
     } else {
@@ -54,7 +54,7 @@ function LoginPage() {
 
     try {
       await login(email, password);
-      navigate({ to: "/" });
+      await redirectByPerfil(navigate);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erro ao fazer login.";
       if (message.includes("Invalid login credentials")) {
