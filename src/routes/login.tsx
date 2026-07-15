@@ -20,7 +20,9 @@ type QuickLogin = {
   password: string;
 };
 
-const QUICK_LOGINS: QuickLogin[] = import.meta.env.DEV
+const TEST_LOGIN_ENABLED = import.meta.env.DEV || import.meta.env.VITE_ENABLE_TEST_LOGIN === "true";
+
+const QUICK_LOGINS: QuickLogin[] = TEST_LOGIN_ENABLED
   ? [
       {
         label: "Entrar como Administrador",

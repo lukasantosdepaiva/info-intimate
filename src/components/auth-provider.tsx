@@ -26,6 +26,7 @@ export function useAuth() {
 }
 
 const PUBLIC_ROUTES = ["/login", "/auth/callback"];
+const TEST_LOGIN_ENABLED = import.meta.env.DEV || import.meta.env.VITE_ENABLE_TEST_LOGIN === "true";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -105,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await supabase.auth.signOut();
     } finally {
-      if (import.meta.env.DEV && typeof window !== "undefined") {
+      if (TEST_LOGIN_ENABLED && typeof window !== "undefined") {
         window.sessionStorage.setItem("info-intimate:skip-pcp-auto-login-once", "true");
       }
       redirectRequest.current += 1;
