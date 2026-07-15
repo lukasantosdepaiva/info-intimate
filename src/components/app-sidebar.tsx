@@ -37,7 +37,7 @@ const mainNav = [
   { title: "Aprovações", href: "/aprovacoes", icon: CheckSquare },
   { title: "Inspeção", href: "/inspecao", icon: Search },
   { title: "RNC", href: "/inspecao/rnc", icon: AlertCircle },
-  { title: "PCP / OP", href: "/pcp", icon: FileText },
+  
   { title: "Saída Armazém 05", href: "/saidas", icon: Package },
   { title: "Veículos", href: "/veiculos", icon: Truck },
   { title: "Histórico", href: "/historico", icon: History },
