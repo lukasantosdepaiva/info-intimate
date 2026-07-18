@@ -30,25 +30,6 @@ const QUICK_LOGINS: QuickLogin[] = [
 // Impede que o sistema entre automaticamente no PCP
 const AUTO_LOGIN_PCP: QuickLogin | null = null;
 
-const QUICK_LOGINS: QuickLogin[] = TEST_LOGIN_ENABLED
-  ? [
-      {
-        label: "Entrar como Administrador",
-        email: import.meta.env.VITE_TEST_ADMIN_EMAIL ?? "",
-        password: import.meta.env.VITE_TEST_ADMIN_PASSWORD ?? "",
-      },
-      {
-        label: "Entrar como PCP",
-        email: import.meta.env.VITE_TEST_PCP_EMAIL ?? "",
-        password: import.meta.env.VITE_TEST_PCP_PASSWORD ?? "",
-      },
-    ].filter((account) => account.email && account.password)
-  : [];
-
-const AUTO_LOGIN_PCP =
-  import.meta.env.DEV || import.meta.env.VITE_AUTO_LOGIN_PCP === "true"
-    ? (QUICK_LOGINS.find((account) => account.label === "Entrar como PCP") ?? null)
-    : null;
 const AUTO_LOGIN_SKIP_ONCE_KEY = "info-intimate:skip-pcp-auto-login-once";
 const AUTO_LOGIN_LABEL = "Login automático PCP";
 
