@@ -5,14 +5,7 @@ import { Package, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 type QuickLogin = {
   label: string;
@@ -20,10 +13,22 @@ type QuickLogin = {
   password: string;
 };
 
-const TEST_LOGIN_ENABLED =
-  import.meta.env.DEV ||
-  import.meta.env.VITE_ENABLE_TEST_LOGIN === "true" ||
-  Boolean(import.meta.env.VITE_TEST_PCP_EMAIL && import.meta.env.VITE_TEST_PCP_PASSWORD);
+// ACESSOS FICTÍCIOS — REMOVER ANTES DA PRODUÇÃO
+const QUICK_LOGINS: QuickLogin[] = [
+  {
+    label: "Entrar na Logística",
+    email: "admin@specialdecor.test",
+    password: "Admin@123456",
+  },
+  {
+    label: "Entrar no PCP",
+    email: "pcp@specialdecor.test",
+    password: "Pcp@123456",
+  },
+];
+
+// Impede que o sistema entre automaticamente no PCP
+const AUTO_LOGIN_PCP: QuickLogin | null = null;
 
 const QUICK_LOGINS: QuickLogin[] = TEST_LOGIN_ENABLED
   ? [
@@ -195,9 +200,7 @@ function LoginPage() {
                       onClick={() => performLogin(account.email, account.password, account.label)}
                       className="gap-2"
                     >
-                      {quickLoginLabel === account.label && (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      )}
+                      {quickLoginLabel === account.label && <Loader2 className="h-4 w-4 animate-spin" />}
                       {quickLoginLabel === account.label ? "Entrando..." : account.label}
                     </Button>
                   ))}
