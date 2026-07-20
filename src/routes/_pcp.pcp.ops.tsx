@@ -135,11 +135,12 @@ function GerarOpModal({
       return;
     }
     const supabase = getSupabase();
+    // vw_sds_disponiveis expõe id, numero_sd, referencia_id (mesma UX,
+    // porém já filtra apenas SDs realmente disponíveis para geração de OP).
     const { data } = await supabase
-      .from("sds")
+      .from("vw_sds_disponiveis")
       .select("id,numero_sd,referencia_id")
-      .eq("referencia_id", refId)
-      .eq("ativo", true);
+      .eq("referencia_id", refId);
     const sdsData = (data as SdRow[]) ?? [];
     setSds(sdsData);
     if (sdsData.length === 1) setSdId(sdsData[0].id);
