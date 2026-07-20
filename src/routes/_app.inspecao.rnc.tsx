@@ -3,21 +3,15 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 import { useState, useCallback, Suspense } from "react";
 import { getSupabase } from "@/lib/supabase";
-import {
-  FileWarning,
-  AlertCircle,
-  Loader2,
-  CheckCircle2,
-  Package,
-  ArrowLeft,
-} from "lucide-react";
+import { FileWarning, AlertCircle, Loader2, CheckCircle2, Package, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 function RncForm() {
-  const search = Route.useSearch() as Record<string,string>; const searchParams = { get: (k: string) => search[k] ?? null };
+  const search = Route.useSearch() as Record<string, string>;
+  const searchParams = { get: (k: string) => search[k] ?? null };
   const navigate = useNavigate();
 
   const pallet_id = searchParams.get("pallet_id") ?? "";
@@ -47,10 +41,8 @@ function RncForm() {
   if (!quantidadeAfetada || isNaN(qaf) || qaf <= 0)
     errosValidacao.push("Quantidade afetada deve ser maior que zero.");
   if (!tipoDefeito.trim()) errosValidacao.push("Tipo de defeito é obrigatório.");
-  if (!descricao.trim())
-    errosValidacao.push("Descrição da não conformidade é obrigatória.");
-  if (!responsavel.trim())
-    errosValidacao.push("Responsável pela abertura é obrigatório.");
+  if (!descricao.trim()) errosValidacao.push("Descrição da não conformidade é obrigatória.");
+  if (!responsavel.trim()) errosValidacao.push("Responsável pela abertura é obrigatório.");
 
   // ─── Submit RNC ───────────────────────────────────────────
   const handleSubmit = useCallback(
@@ -102,8 +94,7 @@ function RncForm() {
           mensagem: "RNC b\u00e1sica aberta com sucesso.",
         });
       } catch (err: unknown) {
-        const msg =
-          err instanceof Error ? err.message : "Erro ao abrir RNC.";
+        const msg = err instanceof Error ? err.message : "Erro ao abrir RNC.";
         setError(msg);
       } finally {
         setSubmitting(false);
@@ -120,7 +111,7 @@ function RncForm() {
       descricao,
       quantidadeAfetada,
       responsavel,
-    ]
+    ],
   );
 
   // ─── UI ───────────────────────────────────────────────────
@@ -132,8 +123,8 @@ function RncForm() {
             Abrir RNC &mdash; N\u00e3o Conformidade
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            RNC completa depende do procedimento/formul\u00e1rio completo FQ023/PQ010.
-            Esta \u00e9 uma RNC b\u00e1sica inicial.
+            RNC completa depende do procedimento/formul\u00e1rio completo FQ023/PQ010. Esta \u00e9
+            uma RNC b\u00e1sica inicial.
           </p>
         </div>
         <Button
@@ -171,23 +162,13 @@ function RncForm() {
             <h2 className="text-lg font-semibold">
               {resposta.sucesso ? "RNC aberta" : "Fun\u00e7\u00e3o bloqueada"}
             </h2>
-            <p className="max-w-md text-sm text-muted-foreground">
-              {resposta.mensagem}
-            </p>
+            <p className="max-w-md text-sm text-muted-foreground">{resposta.mensagem}</p>
             <div className="flex gap-3 mt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate({ to: "/inspecao" })}
-              >
+              <Button variant="outline" size="sm" onClick={() => navigate({ to: "/inspecao" })}>
                 Voltar para inspe\u00e7\u00e3o
               </Button>
               {resposta.sucesso && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate({ to: "/rnc" })}
-                >
+                <Button variant="outline" size="sm" onClick={() => navigate({ to: "/rncs" })}>
                   Ver RNCs
                 </Button>
               )}
@@ -204,9 +185,7 @@ function RncForm() {
               <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
             <h2 className="text-lg font-semibold">Erro ao abrir RNC</h2>
-            <p className="max-w-md text-xs text-muted-foreground font-mono">
-              {error}
-            </p>
+            <p className="max-w-md text-xs text-muted-foreground font-mono">{error}</p>
             <Button variant="outline" size="sm" onClick={() => setError(null)}>
               Tentar novamente
             </Button>
@@ -300,8 +279,8 @@ function RncForm() {
 
           {/* Aviso */}
           <div className="rounded-md border border-yellow-500/30 bg-yellow-500/5 p-4 text-xs text-yellow-600 dark:text-yellow-400">
-            \u26a0\ufe0f RNC completa depende do procedimento/formul\u00e1rio completo
-            FQ023/PQ010. Esta \u00e9 uma RNC b\u00e1sica inicial.
+            \u26a0\ufe0f RNC completa depende do procedimento/formul\u00e1rio completo FQ023/PQ010.
+            Esta \u00e9 uma RNC b\u00e1sica inicial.
           </div>
 
           {/* Erros */}

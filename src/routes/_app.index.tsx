@@ -223,16 +223,15 @@ function DashboardPage() {
         ? "border-orange-500/50 bg-orange-500/5"
         : "";
   const PendenteIcon = pendentes >= 11 ? AlertCircle : ArrowRightLeft;
-  const pendenteIconColor = pendentes >= 11 ? "text-red-500" : pendentes >= 6 ? "text-orange-500" : "text-orange-400";
+  const pendenteIconColor =
+    pendentes >= 11 ? "text-red-500" : pendentes >= 6 ? "text-orange-500" : "text-orange-400";
 
   // ─── Header helper ─────
   const header = (
     <div className="flex items-start justify-between gap-4">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Operação logística · Special Decor
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">Operação logística · Special Decor</p>
       </div>
       <div className="flex items-center gap-3">
         {ultimaAtualizacao && (
@@ -308,9 +307,7 @@ function DashboardPage() {
             <div className="rounded-full bg-destructive/10 p-3">
               <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
-            <h2 className="text-lg font-semibold">
-              Não foi possível carregar o dashboard
-            </h2>
+            <h2 className="text-lg font-semibold">Não foi possível carregar o dashboard</h2>
             <p className="max-w-md rounded-md bg-muted px-3 py-1.5 font-mono text-xs text-muted-foreground">
               {error}
             </p>
@@ -372,15 +369,15 @@ function DashboardPage() {
               <span className="text-3xl font-bold tabular-nums">
                 {dashboardData.pallets_ativos.toLocaleString("pt-BR")}
               </span>
-              <span className="text-xs leading-tight text-muted-foreground">
-                Pallets Ativos
-              </span>
+              <span className="text-xs leading-tight text-muted-foreground">Pallets Ativos</span>
             </CardContent>
           </Card>
         </Link>
 
         <Link to="/aprovacoes" className="group">
-          <Card className={`cursor-pointer shadow-none transition-transform hover:scale-[1.01] ${pendenteStyle}`}>
+          <Card
+            className={`cursor-pointer shadow-none transition-transform hover:scale-[1.01] ${pendenteStyle}`}
+          >
             <CardContent className="flex flex-col gap-2 p-5">
               <div className="rounded-full bg-orange-500/10 p-2 w-fit">
                 <PendenteIcon className={`h-5 w-5 ${pendenteIconColor}`} />
@@ -395,7 +392,7 @@ function DashboardPage() {
           </Card>
         </Link>
 
-        <Link to="/saidas" className="group">
+        <Link to="/saidas" search={{}} className="group">
           <Card className="cursor-pointer shadow-none transition-transform hover:scale-[1.01]">
             <CardContent className="flex flex-col gap-2 p-5">
               <div className="rounded-full bg-yellow-500/10 p-2 w-fit">
@@ -404,9 +401,7 @@ function DashboardPage() {
               <span className="text-3xl font-bold tabular-nums">
                 {dashboardData.saidas_hoje.toLocaleString("pt-BR")}
               </span>
-              <span className="text-xs leading-tight text-muted-foreground">
-                Saídas Hoje
-              </span>
+              <span className="text-xs leading-tight text-muted-foreground">Saídas Hoje</span>
             </CardContent>
           </Card>
         </Link>
@@ -452,7 +447,10 @@ function DashboardPage() {
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height={220}>
-                    <BarChart data={graficoData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+                    <BarChart
+                      data={graficoData}
+                      margin={{ top: 5, right: 10, left: -10, bottom: 0 }}
+                    >
                       <CartesianGrid
                         strokeDasharray="3 3"
                         vertical={false}
@@ -468,9 +466,17 @@ function DashboardPage() {
                         tick={{ fontSize: 11, fill: "currentColor" }}
                         className="text-muted-foreground"
                       />
-                      <Tooltip content={<BarTooltip />} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+                      <Tooltip
+                        content={<BarTooltip />}
+                        cursor={{ fill: "rgba(255,255,255,0.03)" }}
+                      />
                       <Legend wrapperStyle={{ fontSize: 12 }} />
-                      <Bar dataKey="movimentacoes" name="Movimentações" fill="#1E3A5F" radius={[3, 3, 0, 0]} />
+                      <Bar
+                        dataKey="movimentacoes"
+                        name="Movimentações"
+                        fill="#1E3A5F"
+                        radius={[3, 3, 0, 0]}
+                      />
                       <Bar dataKey="saidas" name="Saídas" fill="#F97316" radius={[3, 3, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>

@@ -15,8 +15,48 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// A view vw_saldo_disponivel_pallet é a mesma fonte usada por
+// gerar_op_com_explosao para calcular disponibilidade real (líquida de
+// empenhos ativos). Mantemos os campos permissivos porque a view pode
+// expor colunas adicionais dependendo da revisão do banco.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SaldoRow = Record<string, any>;
+
+// Helpers null-safe (regra do projeto).
+const textoExibicao = (v: unknown, fb = "—") => {
+  if (v === null || v === undefined) return fb;
+  const s = String(v).trim();
+  return s === "" ? fb : s;
+};
+const numeroSeguro = (v: unknown): number => {
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+
+function pickCodigoRef(r: SaldoRow): string {
+  return (
+    r.codigo_referencia ?? r.referencia_codigo ?? r.pallets?.referencias?.codigo_referencia ?? ""
+  );
+}
+function pickDescricao(r: SaldoRow): string {
+  return r.descricao_referencia ?? r.descricao ?? r.referencia_descricao ?? "";
+}
+function pickArmazem(r: SaldoRow): string {
+  return r.armazem_codigo ?? r.locais_estoque?.armazem_codigo ?? "";
+}
+function pickLocalDesc(r: SaldoRow): string {
+  return (
+    r.descricao_local ?? r.local_descricao ?? r.codigo_local ?? r.locais_estoque?.descricao ?? ""
+  );
+}
+function pickCodigoPallet(r: SaldoRow): string {
+  return r.codigo_pallet ?? r.pallets?.codigo_pallet ?? "";
+}
+function pickQtdDisponivel(r: SaldoRow): number {
+  return numeroSeguro(
+    r.quantidade_disponivel ?? r.qtd_disponivel ?? r.saldo_disponivel ?? r.quantidade,
+  );
+}
 
 function SaldosPage() {
   const { locais } = useLocaisEstoque();
@@ -36,12 +76,11 @@ function SaldosPage() {
     setError(null);
     try {
       const supabase = getSupabase();
-      const { data, error: e } = await supabase
-        .from("saldos_pallet")
-        .select(
-          "id, quantidade, locais_estoque!local_estoque_id(descricao,armazem_codigo,armazem_nome), pallets!pallet_id(codigo_pallet, referencias!referencia_id(codigo_referencia,descricao))",
-        )
-        .limit(1000);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error: e } = await (supabase as any)
+        .from("vw_saldo_disponivel_pallet")
+        .select("*")
+        .limit(2000);
       if (e) throw new Error(e.message);
       setRows((data ?? []) as SaldoRow[]);
     } catch (e) {
@@ -56,10 +95,14 @@ function SaldosPage() {
   }, [fetch]);
 
   const filtered = useMemo(() => {
+    const termo = busca.trim().toLowerCase();
     return rows.filter((r) => {
-      const codigo = r.pallets?.referencias?.codigo_referencia ?? "";
-      const arm = r.locais_estoque?.armazem_codigo ?? "";
-      if (busca.trim() && !codigo.toLowerCase().includes(busca.toLowerCase())) return false;
+      const codigo = pickCodigoRef(r).toLowerCase();
+      const desc = pickDescricao(r).toLowerCase();
+      const pallet = pickCodigoPallet(r).toLowerCase();
+      const arm = pickArmazem(r);
+      if (termo && !codigo.includes(termo) && !desc.includes(termo) && !pallet.includes(termo))
+        return false;
       if (armazem !== "all" && arm !== armazem) return false;
       return true;
     });
@@ -71,7 +114,11 @@ function SaldosPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Consulta de Saldo</h1>
           <p className="text-sm text-muted-foreground">
-            Somente leitura. O PCP não movimenta estoque.
+            Somente leitura. Saldo disponível já desconta empenhos ativos (view
+            <code className="mx-1 rounded bg-muted px-1 text-[10px]">
+              vw_saldo_disponivel_pallet
+            </code>
+            ).
           </p>
         </div>
         <Button variant="ghost" size="icon" onClick={fetch}>
@@ -85,7 +132,7 @@ function SaldosPage() {
           <Input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar por referência..."
+            placeholder="Buscar por referência, descrição ou pallet..."
             className="pl-10 text-xs"
           />
         </div>
@@ -125,7 +172,7 @@ function SaldosPage() {
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
             <Warehouse className="h-12 w-12 text-muted-foreground/40" />
-            <h3 className="text-lg font-semibold">Sem saldos</h3>
+            <h3 className="text-lg font-semibold">Sem saldos disponíveis</h3>
           </CardContent>
         </Card>
       )}
@@ -136,22 +183,25 @@ function SaldosPage() {
               <tr className="border-b bg-muted/50 text-left text-xs font-semibold text-muted-foreground">
                 <th className="p-3">Referência</th>
                 <th className="p-3">Descrição</th>
+                <th className="p-3">Pallet</th>
                 <th className="p-3">Armazém</th>
                 <th className="p-3">Local</th>
-                <th className="p-3 text-right">Saldo</th>
+                <th className="p-3 text-right">Disponível</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((r, i) => (
-                <tr key={r.id ?? i} className="border-b hover:bg-muted/30">
-                  <td className="p-3 font-mono">
-                    {r.pallets?.referencias?.codigo_referencia ?? "—"}
-                  </td>
-                  <td className="p-3">{r.pallets?.referencias?.descricao ?? "—"}</td>
-                  <td className="p-3 text-xs">{r.locais_estoque?.armazem_codigo ?? "—"}</td>
-                  <td className="p-3 text-xs">{r.locais_estoque?.descricao ?? "—"}</td>
+                <tr
+                  key={r.id ?? `${pickCodigoPallet(r)}-${i}`}
+                  className="border-b hover:bg-muted/30"
+                >
+                  <td className="p-3 font-mono">{textoExibicao(pickCodigoRef(r))}</td>
+                  <td className="p-3">{textoExibicao(pickDescricao(r))}</td>
+                  <td className="p-3 font-mono text-xs">{textoExibicao(pickCodigoPallet(r))}</td>
+                  <td className="p-3 text-xs">{textoExibicao(pickArmazem(r))}</td>
+                  <td className="p-3 text-xs">{textoExibicao(pickLocalDesc(r))}</td>
                   <td className="p-3 text-right tabular-nums">
-                    {(r.quantidade ?? 0).toLocaleString("pt-BR")}
+                    {pickQtdDisponivel(r).toLocaleString("pt-BR")}
                   </td>
                 </tr>
               ))}
