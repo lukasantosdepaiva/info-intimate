@@ -35,10 +35,7 @@ const numeroSeguro = (v: unknown): number => {
 
 function pickCodigoRef(r: SaldoRow): string {
   return (
-    r.codigo_referencia ??
-    r.referencia_codigo ??
-    r.pallets?.referencias?.codigo_referencia ??
-    ""
+    r.codigo_referencia ?? r.referencia_codigo ?? r.pallets?.referencias?.codigo_referencia ?? ""
   );
 }
 function pickDescricao(r: SaldoRow): string {
@@ -49,11 +46,7 @@ function pickArmazem(r: SaldoRow): string {
 }
 function pickLocalDesc(r: SaldoRow): string {
   return (
-    r.descricao_local ??
-    r.local_descricao ??
-    r.codigo_local ??
-    r.locais_estoque?.descricao ??
-    ""
+    r.descricao_local ?? r.local_descricao ?? r.codigo_local ?? r.locais_estoque?.descricao ?? ""
   );
 }
 function pickCodigoPallet(r: SaldoRow): string {
@@ -122,7 +115,9 @@ function SaldosPage() {
           <h1 className="text-2xl font-bold tracking-tight">Consulta de Saldo</h1>
           <p className="text-sm text-muted-foreground">
             Somente leitura. Saldo disponível já desconta empenhos ativos (view
-            <code className="mx-1 rounded bg-muted px-1 text-[10px]">vw_saldo_disponivel_pallet</code>
+            <code className="mx-1 rounded bg-muted px-1 text-[10px]">
+              vw_saldo_disponivel_pallet
+            </code>
             ).
           </p>
         </div>
@@ -196,7 +191,10 @@ function SaldosPage() {
             </thead>
             <tbody>
               {filtered.map((r, i) => (
-                <tr key={r.id ?? `${pickCodigoPallet(r)}-${i}`} className="border-b hover:bg-muted/30">
+                <tr
+                  key={r.id ?? `${pickCodigoPallet(r)}-${i}`}
+                  className="border-b hover:bg-muted/30"
+                >
                   <td className="p-3 font-mono">{textoExibicao(pickCodigoRef(r))}</td>
                   <td className="p-3">{textoExibicao(pickDescricao(r))}</td>
                   <td className="p-3 font-mono text-xs">{textoExibicao(pickCodigoPallet(r))}</td>
