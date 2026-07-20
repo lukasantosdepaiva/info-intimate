@@ -395,7 +395,7 @@ function DashboardPage() {
           </Card>
         </Link>
 
-        <Link to="/saidas" className="group">
+        <Link to="/saidas" search={{}} className="group">
           <Card className="cursor-pointer shadow-none transition-transform hover:scale-[1.01]">
             <CardContent className="flex flex-col gap-2 p-5">
               <div className="rounded-full bg-yellow-500/10 p-2 w-fit">

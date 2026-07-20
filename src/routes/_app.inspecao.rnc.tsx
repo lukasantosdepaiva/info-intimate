@@ -186,7 +186,7 @@ function RncForm() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate({ to: "/rnc" })}
+                  onClick={() => navigate({ to: "/rncs" })}
                 >
                   Ver RNCs
                 </Button>
