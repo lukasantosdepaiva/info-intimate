@@ -165,5 +165,11 @@ function RoteirosPage() {
 }
 
 export const Route = createFileRoute("/_pcp/pcp/roteiros")({
-  component: RoteirosPage,
+  component: () => (
+    <>
+      <RoteirosPage />
+      <Outlet />
+    </>
+  ),
 });
+

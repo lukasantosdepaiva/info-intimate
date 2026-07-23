@@ -201,5 +201,11 @@ function EstruturasPage() {
 }
 
 export const Route = createFileRoute("/_pcp/pcp/estruturas")({
-  component: EstruturasPage,
+  component: () => (
+    <>
+      <EstruturasPage />
+      <Outlet />
+    </>
+  ),
 });
+
