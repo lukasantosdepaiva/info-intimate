@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { useAuth } from "@/components/auth-provider";
